@@ -2,33 +2,34 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
-  <title>📦 Barcode Scanner Submit</title>
-  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <title>📦 Barcode Scanner 1D</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
   <style>
     body {
       font-family: sans-serif;
       max-width: 400px;
       margin: 20px auto;
-      padding: 10px;
+    }
+    #scanner-container {
+      width: 100%;
+      height: 200px;
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
     }
     input, button {
+      width: 100%;
       font-size: 16px;
       padding: 10px;
-      margin-bottom: 15px;
-      width: 100%;
-    }
-    #reader {
-      width: 100%;
-      margin-bottom: 20px;
+      margin-bottom: 10px;
     }
     .success { color: green; }
     .error { color: red; }
   </style>
 </head>
 <body>
-  <h2>📦 สแกนบาร์โค้ดสินค้า</h2>
 
-  <div id="reader"></div>
+  <h2>📦 สแกนบาร์โค้ด (1D)</h2>
+  <div id="scanner-container"></div>
 
   <form id="barcode-form">
     <label>รหัสบาร์โค้ด</label>
@@ -46,23 +47,41 @@
   <div id="response"></div>
 
   <script>
-    const form = document.getElementById("barcode-form");
+    const scannerContainer = document.getElementById("scanner-container");
     const barcodeInput = document.getElementById("barcode");
     const responseBox = document.getElementById("response");
+    const form = document.getElementById("barcode-form");
 
-    // เริ่มสแกนด้วยกล้อง
-    const html5QrCode = new Html5Qrcode("reader");
-    html5QrCode.start(
-      { facingMode: "environment" }, // กล้องหลัง
-      { fps: 10, qrbox: 250 },
-      (decodedText) => {
-        barcodeInput.value = decodedText;
-        html5QrCode.stop();
-        document.getElementById("quantity").focus();
+    // เริ่ม QuaggaJS
+    Quagga.init({
+      inputStream: {
+        type: "LiveStream",
+        target: scannerContainer,
+        constraints: {
+          facingMode: "environment"
+        }
+      },
+      decoder: {
+        readers: ["ean_reader", "code_128_reader", "upc_reader", "code_39_reader"]
       }
-    );
+    }, function (err) {
+      if (err) {
+        console.error(err);
+        return;
+      }
+      Quagga.start();
+    });
 
-    // เมื่อกด Submit
+    // เมื่อพบบาร์โค้ด
+    Quagga.onDetected((data) => {
+      const code = data.codeResult.code;
+      if (code) {
+        barcodeInput.value = code;
+        Quagga.stop();
+      }
+    });
+
+    // เมื่อ submit
     form.addEventListener("submit", function (e) {
       e.preventDefault();
       responseBox.innerHTML = "⏳ กำลังส่งข้อมูล...";
@@ -79,15 +98,7 @@
             responseBox.innerHTML = `<p class="success">${data.message}</p>`;
             form.reset();
             barcodeInput.value = "";
-            html5QrCode.start(
-              { facingMode: "environment" },
-              { fps: 10, qrbox: 250 },
-              (decodedText) => {
-                barcodeInput.value = decodedText;
-                html5QrCode.stop();
-                document.getElementById("quantity").focus();
-              }
-            );
+            Quagga.start(); // เริ่มสแกนใหม่
           } else {
             responseBox.innerHTML = `<p class="error">${data.message}</p>`;
           }
