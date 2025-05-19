@@ -1,153 +1,56 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <title>📦 Barcode Scanner 1D</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+  <meta charset="UTF-8">
+  <title>Submit Barcode (Manual)</title>
   <style>
     body {
       font-family: sans-serif;
-      max-width: 480px;
-      margin: 0 auto;
+      max-width: 400px;
+      margin: 30px auto;
       padding: 20px;
     }
-
-    #scanner-wrapper {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 4 / 3;
-      border: 1px solid #ccc;
-      overflow: hidden;
-      margin-bottom: 15px;
+    label {
+      font-weight: bold;
+      margin-top: 10px;
+      display: block;
     }
-
-    #scanner-container {
-      width: 100%;
-      height: 100%;
-    }
-
-    .scan-box {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 80%;
-      height: 15%;
-      border: 2px dashed rgba(0, 255, 0, 0.6);
-      transform: translate(-50%, -50%);
-      box-sizing: border-box;
-      z-index: 10;
-      pointer-events: none;
-    }
-
-    .laser-line {
-      position: absolute;
-      top: 50%;
-      left: 0;
-      width: 100%;
-      height: 2px;
-      background-color: red;
-      transform: translateY(-50%);
-      animation: laser-blink 1s infinite;
-      opacity: 0.8;
-    }
-
-    @keyframes laser-blink {
-      0%, 100% { opacity: 0.2; }
-      50% { opacity: 1; }
-    }
-
     input, button {
-      font-size: 16px;
-      padding: 10px;
-      margin-bottom: 10px;
       width: 100%;
-      box-sizing: border-box;
+      padding: 10px;
+      margin-bottom: 15px;
+      font-size: 16px;
     }
-
     .success { color: green; }
     .error { color: red; }
-
-    #btn-rescan {
-      background-color: #f0f0f0;
-      color: #000;
-      border: 1px solid #ccc;
-    }
   </style>
 </head>
 <body>
 
-  <h2>📦 สแกนบาร์โค้ด (1D)</h2>
+  <h2>📝 กรอกข้อมูลบาร์โค้ด (Manual)</h2>
 
-  <div id="scanner-wrapper">
-    <div id="scanner-container"></div>
-    <div class="scan-box">
-      <div class="laser-line"></div>
-    </div>
-  </div>
+  <form id="manual-form">
+    <label>📦 Barcode</label>
+    <input type="text" name="barcode" required />
 
-  <form id="barcode-form">
-    <label>รหัสบาร์โค้ด</label>
-    <input type="text" id="barcode" name="barcode" readonly required />
+    <label>🔢 Quantity</label>
+    <input type="number" name="quantity" required min="1" />
 
-    <label>จำนวน</label>
-    <input type="number" id="quantity" name="quantity" required min="1" />
-
-    <label>ชื่อผู้สแกน</label>
-    <input type="text" id="scanner" name="scanner" required placeholder="เช่น Nick" />
+    <label>👤 Scanner</label>
+    <input type="text" name="scanner" required placeholder="เช่น Nick" />
 
     <button type="submit">📤 ส่งข้อมูล</button>
-    <button type="button" id="btn-rescan">🔄 เริ่มสแกนใหม่</button>
   </form>
 
   <div id="response"></div>
 
-  <!-- เสียงติ๊ด -->
-  <audio id="beep-sound" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg" preload="auto"></audio>
-
   <script>
-    const barcodeInput = document.getElementById("barcode");
-    const form = document.getElementById("barcode-form");
+    const form = document.getElementById("manual-form");
     const responseBox = document.getElementById("response");
-    const beep = document.getElementById("beep-sound");
-    const rescanBtn = document.getElementById("btn-rescan");
-
-    function startScanner() {
-      Quagga.init({
-        inputStream: {
-          type: "LiveStream",
-          target: document.querySelector("#scanner-container"),
-          constraints: {
-            facingMode: "environment"
-          }
-        },
-        decoder: {
-          readers: ["ean_reader", "code_128_reader", "upc_reader", "code_39_reader"]
-        },
-        locate: true
-      }, function(err) {
-        if (err) {
-          console.error(err);
-          return;
-        }
-        Quagga.start();
-      });
-
-      Quagga.onDetected(onBarcodeDetected);
-    }
-
-    function onBarcodeDetected(data) {
-      const code = data.codeResult.code;
-      if (code && barcodeInput.value === "") {
-        barcodeInput.value = code;
-        beep.play();
-        Quagga.offDetected(onBarcodeDetected);
-        Quagga.stop();
-        document.getElementById("quantity").focus();
-      }
-    }
 
     form.addEventListener("submit", function (e) {
       e.preventDefault();
+
       responseBox.innerHTML = "⏳ กำลังส่งข้อมูล...";
 
       const formData = new URLSearchParams(new FormData(form));
@@ -156,30 +59,28 @@
         method: "POST",
         body: formData,
       })
-      .then(res => res.json())
-      .then(data => {
+      .then(res => res.text()) // เปลี่ยนจาก .json() เพื่อหลีกเลี่ยง error
+      .then(text => {
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch (err) {
+          throw new Error("Invalid JSON response: " + text);
+        }
+
         if (data.success) {
           responseBox.innerHTML = `<p class="success">${data.message}</p>`;
           form.reset();
-          barcodeInput.value = "";
-          startScanner();
         } else {
           responseBox.innerHTML = `<p class="error">${data.message}</p>`;
         }
       })
       .catch(err => {
-        responseBox.innerHTML = `<p class="error">❌ เกิดข้อผิดพลาด</p>`;
+        responseBox.innerHTML = `<p class="error">❌ Error: ${err.message}</p>`;
         console.error(err);
       });
     });
-
-    rescanBtn.addEventListener("click", () => {
-      barcodeInput.value = "";
-      startScanner();
-    });
-
-    // เริ่มสแกนตอนโหลด
-    startScanner();
   </script>
+
 </body>
 </html>
