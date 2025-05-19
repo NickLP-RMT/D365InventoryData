@@ -62,13 +62,15 @@
   </div>
 
   <script>
-    const apiURL = "https://script.google.com/macros/s/AKfycby_BsI2EPq19QnDwwWImSIznLlNP6CGdoBBEKshh4-7R8_tOubPnNeUo9uJyvZ7Y8QW/exec";
+    // ใส่ URL Web App ที่ได้จาก Google Apps Script ของคุณ
+    const apiURL = "https://script.google.com/macros/s/AKfycbwQ5E0eX2RQ_VwK6HBN6E10LNoZCKlUBFZxvT23VEu5k66EZV74Kel7KGssxJ-8SSsv/exec";
 
     async function submitBarcode() {
       const barcode = document.getElementById("barcode").value.trim();
       const quantity = document.getElementById("quantity").value.trim();
       const scanner = document.getElementById("scanner").value.trim();
       const result = document.getElementById("result");
+
       result.textContent = "";
       result.className = "message";
 
@@ -88,6 +90,7 @@
         const res = await fetch(`${apiURL}?${params.toString()}`, {
           method: "POST"
         });
+
         const data = await res.json();
 
         if (data.success) {
