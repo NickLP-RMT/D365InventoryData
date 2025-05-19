@@ -54,32 +54,32 @@
       responseBox.innerHTML = "⏳ กำลังส่งข้อมูล...";
 
       const formData = new URLSearchParams(new FormData(form));
-formData.append("page", "submitBarcode"); // ✅ เพิ่ม page
+      formData.append("page", "submitBarcode"); // ✅ ส่ง page สำหรับแยก logic ใน Apps Script
 
-fetch("https://script.google.com/macros/s/AKfycbyCQLDcJnkHOtCz8NdZJnGvYzs86uJYCpYlCJSYHeWgakPmAE3asldukdHLauHAITau/exec", {
-  method: "POST",
-  body: formData,
-})
-.then(res => res.text())
-.then(text => {
-  let data;
-  try {
-    data = JSON.parse(text);
-  } catch (e) {
-    throw new Error("Invalid JSON: " + text);
-  }
+      fetch("https://script.google.com/macros/s/AKfycbyCQLDcJnkHOtCz8NdZJnGvYzs86uJYCpYlCJSYHeWgakPmAE3asldukdHLauHAITau/exec", {
+        method: "POST",
+        body: formData,
+      })
+      .then(res => res.text())
+      .then(text => {
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch (err) {
+          throw new Error("Invalid JSON response: " + text);
+        }
 
-  if (data.success) {
-    responseBox.innerHTML = `<p class="success">${data.message}</p>`;
-    form.reset();
-  } else {
-    responseBox.innerHTML = `<p class="error">${data.message}</p>`;
-  }
-})
-.catch(err => {
-  responseBox.innerHTML = `<p class="error">❌ ${err.message}</p>`;
-});
-
+        if (data.success) {
+          responseBox.innerHTML = `<p class="success">${data.message}</p>`;
+          form.reset();
+        } else {
+          responseBox.innerHTML = `<p class="error">${data.message}</p>`;
+        }
+      })
+      .catch(err => {
+        responseBox.innerHTML = `<p class="error">❌ Error: ${err.message}</p>`;
+        console.error(err);
+      });
     });
   </script>
 
