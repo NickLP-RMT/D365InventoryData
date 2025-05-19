@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>📦 บันทึกบาร์โค้ดเข้า Google Sheet</title>
+  <title>📦 บันทึกบาร์โค้ด</title>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -19,11 +19,8 @@
       padding: 30px;
       border-radius: 12px;
       box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-      width: 350px;
+      width: 340px;
       text-align: center;
-    }
-    h2 {
-      margin-bottom: 20px;
     }
     input {
       padding: 10px;
@@ -50,17 +47,13 @@
       margin-top: 15px;
       font-size: 14px;
     }
-    .error {
-      color: red;
-    }
-    .success {
-      color: green;
-    }
+    .error { color: red; }
+    .success { color: green; }
   </style>
 </head>
 <body>
   <div class="card">
-    <h2>📦 บันทึกข้อมูลบาร์โค้ด</h2>
+    <h2>📦 กรอกข้อมูลบาร์โค้ด</h2>
     <input type="text" id="barcode" placeholder="Barcode" />
     <input type="number" id="quantity" placeholder="Quantity" />
     <input type="text" id="scanner" placeholder="Scanner Name" />
@@ -76,7 +69,6 @@
       const quantity = document.getElementById("quantity").value.trim();
       const scanner = document.getElementById("scanner").value.trim();
       const result = document.getElementById("result");
-
       result.textContent = "";
       result.className = "message";
 
@@ -86,29 +78,30 @@
         return;
       }
 
-      const params = new URLSearchParams({
-        page: "submitBarcode",
-        barcode,
-        quantity,
-        scanner
-      });
+      const params = new URLSearchParams();
+      params.append("page", "submitBarcode");
+      params.append("barcode", barcode);
+      params.append("quantity", quantity);
+      params.append("scanner", scanner);
 
       try {
-        const res = await fetch(`${apiURL}?${params.toString()}`);
+        const res = await fetch(`${apiURL}?${params.toString()}`, {
+          method: "POST"
+        });
         const data = await res.json();
 
         if (data.success) {
-          result.textContent = "✅ ส่งข้อมูลสำเร็จ";
+          result.textContent = data.message;
           result.classList.add("success");
           document.getElementById("barcode").value = "";
           document.getElementById("quantity").value = "";
           document.getElementById("scanner").value = "";
         } else {
-          result.textContent = "⚠️ " + (data.message || "เกิดข้อผิดพลาด");
+          result.textContent = data.message;
           result.classList.add("error");
         }
       } catch (err) {
-        result.textContent = "❌ ไม่สามารถเชื่อมต่อได้";
+        result.textContent = "❌ ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้";
         result.classList.add("error");
         console.error(err);
       }
