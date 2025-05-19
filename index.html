@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <title>📦 Barcode Scanner Submit</title>
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 400px;
+      margin: 20px auto;
+      padding: 10px;
+    }
+    input, button {
+      font-size: 16px;
+      padding: 10px;
+      margin-bottom: 15px;
+      width: 100%;
+    }
+    #reader {
+      width: 100%;
+      margin-bottom: 20px;
+    }
+    .success { color: green; }
+    .error { color: red; }
+  </style>
+</head>
+<body>
+  <h2>📦 สแกนบาร์โค้ดสินค้า</h2>
+
+  <div id="reader"></div>
+
+  <form id="barcode-form">
+    <label>รหัสบาร์โค้ด</label>
+    <input type="text" id="barcode" name="barcode" readonly required />
+
+    <label>จำนวน</label>
+    <input type="number" id="quantity" name="quantity" required min="1" />
+
+    <label>ชื่อผู้สแกน</label>
+    <input type="text" id="scanner" name="scanner" required placeholder="เช่น Nick" />
+
+    <button type="submit">📤 ส่งข้อมูล</button>
+  </form>
+
+  <div id="response"></div>
+
+  <script>
+    const form = document.getElementById("barcode-form");
+    const barcodeInput = document.getElementById("barcode");
+    const responseBox = document.getElementById("response");
+
+    // เริ่มสแกนด้วยกล้อง
+    const html5QrCode = new Html5Qrcode("reader");
+    html5QrCode.start(
+      { facingMode: "environment" }, // กล้องหลัง
+      { fps: 10, qrbox: 250 },
+      (decodedText) => {
+        barcodeInput.value = decodedText;
+        html5QrCode.stop();
+        document.getElementById("quantity").focus();
+      }
+    );
+
+    // เมื่อกด Submit
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      responseBox.innerHTML = "⏳ กำลังส่งข้อมูล...";
+
+      const formData = new URLSearchParams(new FormData(form));
+
+      fetch("https://script.google.com/macros/s/AKfycbxXQERtTL47-EuckkSpNX3PEWeKvFidvxeIsoTvEmrJHrBldufGmmvxFORJFNXBiz4w/exec", {
+        method: "POST",
+        body: formData,
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) {
+            responseBox.innerHTML = `<p class="success">${data.message}</p>`;
+            form.reset();
+            barcodeInput.value = "";
+            html5QrCode.start(
+              { facingMode: "environment" },
+              { fps: 10, qrbox: 250 },
+              (decodedText) => {
+                barcodeInput.value = decodedText;
+                html5QrCode.stop();
+                document.getElementById("quantity").focus();
+              }
+            );
+          } else {
+            responseBox.innerHTML = `<p class="error">${data.message}</p>`;
+          }
+        })
+        .catch((err) => {
+          responseBox.innerHTML = `<p class="error">❌ เกิดข้อผิดพลาดในการส่งข้อมูล</p>`;
+          console.error(err);
+        });
+    });
+  </script>
+</body>
+</html>
