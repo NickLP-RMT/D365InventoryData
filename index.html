@@ -1,87 +1,120 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <title>Submit Barcode (Manual)</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📦 บันทึกบาร์โค้ดเข้า Google Sheet</title>
   <style>
     body {
-      font-family: sans-serif;
-      max-width: 400px;
-      margin: 30px auto;
-      padding: 20px;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f4f4f4;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
     }
-    label {
-      font-weight: bold;
-      margin-top: 10px;
-      display: block;
+    .card {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      width: 350px;
+      text-align: center;
     }
-    input, button {
-      width: 100%;
+    h2 {
+      margin-bottom: 20px;
+    }
+    input {
       padding: 10px;
-      margin-bottom: 15px;
       font-size: 16px;
+      width: 100%;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
     }
-    .success { color: green; }
-    .error { color: red; }
+    button {
+      padding: 12px;
+      font-size: 16px;
+      background-color: #0066ff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+    }
+    button:hover {
+      background-color: #004fcc;
+    }
+    .message {
+      margin-top: 15px;
+      font-size: 14px;
+    }
+    .error {
+      color: red;
+    }
+    .success {
+      color: green;
+    }
   </style>
 </head>
 <body>
-
-  <h2>📝 กรอกข้อมูลบาร์โค้ด (Manual)</h2>
-
-  <form id="manual-form">
-    <label>📦 Barcode</label>
-    <input type="text" name="barcode" required />
-
-    <label>🔢 Quantity</label>
-    <input type="number" name="quantity" required min="1" />
-
-    <label>👤 Scanner</label>
-    <input type="text" name="scanner" required placeholder="เช่น Nick" />
-
-    <button type="submit">📤 ส่งข้อมูล</button>
-  </form>
-
-  <div id="response"></div>
+  <div class="card">
+    <h2>📦 บันทึกข้อมูลบาร์โค้ด</h2>
+    <input type="text" id="barcode" placeholder="Barcode" />
+    <input type="number" id="quantity" placeholder="Quantity" />
+    <input type="text" id="scanner" placeholder="Scanner Name" />
+    <button onclick="submitBarcode()">ส่งข้อมูล</button>
+    <div class="message" id="result"></div>
+  </div>
 
   <script>
-    const form = document.getElementById("manual-form");
-    const responseBox = document.getElementById("response");
+    const apiURL = "https://script.google.com/macros/s/AKfycbyCQLDcJnkHOtCz8NdZJnGvYzs86uJYCpYlCJSYHeWgakPmAE3asldukdHLauHAITau/exec";
 
-    form.addEventListener("submit", function (e) {
-      e.preventDefault();
+    async function submitBarcode() {
+      const barcode = document.getElementById("barcode").value.trim();
+      const quantity = document.getElementById("quantity").value.trim();
+      const scanner = document.getElementById("scanner").value.trim();
+      const result = document.getElementById("result");
 
-      responseBox.innerHTML = "⏳ กำลังส่งข้อมูล...";
+      result.textContent = "";
+      result.className = "message";
 
-      const formData = new URLSearchParams(new FormData(form));
-      formData.append("page", "submitBarcode"); // ✅ ส่ง page สำหรับแยก logic ใน Apps Script
+      if (!barcode || !quantity || !scanner) {
+        result.textContent = "❌ กรุณากรอกข้อมูลให้ครบ";
+        result.classList.add("error");
+        return;
+      }
 
-      fetch("https://script.google.com/macros/s/AKfycbyCQLDcJnkHOtCz8NdZJnGvYzs86uJYCpYlCJSYHeWgakPmAE3asldukdHLauHAITau/exec", {
-        method: "POST",
-        body: formData,
-      })
-      .then(res => res.text())
-      .then(text => {
-        let data;
-        try {
-          data = JSON.parse(text);
-        } catch (err) {
-          throw new Error("Invalid JSON response: " + text);
-        }
+      const params = new URLSearchParams({
+        page: "submitBarcode",
+        barcode,
+        quantity,
+        scanner
+      });
+
+      try {
+        const res = await fetch(`${apiURL}?${params.toString()}`, {
+          method: "POST"
+        });
+        const data = await res.json();
 
         if (data.success) {
-          responseBox.innerHTML = `<p class="success">${data.message}</p>`;
-          form.reset();
+          result.textContent = "✅ ส่งข้อมูลสำเร็จ";
+          result.classList.add("success");
+          document.getElementById("barcode").value = "";
+          document.getElementById("quantity").value = "";
+          document.getElementById("scanner").value = "";
         } else {
-          responseBox.innerHTML = `<p class="error">${data.message}</p>`;
+          result.textContent = "⚠️ " + (data.message || "เกิดข้อผิดพลาด");
+          result.classList.add("error");
         }
-      })
-      .catch(err => {
-        responseBox.innerHTML = `<p class="error">❌ Error: ${err.message}</p>`;
+      } catch (err) {
+        result.textContent = "❌ ไม่สามารถเชื่อมต่อได้";
+        result.classList.add("error");
         console.error(err);
-      });
-    });
+      }
+    }
   </script>
-
 </body>
 </html>
