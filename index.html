@@ -69,7 +69,7 @@
   </div>
 
   <script>
-    const apiURL = "https://script.google.com/macros/s/AKfycbwK2RhhHfs85Etgl928b7cE7F-XSplDolMwhBaMcb8RAC5hZ3VNJXuI7voPB2Urg3fK/exec";
+    const apiURL = "https://script.google.com/macros/s/AKfycbyar4OqP158VzzWVKuukTFSOoEzRvXVZL2YgGa3IPw7Am4Pt4p5H_Pr9F4_DjHkxOKR/exec";
 
     async function submitBarcode() {
       const barcode = document.getElementById("barcode").value.trim();
@@ -94,9 +94,7 @@
       });
 
       try {
-        const res = await fetch(`${apiURL}?${params.toString()}`, {
-          method: "POST"
-        });
+        const res = await fetch(`${apiURL}?${params.toString()}`);
         const data = await res.json();
 
         if (data.success) {
