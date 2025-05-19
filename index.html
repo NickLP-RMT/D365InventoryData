@@ -170,18 +170,19 @@
           }
         },
         decoder: {
-          readers: [
-            "code_128_reader",
-            "ean_reader",
-            "ean_8_reader",
-            "upc_reader",
-            "upc_e_reader",
-            "code_39_reader",
-            "codabar_reader",
-            "i2of5_reader"
-          ]
+          readers: ["code_128_reader"]
         },
         locate: true,
+        locator: {
+          patchSize: "medium",
+          halfSample: true
+        },
+        area: {
+          top: "30%",
+          right: "10%",
+          left: "10%",
+          bottom: "30%"
+        },
         numOfWorkers: 2
       }, function(err) {
         if (err) {
@@ -193,7 +194,7 @@
 
       Quagga.onDetected(function(result) {
         const code = result.codeResult.code;
-        if (code) {
+        if (code && code.startsWith("J00")) {
           document.getElementById("barcode").value = code;
           document.getElementById("beep").play();
           stopScanner();
