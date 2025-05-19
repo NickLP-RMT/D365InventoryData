@@ -145,12 +145,25 @@
           type: "LiveStream",
           target: document.querySelector('#scanner-container'),
           constraints: {
-            facingMode: "environment"
+            facingMode: "environment",
+            width: { ideal: 640 },
+            height: { ideal: 480 }
           }
         },
         decoder: {
-          readers: ["ean_reader", "code_128_reader", "upc_reader"]
-        }
+          readers: [
+            "code_128_reader",
+            "ean_reader",
+            "ean_8_reader",
+            "upc_reader",
+            "upc_e_reader",
+            "code_39_reader",
+            "codabar_reader",
+            "i2of5_reader"
+          ]
+        },
+        locate: true,
+        numOfWorkers: 2
       }, function(err) {
         if (err) {
           console.error(err);
