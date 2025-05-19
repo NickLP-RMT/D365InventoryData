@@ -170,18 +170,16 @@
           }
         },
         decoder: {
-          readers: ["code_128_reader"]
+          readers: [
+            "code_128_reader",
+            "code_39_reader",
+            "ean_reader"
+          ]
         },
         locate: true,
         locator: {
           patchSize: "medium",
           halfSample: true
-        },
-        area: {
-          top: "30%",
-          right: "10%",
-          left: "10%",
-          bottom: "30%"
         },
         numOfWorkers: 2
       }, function(err) {
@@ -194,7 +192,7 @@
 
       Quagga.onDetected(function(result) {
         const code = result.codeResult.code;
-        if (code && code.startsWith("J00")) {
+        if (code) {
           document.getElementById("barcode").value = code;
           document.getElementById("beep").play();
           stopScanner();
