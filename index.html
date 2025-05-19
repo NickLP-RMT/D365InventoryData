@@ -282,15 +282,6 @@
     input[type="number"] {
       -moz-appearance: textfield;
     }
-    .button-group {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      margin-top: 8px;
-    }
-
-    .button-group button {
-      flex: 1;
   </style>
 </head>
 <body>
@@ -300,31 +291,30 @@
         <h2>📦 D365 Inventory Data</h2>
         <p class="subheader">สแกนและบันทึกข้อมูล Inventory</p>
       </div>
-
+      
       <div class="form-group">
         <label class="form-label" for="barcode">รหัสบาร์โค้ด</label>
         <input type="text" id="barcode" class="form-control" placeholder="รหัสบาร์โค้ด" readonly />
       </div>
-
+      
       <div class="form-group">
         <label class="form-label" for="quantity">จำนวน</label>
         <input type="number" inputmode="numeric" id="quantity" class="form-control" placeholder="ระบุจำนวน" />
       </div>
-
+      
       <div class="form-group">
         <label class="form-label" for="scanner">ชื่อผู้สแกน</label>
         <input type="text" id="scanner" class="form-control" placeholder="ชื่อผู้สแกน" />
       </div>
-
-      <div class="button-group">
-        <button class="btn-scanner" onclick="startScanner()">
-          <span>🔍 สแกนบาร์โค้ด</span>
-        </button>
-        <button class="btn-primary" onclick="submitBarcode()">
-          <span>📤 บันทึกข้อมูล</span>
-        </button>
-      </div>
-
+      
+      <button class="btn-scanner" onclick="startScanner()">
+        <span>🔍 สแกนบาร์โค้ด</span>
+      </button>
+      
+      <button class="btn-primary" onclick="submitBarcode()">
+        <span>📤 บันทึกข้อมูล</span>
+      </button>
+      
       <div class="message" id="result"></div>
     </div>
   </div>
