@@ -5,22 +5,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>📦 บันทึกบาร์โค้ด</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
     body {
       font-family: 'Segoe UI', sans-serif;
       background-color: #f4f4f4;
       display: flex;
       align-items: center;
       justify-content: center;
-      height: 100vh;
+      min-height: 100vh;
+      padding: 20px;
       margin: 0;
     }
     .card {
       background: white;
-      padding: 30px;
+      padding: 30px 20px;
       border-radius: 12px;
       box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-      width: 340px;
+      width: 100%;
+      max-width: 400px;
       text-align: center;
+    }
+    h2 {
+      margin-bottom: 20px;
+      font-size: 20px;
     }
     input {
       padding: 10px;
@@ -49,6 +58,7 @@
     }
     .error { color: red; }
     .success { color: green; }
+    .loading { color: #555; font-style: italic; }
   </style>
 </head>
 <body>
@@ -62,8 +72,7 @@
   </div>
 
   <script>
-    // ใส่ URL Web App ที่ได้จาก Google Apps Script ของคุณ
-    const apiURL = "https://script.google.com/macros/s/AKfycbwQ5E0eX2RQ_VwK6HBN6E10LNoZCKlUBFZxvT23VEu5k66EZV74Kel7KGssxJ-8SSsv/exec";
+    const apiURL = "https://script.google.com/macros/s/AKfycbyar4OqP158VzzWVKuukTFSOoEzRvXVZL2YgGa3IPw7Am4Pt4p5H_Pr9F4_DjHkxOKR/exec";
 
     async function submitBarcode() {
       const barcode = document.getElementById("barcode").value.trim();
@@ -80,6 +89,10 @@
         return;
       }
 
+      // แสดงสถานะโหลด
+      result.textContent = "⏳ กำลังส่งข้อมูล...";
+      result.className = "message loading";
+
       const params = new URLSearchParams();
       params.append("page", "submitBarcode");
       params.append("barcode", barcode);
@@ -95,17 +108,17 @@
 
         if (data.success) {
           result.textContent = data.message;
-          result.classList.add("success");
+          result.className = "message success";
           document.getElementById("barcode").value = "";
           document.getElementById("quantity").value = "";
           document.getElementById("scanner").value = "";
         } else {
           result.textContent = data.message;
-          result.classList.add("error");
+          result.className = "message error";
         }
       } catch (err) {
         result.textContent = "❌ ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้";
-        result.classList.add("error");
+        result.className = "message error";
         console.error(err);
       }
     }
