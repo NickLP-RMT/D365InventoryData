@@ -4,71 +4,75 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>📦 บันทึกบาร์โค้ด</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
     body {
       font-family: 'Segoe UI', sans-serif;
       background-color: #f4f4f4;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 20px;
       margin: 0;
+      padding: 20px;
     }
     .card {
       background: white;
       padding: 30px 20px;
       border-radius: 12px;
       box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-      width: 100%;
       max-width: 400px;
+      margin: auto;
       text-align: center;
     }
-    h2 {
-      margin-bottom: 20px;
-      font-size: 20px;
-    }
-    input {
-      padding: 10px;
+    input, button {
       font-size: 16px;
-      width: 100%;
+      padding: 10px;
       margin-bottom: 15px;
-      border: 1px solid #ccc;
+      width: 100%;
       border-radius: 6px;
+      border: 1px solid #ccc;
     }
     button {
-      padding: 12px;
-      font-size: 16px;
       background-color: #0066ff;
       color: white;
       border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      width: 100%;
     }
     button:hover {
       background-color: #004fcc;
     }
     .message {
-      margin-top: 15px;
-      font-size: 14px;
+      margin-top: 10px;
     }
-    .error { color: red; }
     .success { color: green; }
+    .error { color: red; }
     .loading { color: #555; font-style: italic; }
+
+    #scanner-view {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: black;
+      z-index: 1000;
+    }
+    #scanner-container {
+      width: 100vw;
+      height: 100vh;
+      transform: rotate(90deg);
+      transform-origin: center;
+    }
   </style>
 </head>
 <body>
-  <div class="card">
+  <div class="card" id="main-view">
     <h2>📦 กรอกข้อมูลบาร์โค้ด</h2>
-    <input type="text" id="barcode" placeholder="Barcode" />
+    <input type="text" id="barcode" placeholder="Barcode" readonly />
     <input type="number" id="quantity" placeholder="Quantity" />
     <input type="text" id="scanner" placeholder="Scanner Name" />
-    <button onclick="submitBarcode()">ส่งข้อมูล</button>
+    <button onclick="startScanner()">🔍 สแกนบาร์โค้ด</button>
+    <button onclick="submitBarcode()">📤 ส่งข้อมูล</button>
     <div class="message" id="result"></div>
+  </div>
+
+  <div id="scanner-view">
+    <div id="scanner-container"></div>
   </div>
 
   <script>
@@ -80,30 +84,24 @@
       const scanner = document.getElementById("scanner").value.trim();
       const result = document.getElementById("result");
 
-      result.textContent = "";
-      result.className = "message";
-
-      if (!barcode || !quantity || !scanner) {
-        result.textContent = "❌ กรุณากรอกข้อมูลให้ครบ";
-        result.classList.add("error");
-        return;
-      }
-
-      // แสดงสถานะโหลด
       result.textContent = "⏳ กำลังส่งข้อมูล...";
       result.className = "message loading";
 
-      const params = new URLSearchParams();
-      params.append("page", "submitBarcode");
-      params.append("barcode", barcode);
-      params.append("quantity", quantity);
-      params.append("scanner", scanner);
+      if (!barcode || !quantity || !scanner) {
+        result.textContent = "❌ กรุณากรอกข้อมูลให้ครบ";
+        result.className = "message error";
+        return;
+      }
+
+      const params = new URLSearchParams({
+        page: "submitBarcode",
+        barcode,
+        quantity,
+        scanner
+      });
 
       try {
-        const res = await fetch(`${apiURL}?${params.toString()}`, {
-          method: "POST"
-        });
-
+        const res = await fetch(`${apiURL}?${params.toString()}`, { method: "POST" });
         const data = await res.json();
 
         if (data.success) {
@@ -121,6 +119,46 @@
         result.className = "message error";
         console.error(err);
       }
+    }
+
+    function startScanner() {
+      document.getElementById("main-view").style.display = "none";
+      document.getElementById("scanner-view").style.display = "block";
+
+      Quagga.init({
+        inputStream: {
+          name: "Live",
+          type: "LiveStream",
+          target: document.querySelector('#scanner-container'),
+          constraints: {
+            facingMode: "environment"
+          }
+        },
+        decoder: {
+          readers: ["ean_reader", "code_128_reader", "upc_reader"]
+        }
+      }, function(err) {
+        if (err) {
+          console.error(err);
+          return;
+        }
+        Quagga.start();
+      });
+
+      Quagga.onDetected(function(result) {
+        const code = result.codeResult.code;
+        if (code) {
+          document.getElementById("barcode").value = code;
+          stopScanner();
+        }
+      });
+    }
+
+    function stopScanner() {
+      Quagga.stop();
+      document.getElementById("scanner-view").style.display = "none";
+      document.getElementById("main-view").style.display = "block";
+      Quagga.offDetected();
     }
   </script>
 </body>
