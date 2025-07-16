@@ -3,445 +3,109 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>📦 บันทึก Inventory TAG </title>
+  <title>📦 บันทึก Inventory TAG</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
   <style>
     :root {
       --primary-color: #2563eb;
-      --primary-hover: #1d4ed8;
-      --primary-light: #3b82f6;
-      --secondary-color: #64748b;
       --accent-color: #059669;
       --accent-hover: #047857;
       --success-color: #10b981;
       --error-color: #dc2626;
-      --warning-color: #f59e0b;
       --text-primary: #0f172a;
       --text-secondary: #475569;
-      --text-muted: #64748b;
       --border-color: #e2e8f0;
-      --border-hover: #cbd5e1;
       --background: #f8fafc;
       --surface: #ffffff;
-      --surface-elevated: #ffffff;
-      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-      --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-      --radius-sm: 0.375rem;
-      --radius-md: 0.5rem;
       --radius-lg: 0.75rem;
-      --radius-xl: 1rem;
-      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      font-family: 'Inter', sans-serif;
       background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
       color: var(--text-primary);
-      line-height: 1.6;
-      min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 20px;
-      position: relative;
+      min-height: 100vh;
     }
 
-    body::before {
-      content: '';
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: 
-        radial-gradient(circle at 20% 20%, rgba(37, 99, 235, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(5, 150, 105, 0.1) 0%, transparent 50%);
-      z-index: -1;
-    }
-
-    .container {
-      width: 100%;
-      max-width: 480px;
-      margin: 0 auto;
-    }
+    .container { width: 100%; max-width: 480px; }
 
     .card {
-      background: var(--surface-elevated);
-      padding: 40px 32px;
-      border-radius: var(--radius-xl);
-      box-shadow: var(--shadow-xl);
-      border: 1px solid var(--border-color);
-      backdrop-filter: blur(10px);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+      background: var(--surface);
+      padding: 32px 24px;
+      border-radius: 1rem;
+      box-shadow: var(--shadow-lg);
     }
 
     .header {
-      margin-bottom: 32px;
       text-align: center;
-      position: relative;
-    }
-
-    .app-icon {
-      width: 64px;
-      height: 64px;
-      background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-      border-radius: var(--radius-xl);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 28px;
-      margin: 0 auto 16px;
-      box-shadow: var(--shadow-lg);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .app-icon::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent);
-      transform: rotate(45deg);
-      animation: shimmer 3s infinite;
-    }
-
-    @keyframes shimmer {
-      0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-      100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
-    }
-
-    h2 {
-      font-size: 28px;
-      font-weight: 700;
-      color: var(--text-primary);
-      margin-bottom: 8px;
-      letter-spacing: -0.025em;
-    }
-
-    .subheader {
-      font-size: 16px;
-      color: var(--text-secondary);
-      font-weight: 500;
-    }
-
-    .form-section {
       margin-bottom: 24px;
+    }
+
+    .header h2 {
+      font-size: 24px;
+      font-weight: 700;
     }
 
     .form-group {
-      margin-bottom: 24px;
-      position: relative;
+      margin-bottom: 20px;
     }
 
     .form-label {
-      display: block;
       margin-bottom: 8px;
-      font-size: 15px;
       font-weight: 600;
-      color: var(--text-primary);
-      letter-spacing: -0.01em;
+      display: block;
     }
 
     .barcode-row {
       display: flex;
-      gap: 12px;
-      align-items: stretch;
-    }
-
-    .barcode-row input {
-      flex: 1;
+      gap: 8px;
     }
 
     .form-control {
+      padding: 14px 16px;
       width: 100%;
-      padding: 16px 20px;
-      border: 2px solid var(--border-color);
-      border-radius: var(--radius-lg);
       font-size: 16px;
-      font-weight: 500;
-      transition: var(--transition);
-      background-color: var(--surface);
-      color: var(--text-primary);
-      position: relative;
-    }
-
-    .form-control:focus {
-      outline: none;
-      border-color: var(--primary-color);
-      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
-      transform: translateY(-1px);
-    }
-
-    .form-control::placeholder {
-      color: var(--text-muted);
-      font-weight: 400;
-    }
-
-    .form-control:hover {
-      border-color: var(--border-hover);
+      border: 1.5px solid var(--border-color);
+      border-radius: var(--radius-lg);
     }
 
     button {
       border: none;
       border-radius: var(--radius-lg);
-      font-size: 16px;
+      padding: 14px 16px;
       font-weight: 600;
       cursor: pointer;
-      transition: var(--transition);
-      display: flex;
+      transition: 0.2s ease;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
-      position: relative;
-      overflow: hidden;
-      letter-spacing: -0.01em;
-    }
-
-    button:hover {
-      transform: translateY(-2px);
-    }
-
-    button:active {
-      transform: translateY(0);
     }
 
     .btn-primary {
       width: 100%;
-      padding: 18px 24px;
-      background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+      background: var(--primary-color);
       color: white;
-      margin-bottom: 20px;
-      box-shadow: var(--shadow-md);
-    }
-
-    .btn-primary:hover {
-      background: linear-gradient(135deg, var(--primary-hover), var(--primary-color));
-      box-shadow: var(--shadow-lg);
+      margin-top: 16px;
     }
 
     .btn-scanner {
-      padding: 16px 20px;
-      background: linear-gradient(135deg, var(--accent-color), #10b981);
+      background: var(--accent-color);
       color: white;
-      white-space: nowrap;
-      flex-shrink: 0;
+      font-size: 20px;
       min-width: 60px;
-      box-shadow: var(--shadow-md);
-      font-size: 24px;
-      line-height: 1;
     }
 
     .btn-scanner:hover {
-      background: linear-gradient(135deg, var(--accent-hover), var(--accent-color));
-      box-shadow: var(--shadow-lg);
+      background: var(--accent-hover);
     }
 
-    /* Modal Styles */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(8px);
-      z-index: 1000;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      opacity: 0;
-      animation: fadeIn 0.3s ease-out forwards;
-    }
-
-    .modal-overlay.show {
-      display: flex;
-    }
-
-    @keyframes fadeIn {
-      to { opacity: 1; }
-    }
-
-    .modal {
-      background: var(--surface-elevated);
-      border-radius: var(--radius-xl);
-      box-shadow: var(--shadow-xl);
-      border: 1px solid var(--border-color);
-      width: 100%;
-      max-width: 400px;
-      position: relative;
-      overflow: hidden;
-      transform: scale(0.9) translateY(20px);
-      animation: modalIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-    }
-
-    @keyframes modalIn {
-      to {
-        transform: scale(1) translateY(0);
-      }
-    }
-
-    .modal::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
-    }
-
-    .modal-content {
-      padding: 32px 28px;
-      text-align: center;
-    }
-
-    .modal-icon {
-      width: 64px;
-      height: 64px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 28px;
-      margin: 0 auto 20px;
-      box-shadow: var(--shadow-lg);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .modal-icon.loading {
-      background: linear-gradient(135deg, var(--secondary-color), #94a3b8);
-      animation: pulse 2s infinite;
-    }
-
-    .modal-icon.success {
-      background: linear-gradient(135deg, var(--success-color), #34d399);
-      animation: bounce 0.6s ease-out;
-    }
-
-    .modal-icon.error {
-      background: linear-gradient(135deg, var(--error-color), #f87171);
-      animation: shake 0.5s ease-out;
-    }
-
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-    }
-
-    @keyframes bounce {
-      0%, 20%, 50%, 80%, 100% {
-        transform: translateY(0);
-      }
-      40% {
-        transform: translateY(-8px);
-      }
-      60% {
-        transform: translateY(-4px);
-      }
-    }
-
-    @keyframes shake {
-      0%, 100% {
-        transform: translateX(0);
-      }
-      10%, 30%, 50%, 70%, 90% {
-        transform: translateX(-4px);
-      }
-      20%, 40%, 60%, 80% {
-        transform: translateX(4px);
-      }
-    }
-
-    .modal-spinner {
-      width: 28px;
-      height: 28px;
-      border: 4px solid rgba(255, 255, 255, 0.3);
-      border-top-color: white;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    .modal-title {
-      font-size: 20px;
-      font-weight: 700;
-      margin-bottom: 12px;
-      color: var(--text-primary);
-    }
-
-    .modal-message {
-      font-size: 16px;
-      color: var(--text-secondary);
-      margin-bottom: 24px;
-      line-height: 1.5;
-    }
-
-    .modal-actions {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-    }
-
-    .btn-modal {
-      padding: 12px 24px;
-      border-radius: var(--radius-lg);
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: var(--transition);
-      border: 2px solid transparent;
-    }
-
-    .btn-modal-primary {
-      background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-      color: white;
-    }
-
-    .btn-modal-primary:hover {
-      background: linear-gradient(135deg, var(--primary-hover), var(--primary-color));
-      transform: translateY(-1px);
-    }
-
-    .btn-modal-secondary {
-      background: var(--surface);
-      color: var(--text-secondary);
-      border-color: var(--border-color);
-    }
-
-    .btn-modal-secondary:hover {
-      background: var(--background);
-      border-color: var(--border-hover);
-      transform: translateY(-1px);
-    }
-
-    /* Scanner View Styles */
     #scanner-view {
       display: none;
       position: fixed;
@@ -449,195 +113,86 @@
       background: #000;
       z-index: 1000;
     }
-    
+
     #scanner-container {
       width: 100%;
       height: 100%;
       position: relative;
     }
-    
+
     .scanner-ui {
       position: absolute;
-      top: 0;
-      left: 0;
+      top: 0; left: 0;
       width: 100%;
       height: 100%;
-      z-index: 1001;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      z-index: 1001;
     }
-    
-    .scanner-header {
-      padding: 24px 20px;
+
+    .scanner-header, .scanner-footer {
+      padding: 20px;
+      color: white;
       text-align: center;
-      color: white;
-      background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, transparent 100%);
+      background: rgba(0,0,0,0.5);
     }
 
-    .scanner-header h3 {
-      font-size: 20px;
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
-
-    .scanner-instruction {
-      font-size: 14px;
-      color: rgba(255, 255, 255, 0.8);
-    }
-    
-    .scanner-footer {
-      padding: 24px 20px;
-      display: flex;
-      justify-content: center;
-      background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, transparent 100%);
-    }
-    
     .btn-close-scanner {
-      background: rgba(220, 38, 38, 0.9);
+      background: rgba(220,38,38,0.9);
       color: white;
-      border: 2px solid rgba(255, 255, 255, 0.2);
       border-radius: 50%;
-      width: 64px;
-      height: 64px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      width: 56px;
+      height: 56px;
       font-size: 24px;
-      font-weight: 700;
-      backdrop-filter: blur(10px);
-      box-shadow: var(--shadow-lg);
     }
 
-    .btn-close-scanner:hover {
-      background: rgba(220, 38, 38, 1);
-      transform: scale(1.05);
-    }
-    
     .scan-box {
       position: absolute;
-      top: 25%;
-      left: 8%;
-      width: 84%;
-      height: 50%;
-      border: 3px solid var(--primary-color);
-      border-radius: 24px;
+      top: 45%;
+      left: 10%;
+      width: 80%;
+      height: 60px;
+      border: 3px solid red;
+      border-radius: 10px;
       z-index: 1002;
-      box-shadow: 
-        0 0 0 4000px rgba(0, 0, 0, 0.6),
-        inset 0 0 0 2px rgba(255, 255, 255, 0.2),
-        0 0 30px rgba(37, 99, 235, 0.5);
-      position: relative;
+      box-shadow: 0 0 0 4000px rgba(0,0,0,0.6);
     }
 
-    .scan-box::before {
-      content: '';
-      position: absolute;
-      top: -3px;
-      left: -3px;
-      right: -3px;
-      bottom: -3px;
-      border-radius: 24px;
-      background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
-      z-index: -1;
-      animation: pulse 2s infinite;
-    }
-    
     .scan-line {
       position: absolute;
-      top: 25%;
-      left: 8%;
-      width: 84%;
-      height: 3px;
-      background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
-      border-radius: 2px;
-      animation: scan 2.5s ease-in-out infinite;
+      top: 45%;
+      left: 10%;
+      width: 80%;
+      height: 2px;
+      background: linear-gradient(to right, transparent, red, transparent);
+      animation: scan-move 2s infinite;
       z-index: 1003;
-      box-shadow: 0 0 20px rgba(37, 99, 235, 0.8);
-    }
-    
-    @keyframes scan {
-      0% { top: 25%; }
-      50% { top: 75%; }
-      100% { top: 25%; }
     }
 
-    .scan-corners {
+    @keyframes scan-move {
+      0% { top: 45%; }
+      50% { top: 50%; }
+      100% { top: 45%; }
+    }
+
+    .scan-guide-text {
       position: absolute;
-      top: 25%;
-      left: 8%;
-      width: 84%;
-      height: 50%;
+      top: 38%;
+      width: 100%;
+      text-align: center;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 500;
       z-index: 1004;
-      pointer-events: none;
-    }
-
-    .scan-corners::before,
-    .scan-corners::after {
-      content: '';
-      position: absolute;
-      width: 40px;
-      height: 40px;
-      border: 4px solid var(--primary-color);
-    }
-
-    .scan-corners::before {
-      top: -4px;
-      left: -4px;
-      border-right: none;
-      border-bottom: none;
-      border-radius: 20px 0 0 0;
-    }
-
-    .scan-corners::after {
-      top: -4px;
-      right: -4px;
-      border-left: none;
-      border-bottom: none;
-      border-radius: 0 20px 0 0;
     }
 
     input[type="number"]::-webkit-inner-spin-button {
       display: none;
     }
-    
+
     input[type="number"] {
       -moz-appearance: textfield;
-    }
-
-    @media (max-width: 480px) {
-      .container {
-        padding: 0 16px;
-      }
-      
-      .card {
-        padding: 32px 24px;
-      }
-      
-      h2 {
-        font-size: 24px;
-      }
-      
-      .form-control {
-        padding: 14px 16px;
-      }
-      
-      .btn-primary {
-        padding: 16px 20px;
-      }
-      
-      .btn-scanner {
-        padding: 14px 16px;
-        min-width: 56px;
-      }
-
-      .modal {
-        margin: 0 16px;
-      }
-
-      .modal-content {
-        padding: 28px 24px;
-      }
     }
   </style>
 </head>
@@ -645,68 +200,41 @@
   <div class="container">
     <div class="card" id="main-view">
       <div class="header">
-        <div class="app-icon">📦</div>
-        <h2>บันทึกInventoryTAG</h2>
-        <p class="subheader">ระบบสแกนและบันทึกข้อมูล D365</p>
+        <h2>📦 บันทึก Inventory TAG</h2>
       </div>
-
-      <div class="form-section">
-        <div class="form-group">
-          <label class="form-label" for="barcode">🔍 รหัสบาร์โค้ด</label>
-          <div class="barcode-row">
-            <input type="text" id="barcode" class="form-control" placeholder="กดปุ่มสแกนเพื่อเริ่มต้น" readonly />
-            <button class="btn-scanner" onclick="startScanner()">🔍</button>
-          </div>
+      <div class="form-group">
+        <label class="form-label">รหัสบาร์โค้ด</label>
+        <div class="barcode-row">
+          <input type="text" id="barcode" class="form-control" placeholder="สแกนเพื่อใส่รหัส" readonly>
+          <button class="btn-scanner" onclick="startScanner()">🔍</button>
         </div>
-
-        <div class="form-group">
-          <label class="form-label" for="quantity">📊 จำนวน</label>
-          <input type="number" inputmode="numeric" id="quantity" class="form-control" placeholder="ระบุจำนวนสินค้า" />
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="scanner">👤 ชื่อผู้สแกน</label>
-          <input type="text" id="scanner" class="form-control" placeholder="ชื่อผู้สแกน" />
-        </div>
-
-        <button class="btn-primary" onclick="submitBarcode()">
-          <span>💾 บันทึกข้อมูลสินค้า</span>
-        </button>
       </div>
+      <div class="form-group">
+        <label class="form-label">จำนวน</label>
+        <input type="number" id="quantity" inputmode="numeric" class="form-control" placeholder="ระบุจำนวน">
+      </div>
+      <div class="form-group">
+        <label class="form-label">ชื่อผู้สแกน</label>
+        <input type="text" id="scanner" class="form-control" placeholder="ชื่อผู้สแกน">
+      </div>
+      <button class="btn-primary" onclick="submitBarcode()">💾 บันทึกข้อมูล</button>
     </div>
   </div>
 
-  <!-- Message Modal -->
-  <div class="modal-overlay" id="messageModal">
-    <div class="modal">
-      <div class="modal-content">
-        <div class="modal-icon" id="modalIcon">
-          <div class="modal-spinner" id="modalSpinner" style="display: none;"></div>
-          <span id="modalIconText"></span>
-        </div>
-        <h3 class="modal-title" id="modalTitle"></h3>
-        <p class="modal-message" id="modalMessage"></p>
-        <div class="modal-actions">
-          <button class="btn-modal btn-modal-primary" onclick="closeModal()">ตกลง</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
+  <!-- Scanner View -->
   <div id="scanner-view">
     <div id="scanner-container"></div>
     <div class="scanner-ui">
       <div class="scanner-header">
-        <h3>🔍 กำลังสแกนบาร์โค้ด</h3>
-        <p class="scanner-instruction">วางบาร์โค้ดไว้ในกรอบสี่เหลี่ยม</p>
+        <h3>กำลังสแกนบาร์โค้ด</h3>
       </div>
       <div class="scanner-footer">
         <button class="btn-close-scanner" onclick="stopScanner()">✕</button>
       </div>
+      <div class="scan-guide-text">เล็งบาร์โค้ดให้อยู่ในกรอบสี่เหลี่ยม</div>
+      <div class="scan-box"></div>
+      <div class="scan-line"></div>
     </div>
-    <div class="scan-box"></div>
-    <div class="scan-corners"></div>
-    <div class="scan-line"></div>
   </div>
 
   <audio id="beep" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg" preload="auto"></audio>
@@ -714,86 +242,30 @@
   <script>
     const apiURL = "https://script.google.com/macros/s/AKfycbwQ5E0eX2RQ_VwK6HBN6E10LNoZCKlUBFZxvT23VEu5k66EZV74Kel7KGssxJ-8SSsv/exec";
 
-    function showModal(type, title, message) {
-      const modal = document.getElementById('messageModal');
-      const modalIcon = document.getElementById('modalIcon');
-      const modalIconText = document.getElementById('modalIconText');
-      const modalSpinner = document.getElementById('modalSpinner');
-      const modalTitle = document.getElementById('modalTitle');
-      const modalMessage = document.getElementById('modalMessage');
-
-      // Reset classes
-      modalIcon.className = 'modal-icon';
-      modalSpinner.style.display = 'none';
-      modalIconText.style.display = 'block';
-
-      // Set content based on type
-      if (type === 'loading') {
-        modalIcon.classList.add('loading');
-        modalSpinner.style.display = 'block';
-        modalIconText.style.display = 'none';
-        modalTitle.textContent = title || 'กำลังดำเนินการ';
-        modalMessage.textContent = message || 'กำลังส่งข้อมูล...';
-      } else if (type === 'success') {
-        modalIcon.classList.add('success');
-        modalIconText.textContent = '✓';
-        modalTitle.textContent = title || 'สำเร็จ';
-        modalMessage.textContent = message;
-      } else if (type === 'error') {
-        modalIcon.classList.add('error');
-        modalIconText.textContent = '⚠';
-        modalTitle.textContent = title || 'เกิดข้อผิดพลาด';
-        modalMessage.textContent = message;
-      }
-
-      modal.classList.add('show');
-    }
-
-    function closeModal() {
-      const modal = document.getElementById('messageModal');
-      modal.classList.remove('show');
-    }
-
-    // Close modal when clicking outside
-    document.getElementById('messageModal').addEventListener('click', function(e) {
-      if (e.target === this) {
-        closeModal();
-      }
-    });
-
     async function submitBarcode() {
       const barcode = document.getElementById("barcode").value.trim();
       const quantity = document.getElementById("quantity").value.trim();
       const scanner = document.getElementById("scanner").value.trim();
 
-      showModal('loading', 'กำลังส่งข้อมูล', 'กรุณารอสักครู่...');
-
       if (!barcode || !quantity || !scanner) {
-        showModal('error', 'ข้อมูลไม่ครบถ้วน', 'กรุณากรอกข้อมูลให้ครบถ้วน');
+        alert("❌ กรุณากรอกข้อมูลให้ครบ");
         return;
       }
 
-      const params = new URLSearchParams({
-        page: "submitBarcode",
-        barcode,
-        quantity,
-        scanner
-      });
-
       try {
-        const res = await fetch(`${apiURL}?${params.toString()}`, { method: "POST" });
+        const res = await fetch(`${apiURL}?page=submitBarcode&barcode=${barcode}&quantity=${quantity}&scanner=${scanner}`, { method: "POST" });
         const data = await res.json();
 
         if (data.success) {
-          showModal('success', 'บันทึกสำเร็จ', data.message);
+          alert("✅ " + data.message);
           document.getElementById("barcode").value = "";
           document.getElementById("quantity").value = "";
           document.getElementById("scanner").value = "";
         } else {
-          showModal('error', 'ไม่สามารถบันทึกได้', data.message);
+          alert("❌ " + data.message);
         }
       } catch (err) {
-        showModal('error', 'เชื่อมต่อไม่ได้', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง');
+        alert("❌ ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์");
         console.error(err);
       }
     }
@@ -814,11 +286,7 @@
           }
         },
         decoder: {
-          readers: [
-            "code_128_reader",
-            "code_39_reader",
-            "ean_reader"
-          ]
+          readers: ["code_128_reader", "code_39_reader", "ean_reader"]
         },
         locate: true,
         locator: {
