@@ -5,46 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>📦 บันทึก Inventory TAG</title>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script type="module">
-    import { BrowserMultiFormatReader } from 'https://cdn.jsdelivr.net/npm/@zxing/browser@0.0.10/esm/index.min.js';
-
-    let codeReader;
-    let selectedDeviceId;
-
-    window.startScanner = async function () {
-      document.getElementById("main-view").style.display = "none";
-      document.getElementById("scanner-view").style.display = "block";
-
-      codeReader = new BrowserMultiFormatReader();
-
-      const videoElem = document.getElementById("video-preview");
-
-      try {
-        const devices = await codeReader.listVideoInputDevices();
-        selectedDeviceId = devices[0]?.deviceId;
-
-        await codeReader.decodeFromVideoDevice(selectedDeviceId, videoElem, (result, err) => {
-          if (result) {
-            document.getElementById("barcode").value = result.text;
-            document.getElementById("beep").play();
-            stopScanner();
-          }
-        });
-      } catch (err) {
-        console.error(err);
-        Swal.fire("ไม่สามารถเปิดกล้องได้", err.message, "error");
-        stopScanner();
-      }
-    };
-
-    window.stopScanner = function () {
-      if (codeReader) {
-        codeReader.reset();
-      }
-      document.getElementById("scanner-view").style.display = "none";
-      document.getElementById("main-view").style.display = "block";
-    };
-  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.1/umd/index.min.js"></script>
   <style>
     :root {
       --primary-color: #2563eb;
@@ -289,6 +250,41 @@
 
   <script>
     const apiURL = "https://script.google.com/macros/s/AKfycbwQ5E0eX2RQ_VwK6HBN6E10LNoZCKlUBFZxvT23VEu5k66EZV74Kel7KGssxJ-8SSsv/exec";
+    let codeReader;
+    let selectedDeviceId;
+
+    async function startScanner() {
+      document.getElementById("main-view").style.display = "none";
+      document.getElementById("scanner-view").style.display = "block";
+
+      codeReader = new ZXingBrowser.BrowserMultiFormatReader();
+      const videoElem = document.getElementById("video-preview");
+
+      try {
+        const devices = await codeReader.listVideoInputDevices();
+        selectedDeviceId = devices[0]?.deviceId;
+
+        await codeReader.decodeFromVideoDevice(selectedDeviceId, videoElem, (result, err) => {
+          if (result) {
+            document.getElementById("barcode").value = result.text;
+            document.getElementById("beep").play();
+            stopScanner();
+          }
+        });
+      } catch (err) {
+        console.error(err);
+        Swal.fire("ไม่สามารถเปิดกล้องได้", err.message, "error");
+        stopScanner();
+      }
+    }
+
+    function stopScanner() {
+      if (codeReader) {
+        codeReader.reset();
+      }
+      document.getElementById("scanner-view").style.display = "none";
+      document.getElementById("main-view").style.display = "block";
+    }
 
     async function submitBarcode() {
       const barcode = document.getElementById("barcode").value.trim();
