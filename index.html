@@ -335,32 +335,33 @@
         </div>
       </div>
       <div class="form-group">
-<!-- 🔽 กระบวนการหลัก -->
-<div class="form-group">
-  <label class="form-label">กระบวนการหลัก</label>
-  <select id="mainProcess" class="form-control" onchange="handleMainProcessChange()">
-    <option value="">-- เลือกกระบวนการหลัก --</option>
-    <option value="ผสมผง">ผสมผง</option>
-    <option value="Compact">Compact</option>
-    <option value="Sinter & Steam">Sinter & Steam</option>
-    <option value="Finishing">Finishing</option>
-    <option value="Machining">Machining</option>
-    <option value="Sub Store">Sub Store</option>
-    <option value="Magna flux">Magna flux</option>
-    <option value="Sort">Sort</option>
-    <option value="Pack">Pack</option>
-    <option value="Rework">Rework</option>
-  </select>
-</div>
+<div class="form-row d-flex flex-wrap gap-2 align-items-center mb-3">
+  <!-- กระบวนการหลัก -->
+  <div class="flex-fill">
+    <label class="form-label">กระบวนการหลัก</label>
+    <select id="mainProcess" class="form-select" onchange="handleMainProcessChange()" style="min-width: 160px;">
+      <option value="">-- เลือกกระบวนการหลัก --</option>
+      <option value="ผสมผง">ผสมผง</option>
+      <option value="Compact">Compact</option>
+      <option value="Sinter & Steam">Sinter & Steam</option>
+      <option value="Finishing">Finishing</option>
+      <option value="Machining">Machining</option>
+      <option value="Sub Store">Sub Store</option>
+      <option value="Magna flux">Magna flux</option>
+      <option value="Sort">Sort</option>
+      <option value="Pack">Pack</option>
+      <option value="Rework">Rework</option>
+    </select>
+  </div>
 
-<!-- 🔽 กระบวนการย่อย -->
-<div class="form-group">
-  <label class="form-label">กระบวนการย่อย</label>
-  <select id="subProcess" class="form-control">
-    <option value="">-- เลือกกระบวนการย่อย --</option>
-  </select>
+  <!-- กระบวนการย่อย -->
+  <div class="flex-fill">
+    <label class="form-label">กระบวนการย่อย</label>
+    <select id="subProcess" class="form-select" disabled style="min-width: 160px;">
+      <option value="">-- เลือกกระบวนการย่อย --</option>
+    </select>
+  </div>
 </div>
-
         <label class="form-label">จำนวน</label>
         <input type="number" id="quantity" inputmode="numeric" class="form-control" placeholder="ระบุจำนวน">
       </div>
