@@ -554,81 +554,102 @@ function handleMainProcessChange() {
   const main = document.getElementById("mainProcess").value;
   const sub = document.getElementById("subProcess");
 
-  const subOptions = {
-    "Compact": [["P", "P Compact"]],
-    "Sinter & Steam": [
-      ["S", "S Sinter"],
-      ["STE", "STE Steam"],
-      ["TEMP", "TEMP Temper"],
-      ["MW", "MW MachineWash"]
-    ],
-    "Finishing": [
-      ["ESE-Chk. Crack", "ESE-Chk. Crack"],
-      ["OD-Oil Dip", "OD-Oil Dip"],
-      ["BR-Barrel", "BR-Barrel"],
-      ["H", "De-burring"],
-      ["DRY", "Drying"],
-      ["SB", "Shot blast"],
-      ["R", "Impreganate"],
-      ["OG", "Impreganate"],
-      ["U", "UitraSonicWash"],
-      ["DR", "DrawingPress(Sizing)"],
-      ["RP", "Sizing"],
-      ["RO", "Rolling"]
-    ],
-    "Machining": [
-      ["MC", "Machining"],
-      ["NCL", "NC Lath."],
-      ["L", "Lath."],
-      ["GC", "Grinding"],
-      ["DP", "Throuth Pin"],
-      ["UT", "InductionHarden"],
-      ["F", "Buffing"],
-      ["D", "Drilling"],
-      ["AS", "Assembly"],
-      ["WE", "Welding"]
-    ],
-    "Magna flux": [
-      ["SEM", "Magna flux"],
-      ["SEMT", "Magna flux"]
-    ],
-    "Sort": [["SEL", "Sort"]],
-    "Pack": [["KON", "Pack"]],
-    "Rework": [["SELD", "Sort dimension"]]
-  };
-
-  // Clear existing options
+  // เคลียร์ค่าปัจจุบัน
   sub.innerHTML = "";
 
+  // กำหนดรายการย่อยตามเงื่อนไขใหม่
+  const subOptions = {
+    "Compact": [["P", "P - Compact"]],
+    "Sinter & Steam": [
+      ["S", "S - Sinter"],
+      ["STE", "STE - Steam"],
+      ["TEMP", "TEMP - Temper"],
+      ["MW", "MW - MachineWash"]
+    ],
+    "Finishing": [
+      ["ESE", "ESE - Chk. Crack"],
+      ["OD", "OD - Oil Dip"],
+      ["BR", "BR - Barrel"],
+      ["H", "H - De-burring"],
+      ["DRY", "DRY - Drying"],
+      ["SB", "SB - Shot blast"],
+      ["R", "R - Impreganate"],
+      ["OG", "OG - Impreganate"],
+      ["U", "U - UitraSonicWash"],
+      ["DR", "DR - DrawingPress(Sizing)"],
+      ["RP", "RP - Sizing"],
+      ["RO", "RO - Rolling"]
+    ],
+    "Machining": [
+      ["MC", "MC - Machining"],
+      ["NCL", "NCL - NC Lath."],
+      ["L", "L - Lath."],
+      ["GC", "GC - Grinding"],
+      ["DP", "DP - Throuth Pin"],
+      ["UT", "UT - InductionHarden"],
+      ["F", "F - Buffing"],
+      ["D", "D - Drilling"],
+      ["AS", "AS - Assembly"],
+      ["WE", "WE - Welding"]
+    ],
+    "Magna flux": [
+      ["SEM", "SEM - Magna flux"],
+      ["SEMT", "SEMT - Magna flux"]
+    ],
+    "Sort": [["SEL", "SEL - Sort"]],
+    "Pack": [["KON", "KON - Pack"]],
+    "Rework": [["SELD", "SELD - Sort dimension"]]
+  };
+
+  // กรณีที่ไม่ต้องเลือกย่อย
   if (main === "ผสมผง" || main === "Sub Store") {
     sub.disabled = true;
-    sub.style.backgroundColor = "#e5e7eb"; // สีเทา
+    sub.style.backgroundColor = "#e5e7eb";
     const option = document.createElement("option");
     option.text = "-- ไม่ต้องเลือก --";
     sub.appendChild(option);
-  } else if (subOptions[main]) {
+    return;
+  }
+
+  // กรณีที่มีรายการเดียว → ใส่รายการทันที
+  if (["Compact", "Sort", "Pack", "Rework"].includes(main)) {
     sub.disabled = false;
-    sub.style.backgroundColor = "#ffffff"; // กลับมาเป็นขาว
+    sub.style.backgroundColor = "#ffffff";
+    const [code, label] = subOptions[main][0];
+    const option = document.createElement("option");
+    option.value = code;
+    option.text = label;
+    sub.appendChild(option);
+    return;
+  }
+
+  // กรณีมีหลายรายการให้เลือก
+  if (subOptions[main]) {
+    sub.disabled = false;
+    sub.style.backgroundColor = "#ffffff";
 
     const defaultOption = document.createElement("option");
     defaultOption.text = "-- เลือกกระบวนการย่อย --";
     defaultOption.value = "";
     sub.appendChild(defaultOption);
 
-    subOptions[main].forEach(([val, label]) => {
+    subOptions[main].forEach(([code, label]) => {
       const opt = document.createElement("option");
-      opt.value = val;
+      opt.value = code;
       opt.textContent = label;
       sub.appendChild(opt);
     });
-  } else {
-    sub.disabled = true;
-    sub.style.backgroundColor = "#e5e7eb";
-    const option = document.createElement("option");
-    option.text = "-- ไม่มีข้อมูล --";
-    sub.appendChild(option);
+    return;
   }
+
+  // fallback
+  sub.disabled = true;
+  sub.style.backgroundColor = "#e5e7eb";
+  const fallback = document.createElement("option");
+  fallback.text = "-- ไม่มีข้อมูล --";
+  sub.appendChild(fallback);
 }
+
 
 </script>
 
