@@ -315,11 +315,6 @@
     input[type="number"] {
       -moz-appearance: textfield;
     }
-    select:disabled {
-  background-color: #e9ecef !important;
-  cursor: not-allowed;
-}
-
   </style>
 </head>
 <body>
@@ -339,11 +334,12 @@
           </button>
         </div>
       </div>
-      
-<div class="row g-3 align-items-center mb-3">
-  <div class="col-12 col-md-6">
+      <div class="form-group">
+<div class="form-row d-flex flex-wrap gap-2 align-items-center mb-3">
+  <!-- กระบวนการหลัก -->
+  <div class="flex-fill">
     <label class="form-label">กระบวนการหลัก</label>
-    <select id="mainProcess" class="form-select" onchange="handleMainProcessChange()">
+    <select id="mainProcess" class="form-select" onchange="handleMainProcessChange()" style="min-width: 160px;">
       <option value="">-- เลือกกระบวนการหลัก --</option>
       <option value="ผสมผง">ผสมผง</option>
       <option value="Compact">Compact</option>
@@ -357,9 +353,11 @@
       <option value="Rework">Rework</option>
     </select>
   </div>
-  <div class="col-12 col-md-6">
+
+  <!-- กระบวนการย่อย -->
+  <div class="flex-fill">
     <label class="form-label">กระบวนการย่อย</label>
-    <select id="subProcess" class="form-select" disabled>
+    <select id="subProcess" class="form-select" disabled style="min-width: 160px;">
       <option value="">-- เลือกกระบวนการย่อย --</option>
     </select>
   </div>
