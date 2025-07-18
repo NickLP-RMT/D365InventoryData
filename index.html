@@ -334,12 +334,11 @@
           </button>
         </div>
       </div>
-      <div class="form-group">
-<div class="form-row d-flex flex-wrap gap-2 align-items-center mb-3">
-  <!-- กระบวนการหลัก -->
-  <div class="flex-fill">
+      
+<div class="row g-3 align-items-center mb-3">
+  <div class="col-12 col-md-6">
     <label class="form-label">กระบวนการหลัก</label>
-    <select id="mainProcess" class="form-select" onchange="handleMainProcessChange()" style="min-width: 160px;">
+    <select id="mainProcess" class="form-select" onchange="handleMainProcessChange()">
       <option value="">-- เลือกกระบวนการหลัก --</option>
       <option value="ผสมผง">ผสมผง</option>
       <option value="Compact">Compact</option>
@@ -353,11 +352,9 @@
       <option value="Rework">Rework</option>
     </select>
   </div>
-
-  <!-- กระบวนการย่อย -->
-  <div class="flex-fill">
+  <div class="col-12 col-md-6">
     <label class="form-label">กระบวนการย่อย</label>
-    <select id="subProcess" class="form-select" disabled style="min-width: 160px;">
+    <select id="subProcess" class="form-select" disabled>
       <option value="">-- เลือกกระบวนการย่อย --</option>
     </select>
   </div>
