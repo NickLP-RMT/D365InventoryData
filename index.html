@@ -422,44 +422,52 @@
   let html5QrcodeScanner;
 
   async function submitBarcode() {
-    const barcode = document.getElementById("barcode").value.trim();
-    const quantity = document.getElementById("quantity").value.trim();
-    const scanner = document.getElementById("scanner").value.trim();
+  const barcode = document.getElementById("barcode").value.trim();
+  const quantity = document.getElementById("quantity").value.trim();
+  const scanner = document.getElementById("scanner").value.trim();
 
-    if (!barcode || !quantity || !scanner) {
-      Swal.fire({
-        icon: "error",
-        title: "กรอกข้อมูลไม่ครบ",
-        text: "กรุณากรอกข้อมูลให้ครบทุกช่อง",
-      });
-      return;
-    }
+  // ✅ เพิ่มการอ่านค่าช่องใหม่
+  const mainProcess = document.getElementById("mainProcess").value.trim();
+  const subProcess = document.getElementById("subProcess").value.trim();
+  const status = document.getElementById("status").value.trim();
 
-    if (isNaN(quantity) || Number(quantity) <= 0) {
-      Swal.fire({
-        icon: "warning",
-        title: "จำนวนไม่ถูกต้อง",
-        text: "กรุณากรอกจำนวนเป็นตัวเลขที่มากกว่า 0",
-      });
-      return;
-    }
-
-    const confirmResult = await Swal.fire({
-      title: "ยืนยันข้อมูลก่อนบันทึก",
-      html: `
-        <p><strong>📦 Barcode:</strong> ${barcode}</p>
-        <p><strong>🔢 จำนวน:</strong> ${quantity}</p>
-        <p><strong>👤 ผู้สแกน:</strong> ${scanner}</p>
-      `,
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonText: "✅ ยืนยัน",
-      cancelButtonText: "❌ ยกเลิก",
+  if (!barcode || !quantity || !scanner) {
+    Swal.fire({
+      icon: "error",
+      title: "กรอกข้อมูลไม่ครบ",
+      text: "กรุณากรอกข้อมูลให้ครบทุกช่อง",
     });
+    return;
+  }
 
-    if (!confirmResult.isConfirmed) {
-      return;
-    }
+  if (isNaN(quantity) || Number(quantity) <= 0) {
+    Swal.fire({
+      icon: "warning",
+      title: "จำนวนไม่ถูกต้อง",
+      text: "กรุณากรอกจำนวนเป็นตัวเลขที่มากกว่า 0",
+    });
+    return;
+  }
+
+  const confirmResult = await Swal.fire({
+    title: "ยืนยันข้อมูลก่อนบันทึก",
+    html: `
+      <p><strong>📦 Barcode:</strong> ${barcode}</p>
+      <p><strong>🔢 จำนวน:</strong> ${quantity}</p>
+      <p><strong>👤 ผู้สแกน:</strong> ${scanner}</p>
+      <p><strong>⚙️ กระบวนการหลัก:</strong> ${mainProcess || '-'}</p>
+      <p><strong>🧩 กระบวนการย่อย:</strong> ${subProcess || '-'}</p>
+      <p><strong>📌 สถานะ:</strong> ${status || '-'}</p>
+    `,
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonText: "✅ ยืนยัน",
+    cancelButtonText: "❌ ยกเลิก",
+  });
+
+  if (!confirmResult.isConfirmed) {
+    return;
+  }
 
     Swal.fire({
       title: "กำลังบันทึกข้อมูล...",
