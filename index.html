@@ -675,7 +675,7 @@ function handleMainProcessChange() {
     sub.disabled = true;
     sub.style.backgroundColor = "#e5e7eb";
     const option = document.createElement("option");
-    option.text = "-- ไม่ต้องเลือก --";
+    option.text = "ไม่มี";
     sub.appendChild(option);
   } else if (["Compact", "Sort", "Pack", "Rework"].includes(main)) {
     sub.disabled = false;
