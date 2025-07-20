@@ -490,9 +490,9 @@
   });
 
   try {
-    const res = await fetch(`${apiURL}?page=submitBarcode&barcode=${barcode}&quantity=${quantity}&scanner=${scanner}`, {
-      method: "POST",
-    });
+    const res = await fetch(`${apiURL}?page=submitBarcode&barcode=${barcode}&quantity=${quantity}&scanner=${scanner}&mainProcess=${mainProcess}&subProcess=${subProcess}&status=${status}`, {
+  method: "POST"
+});
     const data = await res.json();
 
     if (data.success) {
