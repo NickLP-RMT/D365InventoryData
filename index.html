@@ -429,15 +429,17 @@
   const subProcess = document.getElementById("subProcess").value.trim();
   const status = document.getElementById("status").value.trim();
 
-  if (!barcode || !quantity || !scanner) {
+  // ✅ ตรวจสอบให้ครบทุกช่องที่จำเป็น
+  if (!barcode || !quantity || !scanner || !mainProcess || !subProcess || !status) {
     Swal.fire({
       icon: "error",
       title: "กรอกข้อมูลไม่ครบ",
-      text: "กรุณากรอกข้อมูลให้ครบทุกช่อง",
+      text: "กรุณากรอกข้อมูลให้ครบทุกช่อง รวมถึงกระบวนการและสถานะ",
     });
     return;
   }
 
+  // ✅ ตรวจสอบว่า quantity เป็นตัวเลขและมากกว่า 0
   if (isNaN(quantity) || Number(quantity) <= 0) {
     Swal.fire({
       icon: "warning",
@@ -447,7 +449,7 @@
     return;
   }
 
-  // ✅ ดึงชื่อเต็มของ subProcess จาก list
+  // ✅ ดึงชื่อเต็มของ subProcess
   const subProcessText = document.querySelector('#subProcess option:checked')?.textContent || '-';
   const mainProcessText = mainProcess || '-';
   const statusText = status || '-';
