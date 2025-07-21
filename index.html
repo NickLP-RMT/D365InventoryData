@@ -504,6 +504,10 @@
       });
       document.getElementById("barcode").value = "";
       document.getElementById("quantity").value = "";
+      document.getElementById("mainProcess").value = "";
+      document.getElementById("subProcess").innerHTML = "<option value=''>-- เลือกกระบวนการย่อย --</option>";
+      document.getElementById("subProcess").disabled = true;
+      document.getElementById("status").innerHTML = "<option value=''>-- เลือกสถานะ --</option>";
     } else {
       Swal.fire({
         icon: "error",
