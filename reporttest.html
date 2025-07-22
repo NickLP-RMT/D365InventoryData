@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>📊 รายงาน Inventory TAG</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; margin: 20px; background: #f9fafb; color: #111827; }
+    h1 { font-size: 24px; margin-bottom: 10px; }
+    .filters { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+    .filters input, .filters select, .filters button { padding: 8px; border: 1px solid #ccc; border-radius: 6px; }
+    table { width: 100%; border-collapse: collapse; background: white; }
+    th, td { padding: 8px; border: 1px solid #ddd; font-size: 14px; }
+    th { background: #2563eb; color: white; position: sticky; top: 0; }
+    tr:nth-child(even) { background: #f1f5f9; }
+    .summary { margin-top: 20px; font-weight: bold; }
+    .export-btn { background: #10b981; color: white; cursor: pointer; }
+    @media (max-width: 768px) {
+      .filters { flex-direction: column; }
+      th, td { font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <h1>📦 รายงาน Inventory TAG</h1>
+
+  <div class="filters">
+    <input type="text" id="search" placeholder="🔍 Barcode / Scanner / Status">
+    <input type="text" id="dateRange" placeholder="📅 เลือกช่วงวันที่">
+    <button onclick="loadData()">🔄 Refresh</button>
+    <button onclick="exportToExcel()" class="export-btn">📥 Export Excel</button>
+  </div>
+
+  <div class="summary" id="summary">โหลดข้อมูล...</div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>📅 วันที่</th>
+        <th>🕒 เวลา</th>
+        <th>🔎 Barcode</th>
+        <th>⚙️ กระบวนการหลัก</th>
+        <th>🧩 ย่อย</th>
+        <th>📌 สถานะ</th>
+        <th>🔢 จำนวน</th>
+        <th>👤 ผู้สแกน</th>
+      </tr>
+    </thead>
+    <tbody id="reportTable"></tbody>
+  </table>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+    const supabase = createClient(
+      'https://fvjminqjxfracpvdbjly.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2am1pbnFqeGZyYWNwdmRiamx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMxNTY4NTMsImV4cCI6MjA2ODczMjg1M30.N3X8-qSRQHa7FPIpbDlfL5ewY5_JeCShAuARczfmLgE'
+    );
+
+    const dateRange = document.getElementById('dateRange');
+    const searchInput = document.getElementById('search');
+    const tableBody = document.getElementById('reportTable');
+    const summaryDiv = document.getElementById('summary');
+    let rawData = [];
+
+    flatpickr("#dateRange", {
+      mode: "range",
+      dateFormat: "Y-m-d",
+      locale: "th",
+    });
+
+    async function loadData() {
+      tableBody.innerHTML = "";
+      summaryDiv.textContent = "⏳ กำลังโหลดข้อมูล...";
+
+      const range = dateRange.value.split(" ถึง ");
+      let from = range[0] || null;
+      let to = range[1] || range[0] || null;
+
+      let { data, error } = await supabase
+        .from("inventory_tags")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        summaryDiv.textContent = "❌ โหลดข้อมูลผิดพลาด";
+        console.error(error);
+        return;
+      }
+
+      rawData = data.filter(row => {
+        const created = new Date(row.created_at);
+        if (from && to) {
+          const fromDate = new Date(from + "T00:00:00");
+          const toDate = new Date(to + "T23:59:59");
+          if (created < fromDate || created > toDate) return false;
+        }
+
+        const keyword = searchInput.value.trim().toLowerCase();
+        if (keyword) {
+          return (
+            row.barcode?.toLowerCase().includes(keyword) ||
+            row.scanner?.toLowerCase().includes(keyword) ||
+            row.status?.toLowerCase().includes(keyword)
+          );
+        }
+
+        return true;
+      });
+
+      renderTable();
+    }
+
+    function renderTable() {
+      tableBody.innerHTML = "";
+      let totalQty = 0;
+      let processCount = {};
+
+      rawData.forEach(row => {
+        const date = new Date(row.created_at);
+        const thaiDate = date.toLocaleDateString("th-TH");
+        const time = date.toLocaleTimeString("th-TH", { hour: '2-digit', minute: '2-digit' });
+
+        totalQty += row.quantity || 0;
+        processCount[row.main_process] = (processCount[row.main_process] || 0) + 1;
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${thaiDate}</td>
+          <td>${time}</td>
+          <td>${row.barcode}</td>
+          <td>${row.main_process}</td>
+          <td>${row.sub_process}</td>
+          <td>${row.status}</td>
+          <td style="text-align:right">${row.quantity}</td>
+          <td>${row.scanner}</td>
+        `;
+        tableBody.appendChild(tr);
+      });
+
+      const summaryText = `📌 จำนวนรายการ: ${rawData.length.toLocaleString()} | 🔢 รวมจำนวนทั้งหมด: ${totalQty.toLocaleString()} | ⚙️ รายการตามกระบวนการ: ` +
+        Object.entries(processCount).map(([k, v]) => `${k} (${v})`).join(", ");
+      summaryDiv.textContent = summaryText;
+    }
+
+    function exportToExcel() {
+      if (rawData.length === 0) {
+        Swal.fire("ไม่มีข้อมูลให้ Export", "", "info");
+        return;
+      }
+
+      const rows = rawData.map(row => {
+        const date = new Date(row.created_at);
+        return {
+          "วันที่": date.toLocaleDateString("th-TH"),
+          "เวลา": date.toLocaleTimeString("th-TH", { hour: '2-digit', minute: '2-digit' }),
+          "Barcode": row.barcode,
+          "กระบวนการหลัก": row.main_process,
+          "ย่อย": row.sub_process,
+          "สถานะ": row.status,
+          "จำนวน": row.quantity,
+          "ผู้สแกน": row.scanner,
+        };
+      });
+
+      const ws = XLSX.utils.json_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Inventory_Report");
+      XLSX.writeFile(wb, `inventory_report_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    }
+
+    // โหลดครั้งแรก
+    loadData();
+  </script>
+</body>
+</html>
