@@ -479,14 +479,18 @@
       Swal.fire({ title: "กำลังบันทึกข้อมูล...", allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
       try {
-        const { error } = await supabase.from('inventory_tags').insert([{
-          barcode,
-          quantity: parseInt(quantity),
-          scanner,
-          main_process: mainProcess,
-          sub_process: subProcess,
-          status
-        }]);
+        // สร้างวันที่แบบเวลาประเทศไทย
+const thaiDate = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Bangkok" }));
+
+const { error } = await supabase.from('inventory_tags').insert([{
+  barcode,
+  quantity: parseInt(quantity),
+  scanner,
+  main_process: mainProcess,
+  sub_process: subProcess,
+  status,
+  created_at: thaiDate.toISOString()
+}]);
 
         if (error) {
           throw error;
