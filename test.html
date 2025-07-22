@@ -480,7 +480,8 @@
 
       try {
         // สร้างวันที่แบบเวลาประเทศไทย
-const thaiDate = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Bangkok" }));
+const utcNow = new Date();
+const bangkokTime = new Date(utcNow.getTime() + (7 * 60 * 60 * 1000)); // +7 ชั่วโมง
 
 const { error } = await supabase.from('inventory_tags').insert([{
   barcode,
@@ -489,7 +490,7 @@ const { error } = await supabase.from('inventory_tags').insert([{
   main_process: mainProcess,
   sub_process: subProcess,
   status,
-  created_at: thaiDate.toISOString()
+  created_at: bangkokTime.toISOString()
 }]);
 
         if (error) {
