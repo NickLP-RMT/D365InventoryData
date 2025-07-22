@@ -100,7 +100,8 @@
       position: relative;
     }
 
-    .input-group input {
+    .input-group input,
+    .input-group select {
       width: 100%;
       padding: 0.875rem 1rem 0.875rem 2.5rem;
       border: 2px solid var(--border-gray);
@@ -109,12 +110,18 @@
       transition: all 0.3s ease;
       background: var(--white);
       color: var(--text-dark);
+      font-family: inherit;
     }
 
-    .input-group input:focus {
+    .input-group input:focus,
+    .input-group select:focus {
       outline: none;
       border-color: var(--secondary-blue);
       box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .input-group select {
+      cursor: pointer;
     }
 
     .input-group i {
@@ -401,15 +408,31 @@
           <input type="text" id="endDate" placeholder="วันที่สิ้นสุด">
         </div>
         <div class="input-group">
-          <i class="fas fa-search"></i>
-          <input type="text" id="search" placeholder="ค้นหาข้อมูล...">
+          <i class="fas fa-cogs"></i>
+          <select id="mainProcess">
+            <option value="">ทุกกระบวนการ</option>
+            <option value="ผสมผง">ผสมผง</option>
+            <option value="Compact">Compact</option>
+            <option value="Sinter & Steam">Sinter & Steam</option>
+            <option value="Finishing">Finishing</option>
+            <option value="Machining">Machining</option>
+            <option value="Sub Store">Sub Store</option>
+            <option value="Magna flux">Magna flux</option>
+            <option value="Sort">Sort</option>
+            <option value="Pack">Pack</option>
+            <option value="Rework">Rework</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <i class="fas fa-barcode"></i>
+          <input type="text" id="barcodeSearch" placeholder="ค้นหา Barcode...">
         </div>
       </div>
 
       <div class="button-group">
         <button class="btn btn-primary" onclick="loadData()">
-          <i class="fas fa-sync-alt"></i>
-          รีเฟรชข้อมูล
+          <i class="fas fa-search"></i>
+          ค้นหา
         </button>
         <button class="btn btn-secondary" onclick="exportExcel()">
           <i class="fas fa-file-excel"></i>
@@ -476,11 +499,14 @@
     theme: "light"
   });
 
-  // Add search functionality with debounce
-  let searchTimeout;
-  document.getElementById("search").addEventListener("input", function() {
-    clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(loadData, 500);
+  // Add main process filter and barcode search functionality
+  document.getElementById("mainProcess").addEventListener("change", loadData);
+  
+  // Add barcode search with debounce
+  let barcodeSearchTimeout;
+  document.getElementById("barcodeSearch").addEventListener("input", function() {
+    clearTimeout(barcodeSearchTimeout);
+    barcodeSearchTimeout = setTimeout(loadData, 500);
   });
 
   async function loadData() {
@@ -514,15 +540,15 @@
 
       const start = document.getElementById("startDate").value;
       const end = document.getElementById("endDate").value;
-      const keyword = document.getElementById("search").value.toLowerCase();
+      const selectedProcess = document.getElementById("mainProcess").value;
+      const barcodeKeyword = document.getElementById("barcodeSearch").value.toLowerCase();
 
       const filtered = data.filter(item => {
         const date = item.created_at.split("T")[0];
         const matchDate = (!start || date >= start) && (!end || date <= end);
-        const matchKeyword = !keyword || Object.values(item).some(v => 
-          v?.toString().toLowerCase().includes(keyword)
-        );
-        return matchDate && matchKeyword;
+        const matchProcess = !selectedProcess || item.main_process === selectedProcess;
+        const matchBarcode = !barcodeKeyword || (item.barcode && item.barcode.toLowerCase().includes(barcodeKeyword));
+        return matchDate && matchProcess && matchBarcode;
       });
 
       // Update table
@@ -558,23 +584,33 @@
       // Update summary
       const totalQty = filtered.reduce((sum, row) => sum + Number(row.quantity || 0), 0);
       const uniqueScanner = [...new Set(filtered.map(row => row.scanner))].length;
-      const processCount = {};
       
+      // Define all processes and initialize with 0
+      const allProcesses = [
+        "ผสมผง", "Compact", "Sinter & Steam", "Finishing", "Machining",
+        "Sub Store", "Magna flux", "Sort", "Pack", "Rework"
+      ];
+      
+      const processCount = {};
+      allProcesses.forEach(process => {
+        processCount[process] = 0;
+      });
+      
+      // Count actual data - sum quantities instead of count items
       filtered.forEach(row => {
-        const proc = row.main_process || "ไม่ระบุ";
-        processCount[proc] = (processCount[proc] || 0) + 1;
+        const proc = row.main_process || "อื่นๆ";
+        if (allProcesses.includes(proc)) {
+          processCount[proc] += Number(row.quantity || 0);
+        }
       });
 
-      const processCards = Object.entries(processCount)
-        .sort(([,a], [,b]) => b - a)
-        .slice(0, 4)
-        .map(([process, count]) => `
-          <div class="summary-card">
-            <div class="icon"><i class="fas fa-cog"></i></div>
-            <div class="title">${process}</div>
-            <div class="value">${count.toLocaleString()}</div>
-          </div>
-        `).join("");
+      const processCards = allProcesses.map(process => `
+        <div class="summary-card">
+          <div class="icon"><i class="fas fa-cog"></i></div>
+          <div class="title">${process}</div>
+          <div class="value">${processCount[process].toLocaleString()}</div>
+        </div>
+      `).join("");
 
       summaryDiv.innerHTML = `
         <div class="summary-card">
