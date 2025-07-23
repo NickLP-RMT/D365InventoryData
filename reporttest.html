@@ -468,6 +468,10 @@
           <i class="fas fa-search"></i>
           ค้นหา
         </button>
+        <button class="btn btn-secondary" onclick="clearFilters()">
+          <i class="fas fa-eraser"></i>
+          Clear
+        </button>
         <button class="btn btn-secondary" onclick="exportExcel()">
           <i class="fas fa-file-excel"></i>
           ดาวน์โหลด Excel
@@ -559,14 +563,29 @@
   });
 
   // Add main process filter and barcode search functionality
-  document.getElementById("mainProcess").addEventListener("change", loadData);
+  // Removed auto search - now only search when button is clicked
   
-  // Add barcode search with debounce
-  let barcodeSearchTimeout;
-  document.getElementById("barcodeSearch").addEventListener("input", function() {
-    clearTimeout(barcodeSearchTimeout);
-    barcodeSearchTimeout = setTimeout(loadData, 500);
-  });
+  // Remove auto search timeout for barcode
+  // let barcodeSearchTimeout;
+  // document.getElementById("barcodeSearch").addEventListener("input", function() {
+  //   clearTimeout(barcodeSearchTimeout);
+  //   barcodeSearchTimeout = setTimeout(loadData, 500);
+  // });
+
+  // Clear filters function
+  function clearFilters() {
+    document.getElementById("startDate").value = "";
+    document.getElementById("endDate").value = "";
+    document.getElementById("mainProcess").value = "";
+    document.getElementById("barcodeSearch").value = "";
+    
+    // Clear flatpickr instances
+    document.getElementById("startDate")._flatpickr?.clear();
+    document.getElementById("endDate")._flatpickr?.clear();
+    
+    // Load default data (all data)
+    loadData();
+  }
 
   async function loadData() {
     const tbody = document.getElementById("tableBody");
