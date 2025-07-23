@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <style>
-    /* ... (CSS ส่วนเดิมทั้งหมด) ... */
+    /* CSS ส่วนเดิมทั้งหมด */
     * {
       margin: 0;
       padding: 0;
@@ -293,7 +293,7 @@
 
     .table-container {
       overflow-x: auto;
-      max-height: 600px; /* ยังคงเก็บ max-height สำหรับ scrollbar กรณีข้อมูลน้อยกว่า 20 แถวแต่ไม่พอดีหน้าจอ */
+      max-height: 600px;
       overflow-y: auto;
     }
 
@@ -461,11 +461,62 @@
       color: var(--text-light);
       margin: 0 1rem;
     }
+
+    /* New CSS for Main Menu */
+    .main-menu {
+        display: flex;
+        justify-content: center; /* จัดให้อยู่ตรงกลาง */
+        gap: 1.5rem; /* ระยะห่างระหว่างปุ่ม */
+        margin-bottom: 2rem; /* ระยะห่างจากส่วนควบคุม */
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border-gray); /* เส้นแบ่งด้านล่าง */
+    }
+
+    .main-menu-btn {
+        padding: 0.75rem 2rem;
+        border: none;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: var(--light-gray);
+        color: var(--text-dark);
+        font-family: inherit;
+        box-shadow: var(--shadow); /* เพิ่มเงาเล็กน้อย */
+    }
+
+    .main-menu-btn.active {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+        color: var(--white);
+        box-shadow: var(--shadow-lg); /* เงาเข้มขึ้นเมื่อ active */
+        transform: translateY(-2px);
+    }
+
+    .main-menu-btn:hover:not(.active) {
+        background-color: var(--border-gray);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow);
+    }
+
+    /* Style for the dashboard content */
+    #pageDashboard {
+        min-height: 300px; /* เพื่อให้มีพื้นที่แสดงผล */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--white);
+        border-radius: 16px;
+        box-shadow: var(--shadow);
+        padding: 2rem;
+        font-size: 1.2rem;
+        color: var(--text-light);
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <!-- Header -->
+    <!-- Header (เหมือนเดิม) -->
     <div class="header">
       <h1>
         <i class="fas fa-chart-bar"></i>
@@ -474,112 +525,133 @@
       <p>ระบบจัดการและรายงานข้อมูล Inventory โรงงาน CHP </p>
     </div>
 
-    <!-- Controls Section -->
-    <div class="controls-section">
-      <div class="controls-title">
-        <i class="fas fa-filter"></i>
-        ตัวกรองข้อมูล
-      </div>
-      
-      <div class="controls">
-        <div class="input-group">
-          <i class="fas fa-calendar-alt"></i>
-          <input type="text" id="startDate" placeholder="วันที่เริ่ม">
-        </div>
-        <div class="input-group">
-          <i class="fas fa-calendar-alt"></i>
-          <input type="text" id="endDate" placeholder="วันที่สิ้นสุด">
-        </div>
-        <div class="input-group">
-          <i class="fas fa-cogs"></i>
-          <select id="mainProcess">
-            <option value="">ทุกกระบวนการ</option>
-            <option value="ผสมผง">ผสมผง</option>
-            <option value="Compact">Compact</option>
-            <option value="Sinter & Steam">Sinter & Steam</option>
-            <option value="Finishing">Finishing</option>
-            <option value="Machining">Machining</option>
-            <option value="Sub Store">Sub Store</option>
-            <option value="Magna flux">Magna flux</option>
-            <option value="Sort">Sort</option>
-            <option value="Pack">Pack</option>
-            <option value="Rework">Rework</option>
-          </select>
-        </div>
-        <div class="input-group">
-          <i class="fas fa-barcode"></i>
-          <input type="text" id="barcodeSearch" placeholder="ค้นหา Barcode...">
-        </div>
-      </div>
+    <!-- Main Menu (ส่วนที่เพิ่มใหม่) -->
+    <nav class="main-menu">
+      <button id="btnDashboard" class="main-menu-btn">
+        <i class="fas fa-tachometer-alt"></i> Dashboard
+      </button>
+      <button id="btnSearch" class="main-menu-btn active">
+        <i class="fas fa-search"></i> ค้นหา
+      </button>
+    </nav>
 
-      <div class="button-group">
-        <button class="btn btn-primary" onclick="loadData()">
-          <i class="fas fa-search"></i>
-          ค้นหา
-        </button>
-        <button class="btn btn-secondary" onclick="clearFilters()">
-          <i class="fas fa-eraser"></i>
-          Clear
-        </button>
-        <button class="btn btn-secondary" onclick="exportExcel()">
-          <i class="fas fa-file-excel"></i>
-          ดาวน์โหลด Excel
-        </button>
+    <!-- Page Content (แยกเป็น 2 ส่วน) -->
+    <div id="pageDashboard" style="display: none;">
+      <!-- เนื้อหาสำหรับ Dashboard -->
+      <div>
+        <i class="fas fa-tools" style="font-size: 3rem; margin-bottom: 1rem; color: var(--secondary-blue);"></i>
+        <p>ส่วนของ Dashboard กำลังอยู่ระหว่างการพัฒนา กรุณากลับมาใหม่ภายหลัง</p>
       </div>
     </div>
 
-    <!-- Tab Container -->
-    <div class="tab-container">
-      <!-- Tab Header -->
-      <div class="tab-header">
-        <button class="tab-button active" onclick="switchTab('summary')">
-          <i class="fas fa-chart-pie"></i>
-          สรุปยอดข้อมูล
-        </button>
-        <button class="tab-button" onclick="switchTab('details')">
-          <i class="fas fa-table"></i>
-          ตารางข้อมูลรายละเอียด
-        </button>
-      </div>
-
-      <!-- Summary Tab Content -->
-      <div id="summaryTab" class="tab-content active">
-        <div class="summary-grid" id="summary">
-          <div class="loading">
-            <i class="fas fa-spinner"></i>
-            <div>กำลังโหลดข้อมูล...</div>
+    <div id="pageSearch" style="display: block;">
+      <!-- Controls Section (เหมือนเดิม) -->
+      <div class="controls-section">
+        <div class="controls-title">
+          <i class="fas fa-filter"></i>
+          ตัวกรองข้อมูล
+        </div>
+        
+        <div class="controls">
+          <div class="input-group">
+            <i class="fas fa-calendar-alt"></i>
+            <input type="text" id="startDate" placeholder="วันที่เริ่ม">
+          </div>
+          <div class="input-group">
+            <i class="fas fa-calendar-alt"></i>
+            <input type="text" id="endDate" placeholder="วันที่สิ้นสุด">
+          </div>
+          <div class="input-group">
+            <i class="fas fa-cogs"></i>
+            <select id="mainProcess">
+              <option value="">ทุกกระบวนการ</option>
+              <option value="ผสมผง">ผสมผง</option>
+              <option value="Compact">Compact</option>
+              <option value="Sinter & Steam">Sinter & Steam</option>
+              <option value="Finishing">Finishing</option>
+              <option value="Machining">Machining</option>
+              <option value="Sub Store">Sub Store</option>
+              <option value="Magna flux">Magna flux</option>
+              <option value="Sort">Sort</option>
+              <option value="Pack">Pack</option>
+              <option value="Rework">Rework</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <i class="fas fa-barcode"></i>
+            <input type="text" id="barcodeSearch" placeholder="ค้นหา Barcode...">
           </div>
         </div>
+
+        <div class="button-group">
+          <button class="btn btn-primary" onclick="loadData()">
+            <i class="fas fa-search"></i>
+            ค้นหา
+          </button>
+          <button class="btn btn-secondary" onclick="clearFilters()">
+            <i class="fas fa-eraser"></i>
+            Clear
+          </button>
+          <button class="btn btn-secondary" onclick="exportExcel()">
+            <i class="fas fa-file-excel"></i>
+            ดาวน์โหลด Excel
+          </button>
+        </div>
       </div>
 
-      <!-- Details Tab Content -->
-      <div id="detailsTab" class="tab-content">
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th><i class="fas fa-calendar"></i> วันที่</th>
-                <th><i class="fas fa-barcode"></i> Barcode</th>
-                <th><i class="fas fa-cogs"></i> กระบวนการหลัก</th>
-                <th><i class="fas fa-puzzle-piece"></i> กระบวนการย่อย</th>
-                <th><i class="fas fa-flag"></i> สถานะ</th>
-                <th><i class="fas fa-hashtag"></i> จำนวน</th>
-                <th><i class="fas fa-user"></i> ผู้สแกน</th>
-              </tr>
-            </thead>
-            <tbody id="tableBody">
-              <tr>
-                <td colspan="7" class="loading">
-                  <i class="fas fa-spinner"></i>
-                  <div>กำลังโหลดข้อมูล...</div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+      <!-- Tab Container (เหมือนเดิม) -->
+      <div class="tab-container">
+        <!-- Tab Header -->
+        <div class="tab-header">
+          <button class="tab-button active" onclick="switchTab('summary', event)">
+            <i class="fas fa-chart-pie"></i>
+            สรุปยอดข้อมูล
+          </button>
+          <button class="tab-button" onclick="switchTab('details', event)">
+            <i class="fas fa-table"></i>
+            ตารางข้อมูลรายละเอียด
+          </button>
         </div>
-        <!-- Pagination Controls -->
-        <div id="paginationControls" class="pagination-controls" style="display: none;">
-          <!-- Pagination buttons will be inserted here by JavaScript -->
+
+        <!-- Summary Tab Content -->
+        <div id="summaryTab" class="tab-content active">
+          <div class="summary-grid" id="summary">
+            <div class="loading">
+              <i class="fas fa-spinner"></i>
+              <div>กำลังโหลดข้อมูล...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Details Tab Content -->
+        <div id="detailsTab" class="tab-content">
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th><i class="fas fa-calendar"></i> วันที่</th>
+                  <th><i class="fas fa-barcode"></i> Barcode</th>
+                  <th><i class="fas fa-cogs"></i> กระบวนการหลัก</th>
+                  <th><i class="fas fa-puzzle-piece"></i> กระบวนการย่อย</th>
+                  <th><i class="fas fa-flag"></i> สถานะ</th>
+                  <th><i class="fas fa-hashtag"></i> จำนวน</th>
+                  <th><i class="fas fa-user"></i> ผู้สแกน</th>
+                </tr>
+              </thead>
+              <tbody id="tableBody">
+                <tr>
+                  <td colspan="7" class="loading">
+                    <i class="fas fa-spinner"></i>
+                    <div>กำลังโหลดข้อมูล...</div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <!-- Pagination Controls -->
+          <div id="paginationControls" class="pagination-controls" style="display: none;">
+            <!-- Pagination buttons will be inserted here by JavaScript -->
+          </div>
         </div>
       </div>
     </div>
@@ -587,22 +659,45 @@
 
 <script>
   const { createClient } = supabase;
-  const supabaseClient = createClient("https://fvjminqjxfracpvdbjly.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2am1pbnFqeGZyYWNwdmRiamx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMxNTY4NTMsImV4cCI6MjA2ODczMjg1M30.N3X8-qSRQHa7FPIpbDlfL5ewY5_JeCShAuARczfmLgE");
+  const supabaseClient = createClient("https://fvjminqjxfracpvdbjly.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2am1pbnFqeGZyYWNwdmRiamx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMxNTY4NTMsImexZCI6MjA2ODczMjg1M30.N3X8-qSRQHa7FPIpbDlfL5ewY5_JeCShAuARczfmLgE");
 
   let allFilteredData = []; // เก็บข้อมูลที่ถูกกรองทั้งหมด
   let currentPage = 1;
   const rowsPerPage = 20;
 
-  // Tab switching function
-  function switchTab(tabName) {
+  // Function to switch main pages (Dashboard/Search)
+  function switchMainPage(pageId) {
+    const pages = ['pageDashboard', 'pageSearch'];
+    pages.forEach(id => {
+      document.getElementById(id).style.display = 'none';
+    });
+    document.getElementById(pageId).style.display = 'block';
+
+    // Update active button state
+    document.querySelectorAll('.main-menu-btn').forEach(btn => {
+      btn.classList.remove('active');
+    });
+    document.getElementById('btn' + pageId.replace('page', '')).classList.add('active');
+
+    // If switching to Search page, ensure data is loaded
+    if (pageId === 'pageSearch') {
+        loadData(); // Reload data if coming from dashboard to ensure up-to-date filtered data
+    }
+  }
+
+  // Event Listeners for Main Menu Buttons
+  document.getElementById('btnDashboard').addEventListener('click', () => switchMainPage('pageDashboard'));
+  document.getElementById('btnSearch').addEventListener('click', () => switchMainPage('pageSearch'));
+
+
+  // Tab switching function (within the Search page)
+  function switchTab(tabName, event) { // เพิ่ม event parameter
     // Remove active class from all tabs
     document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
 
     // Add active class to selected tab
-    // ต้องใช้วิธีหาปุ่มที่ถูกคลิก หรือส่ง parameter ที่ถูกต้อง
-    // currentTarget แทน target เพราะ target อาจเป็น i element ภายใน button
-    document.querySelector(`.tab-button[onclick="switchTab('${tabName}')"]`).classList.add('active');
+    event.currentTarget.classList.add('active'); // ใช้ currentTarget แทน target
     
     if (tabName === 'summary') {
       document.getElementById('summaryTab').classList.add('active');
@@ -978,8 +1073,8 @@
     }
   }
 
-  // Initialize data load
-  loadData();
+  // Initial load: Set default page to Search and load data
+  switchMainPage('pageSearch');
 </script>
 </body>
 </html>
