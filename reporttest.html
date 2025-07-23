@@ -527,12 +527,32 @@
               </tr>
             </tbody>
           </table>
+          <!-- Pagination Controls -->
+<div id="paginationControls" style="margin-top: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+  <div>
+    แสดง
+    <select id="itemsPerPageSelect" onchange="changeItemsPerPage()" style="padding: 0.5rem; border-radius: 8px;">
+      <option value="50">50</option>
+      <option value="100">100</option>
+      <option value="200">200</option>
+    </select>
+    รายการต่อหน้า
+  </div>
+  <div>
+    <button onclick="changePage(-1)" class="btn btn-secondary"><i class="fas fa-chevron-left"></i> ก่อนหน้า</button>
+    <span id="pageInfo" style="margin: 0 1rem; font-weight: bold;"></span>
+    <button onclick="changePage(1)" class="btn btn-secondary">ถัดไป <i class="fas fa-chevron-right"></i></button>
+  </div>
+</div>
         </div>
       </div>
     </div>
   </div>
 
 <script>
+  let currentPage = 1;
+let itemsPerPage = 50;
+let filteredData = [];
   const { createClient } = supabase;
   const supabaseClient = createClient("https://fvjminqjxfracpvdbjly.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2am1pbnFqeGZyYWNwdmRiamx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMxNTY4NTMsImV4cCI6MjA2ODczMjg1M30.N3X8-qSRQHa7FPIpbDlfL5ewY5_JeCShAuARczfmLgE");
 
@@ -644,12 +664,9 @@
           </tr>
         `;
       } else {
-        tbody.innerHTML = filtered.map(row => {
-          // Adjust time by -7 hours
-          const adjustedDate = adjustTimeByHours(row.created_at, -7);
-          
-          // Extract barcode before slash
-          const displayBarcode = extractBarcodeBeforeSlash(row.barcode);
+        filteredData = filtered;
+renderTable();
+renderPagination();
           
           return `
             <tr>
@@ -782,9 +799,69 @@
       });
     }
   }
+function renderTable() {
+  const tbody = document.getElementById("tableBody");
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedData = filteredData.slice(startIndex, startIndex + itemsPerPage);
+
+  if (paginatedData.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" class="no-data">
+          <i class="fas fa-inbox"></i>
+          <div>ไม่พบข้อมูลที่ตรงกับเงื่อนไข</div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = paginatedData.map(row => {
+    const adjustedDate = adjustTimeByHours(row.created_at, -7);
+    const displayBarcode = extractBarcodeBeforeSlash(row.barcode);
+
+    return `
+      <tr>
+        <td>${adjustedDate.toLocaleDateString("th-TH", {
+          year: "numeric", month: "short", day: "numeric",
+          hour: "2-digit", minute: "2-digit"
+        })}</td>
+        <td><code>${displayBarcode}</code></td>
+        <td>${row.main_process || '-'}</td>
+        <td>${row.sub_process || '-'}</td>
+        <td><span class="status">${row.status || '-'}</span></td>
+        <td><strong>${(row.quantity || 0).toLocaleString()}</strong></td>
+        <td>${row.scanner || '-'}</td>
+      </tr>
+    `;
+  }).join("");
+}
+
+function renderPagination() {
+  const pageInfo = document.getElementById("pageInfo");
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  pageInfo.textContent = `หน้าที่ ${currentPage} จาก ${totalPages}`;
+}
+
+function changePage(direction) {
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  currentPage += direction;
+  if (currentPage < 1) currentPage = 1;
+  if (currentPage > totalPages) currentPage = totalPages;
+  renderTable();
+  renderPagination();
+}
+
+function changeItemsPerPage() {
+  itemsPerPage = parseInt(document.getElementById("itemsPerPageSelect").value);
+  currentPage = 1;
+  renderTable();
+  renderPagination();
+}
 
   // Initialize data load
   loadData();
+  
 </script>
 </body>
 </html>
