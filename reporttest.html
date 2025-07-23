@@ -562,16 +562,6 @@
     theme: "light"
   });
 
-  // Add main process filter and barcode search functionality
-  // Removed auto search - now only search when button is clicked
-  
-  // Remove auto search timeout for barcode
-  // let barcodeSearchTimeout;
-  // document.getElementById("barcodeSearch").addEventListener("input", function() {
-  //   clearTimeout(barcodeSearchTimeout);
-  //   barcodeSearchTimeout = setTimeout(loadData, 500);
-  // });
-
   // Clear filters function
   function clearFilters() {
     document.getElementById("startDate").value = "";
@@ -585,6 +575,20 @@
     
     // Load default data (all data)
     loadData();
+  }
+
+  // Helper function to adjust time by -7 hours
+  function adjustTimeByHours(dateString, hours) {
+    const date = new Date(dateString);
+    date.setHours(date.getHours() + hours);
+    return date;
+  }
+
+  // Helper function to extract barcode before slash
+  function extractBarcodeBeforeSlash(barcode) {
+    if (!barcode) return '-';
+    const slashIndex = barcode.indexOf('/');
+    return slashIndex !== -1 ? barcode.substring(0, slashIndex) : barcode;
   }
 
   async function loadData() {
@@ -640,23 +644,31 @@
           </tr>
         `;
       } else {
-        tbody.innerHTML = filtered.map(row => `
-          <tr>
-            <td>${new Date(row.created_at).toLocaleDateString("th-TH", {
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-              hour: "2-digit",
-              minute: "2-digit"
-            })}</td>
-            <td><code>${row.barcode || '-'}</code></td>
-            <td>${row.main_process || '-'}</td>
-            <td>${row.sub_process || '-'}</td>
-            <td><span class="status">${row.status || '-'}</span></td>
-            <td><strong>${(row.quantity || 0).toLocaleString()}</strong></td>
-            <td>${row.scanner || '-'}</td>
-          </tr>
-        `).join("");
+        tbody.innerHTML = filtered.map(row => {
+          // Adjust time by -7 hours
+          const adjustedDate = adjustTimeByHours(row.created_at, -7);
+          
+          // Extract barcode before slash
+          const displayBarcode = extractBarcodeBeforeSlash(row.barcode);
+          
+          return `
+            <tr>
+              <td>${adjustedDate.toLocaleDateString("th-TH", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit"
+              })}</td>
+              <td><code>${displayBarcode}</code></td>
+              <td>${row.main_process || '-'}</td>
+              <td>${row.sub_process || '-'}</td>
+              <td><span class="status">${row.status || '-'}</span></td>
+              <td><strong>${(row.quantity || 0).toLocaleString()}</strong></td>
+              <td>${row.scanner || '-'}</td>
+            </tr>
+          `;
+        }).join("");
       }
 
       // Update summary
