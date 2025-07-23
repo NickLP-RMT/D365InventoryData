@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>🏭 Factory Layout Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --primary-blue: #1e40af;
+      --secondary-blue: #3b82f6;
+      --success-green: #10b981;
+      --warning-orange: #f59e0b;
+      --danger-red: #ef4444;
+      --white: #ffffff;
+      --light-gray: #f8fafc;
+      --border-gray: #e2e8f0;
+      --text-dark: #1e293b;
+      --text-light: #64748b;
+      --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+    }
+    body {
+      font-family: 'Kanit', sans-serif;
+      background: linear-gradient(135deg,#f1f5f9 0%,#e2e8f0 100%);
+      min-height:100vh;
+      color:var(--text-dark);
+      padding:1rem;
+      user-select:none;
+    }
+    .dashboard-container { max-width:1600px; margin:0 auto; }
+    .header {
+      background:linear-gradient(135deg,var(--primary-blue) 0%,var(--secondary-blue) 100%);
+      padding:1.5rem 2rem;
+      border-radius:16px;
+      margin-bottom:2rem;
+      box-shadow:var(--shadow-lg);
+      color:var(--white);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      flex-wrap: wrap;
+    }
+    .header h1 {
+      font-size:2rem;
+      font-weight:700;
+      display:flex;
+      align-items:center;
+      gap:1rem;
+    }
+    .status-info {
+      text-align:right;
+      font-size:0.9rem;
+      opacity:0.9;
+      min-width:150px;
+    }
+    .factory-layout {
+      background:var(--white);
+      border-radius:20px;
+      padding:2rem;
+      box-shadow:var(--shadow-lg);
+      position:relative;
+      min-height:80vh;
+      overflow:hidden;
+    }
+    .layout-title {
+      text-align:center;
+      font-size:1.5rem;
+      font-weight:600;
+      margin-bottom:2rem;
+      color:var(--text-dark);
+    }
+    .factory-floor {
+      position:relative;
+      width:100%;
+      height:700px;
+      background:linear-gradient(45deg,#f8fafc 25%,#e2e8f0 25%,#e2e8f0 50%,#f8fafc 50%,#f8fafc 75%,#e2e8f0 75%);
+      background-size:20px 20px;
+      border:3px solid var(--border-gray);
+      border-radius:12px;
+      overflow:hidden;
+    }
+    .process-area {
+      position:absolute;
+      border:2px solid var(--border-gray);
+      border-radius:12px;
+      background:var(--white);
+      box-shadow:var(--shadow);
+      transition:box-shadow .3s ease;
+      cursor:default;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      text-align:center;
+      padding:1rem;
+      min-width:100px;
+      min-height:80px;
+      user-select:none;
+    }
+    .process-area:hover { box-shadow:var(--shadow-lg); z-index:10; }
+    .process-area.dragging {
+      z-index:1000;
+      transform:rotate(2deg);
+      box-shadow:0 20px 25px -5px rgba(0,0,0,0.2);
+    }
+    .process-area.high-volume {
+      border-color:var(--success-green);
+      background:linear-gradient(135deg,var(--white) 0%,#ecfdf5 100%);
+      animation:pulse-green 2s infinite;
+    }
+    .process-area.medium-volume {
+      border-color:var(--warning-orange);
+      background:linear-gradient(135deg,var(--white) 0%,#fffbeb 100%);
+      animation:pulse-orange 2s infinite;
+    }
+    .process-area.low-volume {
+      border-color:var(--danger-red);
+      background:linear-gradient(135deg,var(--white) 0%,#fef2f2 100%);
+      animation:pulse-red 2s infinite;
+    }
+    @keyframes pulse-green {
+      0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,0.4);}
+      50%{box-shadow:0 0 0 10px rgba(16,185,129,0);}
+    }
+    @keyframes pulse-orange {
+      0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,0.4);}
+      50%{box-shadow:0 0 0 10px rgba(245,158,11,0);}
+    }
+    @keyframes pulse-red {
+      0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.4);}
+      50%{box-shadow:0 0 0 10px rgba(239,68,68,0);}
+    }
+    .process-icon { font-size:2rem; margin-bottom:0.5rem; pointer-events:none; }
+    .high-volume .process-icon{color:var(--success-green);}
+    .medium-volume .process-icon{color:var(--warning-orange);}
+    .low-volume .process-icon{color:var(--danger-red);}
+    .process-name{font-size:.9rem;font-weight:600;margin-bottom:.25rem;pointer-events:none;}
+    .process-count{font-size:1.5rem;font-weight:700;color:var(--text-dark);pointer-events:none;}
+    .process-status{font-size:.75rem;margin-top:.25rem;opacity:.8;pointer-events:none;}
+    .resize-handle {
+      position:absolute;
+      background:var(--primary-blue);
+      opacity:0;
+      transition:opacity .3s ease;
+      z-index:2;
+    }
+    .process-area:hover .resize-handle{opacity:.7;}
+    .resize-handle:hover{opacity:1!important;}
+    .resize-se {
+      bottom:-3px; right:-3px;
+      width:12px; height:12px;
+      cursor:se-resize;
+      border-radius:0 0 12px 0;
+    }
+    .resize-s {
+      bottom:-3px; left:50%;
+      transform:translateX(-50%);
+      width:20px; height:6px;
+      cursor:s-resize;
+      border-radius:0 0 6px 6px;
+    }
+    .resize-e {
+      right:-3px; top:50%;
+      transform:translateY(-50%);
+      width:6px; height:20px;
+      cursor:e-resize;
+      border-radius:0 6px 6px 0;
+    }
+    /* กำหนดตำแหน่งและขนาดเริ่มต้นแต่ละ process area */
+    .powder-mixing { top:50px; left:50px; width:150px; height:120px; }
+    .compact       { top:50px; left:250px; width:150px; height:120px; }
+    .sinter-steam  { top:50px; left:450px; width:180px; height:120px; }
+    .finishing     { top:200px; left:50px; width:150px; height:120px; }
+    .machining     { top:200px; left:250px; width:150px; height:120px; }
+
+    /* สำหรับลูกเล่นลูกศรแสดง flow */
+    .flow-arrow {
+      position:absolute;
+      color:var(--primary-blue);
+      font-size:1.5rem;
+      opacity:.6;
+      animation:flow 3s ease-in-out infinite;
+      pointer-events:none;
+    }
+    @keyframes flow {
+      0%,100%{opacity:.3;}
+      50%{opacity:.8;}
+    }
+    /* เพิ่มตำแหน่งลูกศร flow ตามต้องการ */
+    .arrow1{top:100px; left:210px;}
+    .arrow2{top:100px; left:410px;}
+    .arrow3{top:180px; left:500px; transform:rotate(90deg);}
+    .arrow4{top:250px; left:210px;}
+    .arrow5{top:250px; left:410px;}
+    .arrow6{top:330px; left:125px; transform:rotate(90deg);}
+    .arrow7{top:330px; left:295px; transform:rotate(90deg);}
+    .arrow8{top:330px; left:465px; transform:rotate(90deg);}
+
+    .legend {
+      position:absolute;
+      top:20px;
+      right:20px;
+      background:var(--white);
+      padding:1rem;
+      border-radius:12px;
+      box-shadow:var(--shadow);
+      border:1px solid var(--border-gray);
+      font-size: 0.8rem;
+      user-select:none;
+    }
+    .legend-title {
+      font-size:.9rem;
+      font-weight:600;
+      margin-bottom:.5rem;
+      color:var(--text-dark);
+    }
+    .legend-item {
+      display:flex;
+      align-items:center;
+      gap:.5rem;
+      margin-bottom:.25rem;
+    }
+    .legend-color {
+      width:16px;
+      height:16px;
+      border-radius:4px;
+    }
+    .high { background:var(--success-green); }
+    .medium { background:var(--warning-orange); }
+    .low { background:var(--danger-red); }
+
+    .stats-panel {
+      position:absolute;
+      bottom:20px;
+      left:20px;
+      background:var(--white);
+      padding:1rem;
+      border-radius:12px;
+      box-shadow:var(--shadow);
+      border:1px solid var(--border-gray);
+      min-width:200px;
+      font-size: 0.85rem;
+      user-select:none;
+    }
+    .stats-title {
+      font-size:.9rem;
+      font-weight:600;
+      margin-bottom:.5rem;
+      color:var(--text-dark);
+    }
+    .stat-item {
+      display:flex;
+      justify-content:space-between;
+      margin-bottom:.25rem;
+    }
+
+    .controls {
+      position:absolute;
+      top:20px;
+      left:20px;
+      display:flex;
+      gap:10px;
+    }
+    .control-btn {
+      background:var(--primary-blue);
+      color:var(--white);
+      border:none;
+      padding:.75rem 1rem;
+      border-radius:8px;
+      cursor:pointer;
+      font-size:.9rem;
+      display:flex;
+      align-items:center;
+      gap:.5rem;
+      transition:all .3s ease;
+      user-select:none;
+    }
+    .control-btn:hover {
+      background:var(--secondary-blue);
+      transform:translateY(-2px);
+    }
+    .control-btn.active {
+      background:var(--success-green);
+    }
+
+    .instructions {
+      position:absolute;
+      bottom:20px;
+      right:20px;
+      background:var(--white);
+      padding:1rem;
+      border-radius:12px;
+      box-shadow:var(--shadow);
+      border:1px solid var(--border-gray);
+      max-width:250px;
+      font-size:.8rem;
+      line-height:1.4;
+      user-select:none;
+    }
+    .instructions-title {
+      font-weight:600;
+      margin-bottom:.5rem;
+      color:var(--text-dark);
+    }
+
+    @media(max-width:768px) {
+      .factory-floor {
+        height:500px;
+        transform:scale(.8);
+        transform-origin:top left;
+      }
+      .header {
+        flex-direction:column;
+        text-align:center;
+        gap:1rem;
+      }
+      .header h1 {
+        font-size:1.5rem;
+      }
+      .instructions {
+        display:none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-container">
+    <div class="header">
+      <h1><i class="fas fa-industry"></i> Factory Layout Dashboard</h1>
+      <div class="status-info">
+        <div>โรงงาน CHP</div>
+        <div id="currentTime"></div>
+        <div>🟢 ระบบทำงานปกติ</div>
+      </div>
+    </div>
+    <div class="factory-layout">
+      <div class="layout-title"><i class="fas fa-map"></i> แผนผังโรงงานและการกระจายชิ้นงาน</div>
+      <div class="factory-floor">
+        <div class="controls">
+          <button class="control-btn" onclick="refreshData()"><i class="fas fa-sync-alt"></i> รีเฟรช</button>
+          <button class="control-btn" id="editMode" onclick="toggleEditMode()"><i class="fas fa-edit"></i> แก้ไขเลย์เอาต์</button>
+          <button class="control-btn" onclick="resetLayout()"><i class="fas fa-undo"></i> รีเซ็ต</button>
+        </div>
+        <div class="legend">
+          <div class="legend-title">สถานะปริมาณงาน</div>
+          <div class="legend-item"><div class="legend-color high"></div><span>สูง (&gt;1000)</span></div>
+          <div class="legend-item"><div class="legend-color medium"></div><span>ปานกลาง (500-1000)</span></div>
+          <div class="legend-item"><div class="legend-color low"></div><span>ต่ำ (&lt;500)</span></div>
+        </div>
+        <div class="stats-panel">
+          <div class="stats-title">สถิติรวม</div>
+          <div class="stat-item"><span>รวมทั้งหมด:</span><strong id="totalItems">12,450</strong></div>
+          <div class="stat-item"><span>สแกนวันนี้:</span><strong id="todayScans">1,234</strong></div>
+          <div class="stat-item"><span>กระบวนการทำงาน:</span><strong id="activeProcesses">8/10</strong></div>
+          <div class="stat-item"><span>อัปเดตล่าสุด:</span><strong id="lastUpdate">09:45</strong></div>
+        </div>
+        <div class="instructions">
+          <div class="instructions-title">วิธีใช้งาน</div>
+          <div>• คลิก "แก้ไขเลย์เอาต์" เพื่อเปิดโหมดแก้ไข</div>
+          <div>• ลากเพื่อย้ายตำแหน่ง</div>
+          <div>• ลากมุมล่างขวาเพื่อปรับขนาด</div>
+          <div>• ลากขอบเพื่อปรับความกว้าง/สูง</div>
+          <div>• คลิก "รีเซ็ต" เพื่อกลับสู่ตำแหน่งเดิม</div>
+        </div>
+
+        <!-- Process Areas -->
+        <div class="process-area powder-mixing high-volume" data-id="powder-mixing">
+          <div class="process-icon"><i class="fas fa-flask"></i></div>
+          <div class="process-name">ผสมผง</div>
+          <div class="process-count">1,245</div>
+          <div class="process-status">ทำงานปกติ</div>
+          <div class="resize-handle resize-se"></div>
+          <div class="resize-handle resize-s"></div>
+          <div class="resize-handle resize-e"></div>
+        </div>
+        <div class="process-area compact medium-volume" data-id="compact">
+          <div class="process-icon"><i class="fas fa-compress-arrows-alt"></i></div>
+          <div class="process-name">Compact</div>
+          <div class="process-count">856</div>
+          <div class="process-status">ทำงานปกติ</div>
+          <div class="resize-handle resize-se"></div>
+          <div class="resize-handle resize-s"></div>
+          <div class="resize-handle resize-e"></div>
+        </div>
+        <div class="process-area sinter-steam high-volume" data-id="sinter-steam">
+          <div class="process-icon"><i class="fas fa-fire"></i></div>
+          <div class="process-name">Sinter & Steam</div>
+          <div class="process-count">1,567</div>
+          <div class="process-status">ทำงานปกติ</div>
+          <div class="resize-handle resize-se"></div>
+          <div class="resize-handle resize-s"></div>
+          <div class="resize-handle resize-e"></div>
+        </div>
+        <div class="process-area finishing medium-volume" data-id="finishing">
+          <div class="process-icon"><i class="fas fa-gem"></i></div>
+          <div class="process-name">Finishing</div>
+          <div class="process-count">734</div>
+          <div class="process-status">ทำงานปกติ</div>
+          <div class="resize-handle resize-se"></div>
+          <div class="resize-handle resize-s"></div>
+          <div class="resize-handle resize-e"></div>
+        </div>
+        <div class="process-area machining high-volume" data-id="machining">
+          <div class="process-icon"><i class="fas fa-cog"></i></div>
+          <div class="process-name">Machining</div>
+          <div class="process-count">1,123</div>
+          <div class="process-status">ทำงานปกติ</div>
+          <div class="resize-handle resize-se"></div>
+          <div class="resize-handle resize-s"></div>
+          <div class="resize-handle resize-e"></div>
+        </div>
+
+        <!-- ตัวอย่างลูกศร Flow -->
+        <i class="fas fa-long-arrow-alt-right flow-arrow arrow1"></i>
+        <i class="fas fa-long-arrow-alt-right flow-arrow arrow2"></i>
+        <i class="fas fa-long-arrow-alt-down flow-arrow arrow3"></i>
+        <i class="fas fa-long-arrow-alt-right flow-arrow arrow4"></i>
+        <i class="fas fa-long-arrow-alt-right flow-arrow arrow5"></i>
+        <i class="fas fa-long-arrow-alt-down flow-arrow arrow6"></i>
+        <i class="fas fa-long-arrow-alt-down flow-arrow arrow7"></i>
+        <i class="fas fa-long-arrow-alt-down flow-arrow arrow8"></i>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // แสดงเวลาปัจจุบันใน #currentTime ทุกๆ วินาที
+    function updateTime() {
+      const now = new Date();
+      const timeString = now.toLocaleTimeString('th-TH', {hour: '2-digit', minute: '2-digit', second: '2-digit'});
+      document.getElementById('currentTime').textContent = timeString;
+    }
+    setInterval(updateTime, 1000);
+    updateTime();
+
+    let editMode = false;
+
+    function toggleEditMode() {
+      editMode = !editMode;
+      const btn = document.getElementById('editMode');
+      btn.classList.toggle('active', editMode);
+      btn.innerHTML = editMode ? '<i class="fas fa-check"></i> บันทึกเลย์เอาต์' : '<i class="fas fa-edit"></i> แก้ไขเลย์เอาต์';
+
+      const areas = document.querySelectorAll('.process-area');
+      areas.forEach(area => {
+        if (editMode) {
+          area.style.cursor = 'move';
+          enableResize(area);
+          enableDrag(area);
+        } else {
+          area.style.cursor = 'default';
+          disableResize(area);
+          disableDrag(area);
+        }
+      });
+    }
+
+    function resetLayout() {
+      if (confirm('คุณต้องการรีเซ็ตเลย์เอาต์กลับสู่ค่าเริ่มต้นใช่หรือไม่?')) {
+        const defaults = {
+          'powder-mixing': {top: '50px', left: '50px', width: '150px', height: '120px'},
+          'compact': {top: '50px', left: '250px', width: '150px', height: '120px'},
+          'sinter-steam': {top: '50px', left: '450px', width: '180px', height: '120px'},
+          'finishing': {top: '200px', left: '50px', width: '150px', height: '120px'},
+          'machining': {top: '200px', left: '250px', width: '150px', height: '120px'}
+        };
+        Object.keys(defaults).forEach(id => {
+          const area = document.querySelector(`.process-area[data-id="${id}"]`);
+          if (area) {
+            const style = defaults[id];
+            area.style.top = style.top;
+            area.style.left = style.left;
+            area.style.width = style.width;
+            area.style.height = style.height;
+          }
+        });
+      }
+    }
+
+    function refreshData() {
+      alert('กำลังรีเฟรชข้อมูล... (ตัวอย่าง)');
+      // สามารถใส่โค้ดดึงข้อมูล API มาทดแทนที่นี้ได้
+    }
+
+    // Drag support
+    function enableDrag(element) {
+      let offsetX, offsetY;
+      function onMouseDown(e) {
+        if(!editMode) return;
+        if(e.target.classList.contains('resize-handle')) return; // ป้องกัน conflict กับ resize
+        e.preventDefault();
+        offsetX = e.clientX - element.getBoundingClientRect().left;
+        offsetY = e.clientY - element.getBoundingClientRect().top;
+        element.classList.add('dragging');
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+      }
+      function onMouseMove(e) {
+        let parentRect = element.parentElement.getBoundingClientRect();
+        let newLeft = e.clientX - offsetX - parentRect.left;
+        let newTop = e.clientY - offsetY - parentRect.top;
+
+        // จำกัดไม่ให้ลากออกนอกพื้นที่
+        newLeft = Math.max(0, Math.min(newLeft, element.parentElement.clientWidth - element.offsetWidth));
+        newTop = Math.max(0, Math.min(newTop, element.parentElement.clientHeight - element.offsetHeight));
+
+        element.style.left = newLeft + 'px';
+        element.style.top = newTop + 'px';
+      }
+      function onMouseUp() {
+        element.classList.remove('dragging');
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+      }
+      element.addEventListener('mousedown', onMouseDown);
+      element._onMouseDownDrag = onMouseDown;
+    }
+    function disableDrag(element) {
+      if(element._onMouseDownDrag) {
+        element.removeEventListener('mousedown', element._onMouseDownDrag);
+        element._onMouseDownDrag = null;
+      }
+    }
+
+    // Resize support
+    function enableResize(element) {
+      if(element._resizeEnabled) return;
+      let currentHandle = null;
+      let startX, startY, startWidth, startHeight;
+
+      function onMouseDown(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        currentHandle = e.target;
+        startX = e.clientX;
+        startY = e.clientY;
+        startWidth = element.offsetWidth;
+        startHeight = element.offsetHeight;
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+      }
+      function onMouseMove(e) {
+        if (!currentHandle) return;
+        let dx = e.clientX - startX;
+        let dy = e.clientY - startY;
+
+        if(currentHandle.classList.contains('resize-se')) {
+          element.style.width = (startWidth + dx) + 'px';
+          element.style.height = (startHeight + dy) + 'px';
+        } else if(currentHandle.classList.contains('resize-s')) {
+          element.style.height = (startHeight + dy) + 'px';
+        } else if(currentHandle.classList.contains('resize-e')) {
+          element.style.width = (startWidth + dx) + 'px';
+        }
+      }
+      function onMouseUp() {
+        currentHandle = null;
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+      }
+      const handles = element.querySelectorAll('.resize-handle');
+      handles.forEach(handle => handle.addEventListener('mousedown', onMouseDown));
+      element._resizeEnabled = true;
+    }
+    function disableResize(element) {
+      if(!element._resizeEnabled) return;
+      const handles = element.querySelectorAll('.resize-handle');
+      handles.forEach(handle => handle.removeEventListener('mousedown', null));
+      element._resizeEnabled = false;
+    }
+
+    // เริ่มต้นสถานะโหมดแก้ไขเป็นปิด (ป้องกันการแก้ไขเลย์เอาต์ทันที)
+    editMode = false;
+  </script>
+</body>
+</html>
