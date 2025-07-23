@@ -73,66 +73,84 @@
       color:var(--text-dark);
     }
     .factory-floor {
-      position:relative;
-      width:100%;
-      height:700px;
-      background:linear-gradient(45deg,#f8fafc 25%,#e2e8f0 25%,#e2e8f0 50%,#f8fafc 50%,#f8fafc 75%,#e2e8f0 75%);
-      background-size:20px 20px;
-      border:3px solid var(--border-gray);
-      border-radius:12px;
-      overflow:hidden;
+      position: relative;
+      width: 100%;
+      height: 700px;
+
+      /* เปลี่ยนเป็นภาพ background โรงงาน */
+      background: url('https://nicklp-rmt.github.io/D365InventoryData/pic/layout.jpg') no-repeat center center;
+      background-size: cover;
+      border: 3px solid var(--border-gray);
+      border-radius: 12px;
+      overflow: hidden;
+
+      /* ถ้าต้องการซ้อนกริดเบาๆ ใช้ background-image ชั้นสองพร้อม blend mode */
+      /* background-image:
+         url('path/to/your-factory-layout.jpg'),
+         linear-gradient(45deg,#f8fafc 25%,#e2e8f0 25%,#e2e8f0 50%,#f8fafc 50%,#f8fafc 75%,#e2e8f0 75%);
+      background-size: cover, 20px 20px;
+      background-repeat: no-repeat, repeat;
+      background-position: center, 0 0;
+      background-blend-mode: multiply; */
     }
     .process-area {
-      position:absolute;
-      border:2px solid var(--border-gray);
-      border-radius:12px;
-      background:var(--white);
-      box-shadow:var(--shadow);
-      transition:box-shadow .3s ease;
-      cursor:default;
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      align-items:center;
-      text-align:center;
-      padding:1rem;
-      min-width:100px;
-      min-height:80px;
-      user-select:none;
+      position: absolute;
+      border: 2px solid var(--border-gray);
+      border-radius: 12px;
+      /* พื้นหลังโปร่งแสง เห็นรูปด้านหลัง */
+      background-color: rgba(255, 255, 255, 0.85);
+      box-shadow: var(--shadow);
+      transition: box-shadow .3s ease;
+      cursor: default;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 1rem;
+      min-width: 100px;
+      min-height: 80px;
+      user-select: none;
     }
-    .process-area:hover { box-shadow:var(--shadow-lg); z-index:10; }
+    .process-area:hover {
+      box-shadow: var(--shadow-lg);
+      z-index: 10;
+    }
     .process-area.dragging {
-      z-index:1000;
-      transform:rotate(2deg);
-      box-shadow:0 20px 25px -5px rgba(0,0,0,0.2);
+      z-index: 1000;
+      transform: rotate(2deg);
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
     }
-    .process-area.high-volume {
-      border-color:var(--success-green);
-      background:linear-gradient(135deg,var(--white) 0%,#ecfdf5 100%);
-      animation:pulse-green 2s infinite;
+
+    /* ปรับ background gradient ของแต่ละสถานะให้โปร่งแสงด้วย alpha ใน rgba */
+    .high-volume {
+      border-color: var(--success-green);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(236, 253, 245, 0.85) 100%);
+      animation: pulse-green 2s infinite;
     }
-    .process-area.medium-volume {
-      border-color:var(--warning-orange);
-      background:linear-gradient(135deg,var(--white) 0%,#fffbeb 100%);
-      animation:pulse-orange 2s infinite;
+    .medium-volume {
+      border-color: var(--warning-orange);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 251, 235, 0.85) 100%);
+      animation: pulse-orange 2s infinite;
     }
-    .process-area.low-volume {
-      border-color:var(--danger-red);
-      background:linear-gradient(135deg,var(--white) 0%,#fef2f2 100%);
-      animation:pulse-red 2s infinite;
+    .low-volume {
+      border-color: var(--danger-red);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(254, 242, 242, 0.85) 100%);
+      animation: pulse-red 2s infinite;
     }
     @keyframes pulse-green {
-      0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,0.4);}
-      50%{box-shadow:0 0 0 10px rgba(16,185,129,0);}
+      0%,100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.4); }
+      50% { box-shadow: 0 0 0 10px rgba(16,185,129,0); }
     }
     @keyframes pulse-orange {
-      0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,0.4);}
-      50%{box-shadow:0 0 0 10px rgba(245,158,11,0);}
+      0%,100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.4); }
+      50% { box-shadow: 0 0 0 10px rgba(245,158,11,0); }
     }
     @keyframes pulse-red {
-      0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.4);}
-      50%{box-shadow:0 0 0 10px rgba(239,68,68,0);}
+      0%,100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
+      50% { box-shadow: 0 0 0 10px rgba(239,68,68,0); }
     }
+
     .process-icon { font-size:2rem; margin-bottom:0.5rem; pointer-events:none; }
     .high-volume .process-icon{color:var(--success-green);}
     .medium-volume .process-icon{color:var(--warning-orange);}
