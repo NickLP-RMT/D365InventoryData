@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>📊 รายงาน Inventory TAG</title>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
   <script src="https://unpkg.com/@supabase/supabase-js"></script>
-  <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
   <style>
-    /* CSS ส่วนเดิมทั้งหมด */
+    /* CSS ส่วนเดิมทั้งหมด + ปรับแก้ไขสำหรับเมนูใน header */
     * {
       margin: 0;
       padding: 0;
@@ -47,13 +47,17 @@
       padding: 2rem;
     }
 
+    /* Header ปรับเปลี่ยนให้สูงขึ้นและวางเมนูภายใน */
     .header {
       background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
-      padding: 2rem;
+      padding: 2rem 2rem 3rem 2rem; /* เพิ่ม bottom padding */
       border-radius: 16px;
       margin-bottom: 2rem;
       box-shadow: var(--shadow-lg);
       color: var(--white);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
     }
 
     .header h1 {
@@ -69,6 +73,43 @@
       font-size: 1.1rem;
       opacity: 0.9;
       font-weight: 300;
+      margin-bottom: 0;
+    }
+
+    /* เมนูปุ่มที่อยู่ใน header */
+    .header-menu {
+      display: flex;
+      gap: 1rem;
+      margin-top: auto; /* ดันเมนูไปด้านล่างสุดของ header */
+    }
+
+    /* ปุ่มเมนูใน header */
+    .header-menu-btn {
+      background: rgba(255 255 255 / 0.2);
+      border: none;
+      border-radius: 12px;
+      padding: 0.75rem 2rem;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--white);
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .header-menu-btn:hover:not(.active) {
+      background: rgba(255 255 255 / 0.4);
+      transform: translateY(-2px);
+    }
+
+    .header-menu-btn.active {
+      background: var(--white);
+      color: var(--primary-blue);
+      font-weight: 700;
+      cursor: default;
+      box-shadow: var(--shadow-lg);
     }
 
     .controls-section {
@@ -303,7 +344,8 @@
       background: var(--white);
     }
 
-    th, td {
+    th,
+    td {
       padding: 1rem;
       text-align: left;
       border-bottom: 1px solid var(--border-gray);
@@ -349,8 +391,12 @@
     }
 
     @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
     }
 
     .error {
@@ -397,7 +443,8 @@
         font-size: 0.8rem;
       }
 
-      th, td {
+      th,
+      td {
         padding: 0.5rem;
       }
     }
@@ -462,82 +509,45 @@
       margin: 0 1rem;
     }
 
-    /* New CSS for Main Menu */
-    .main-menu {
-        display: flex;
-        justify-content: center; /* จัดให้อยู่ตรงกลาง */
-        gap: 1.5rem; /* ระยะห่างระหว่างปุ่ม */
-        margin-bottom: 2rem; /* ระยะห่างจากส่วนควบคุม */
-        padding-bottom: 1rem;
-        border-bottom: 1px solid var(--border-gray); /* เส้นแบ่งด้านล่าง */
-    }
-
-    .main-menu-btn {
-        padding: 0.75rem 2rem;
-        border: none;
-        border-radius: 12px;
-        font-size: 1.1rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        background: var(--light-gray);
-        color: var(--text-dark);
-        font-family: inherit;
-        box-shadow: var(--shadow); /* เพิ่มเงาเล็กน้อย */
-    }
-
-    .main-menu-btn.active {
-        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
-        color: var(--white);
-        box-shadow: var(--shadow-lg); /* เงาเข้มขึ้นเมื่อ active */
-        transform: translateY(-2px);
-    }
-
-    .main-menu-btn:hover:not(.active) {
-        background-color: var(--border-gray);
-        transform: translateY(-2px);
-        box-shadow: var(--shadow);
-    }
-
     /* Style for the dashboard content */
     #pageDashboard {
-        min-height: 300px; /* เพื่อให้มีพื้นที่แสดงผล */
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: var(--white);
-        border-radius: 16px;
-        box-shadow: var(--shadow);
-        padding: 2rem;
-        font-size: 1.2rem;
-        color: var(--text-light);
+      min-height: 300px;
+      /* เพื่อให้มีพื้นที่แสดงผล */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--white);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 2rem;
+      font-size: 1.2rem;
+      color: var(--text-light);
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <!-- Header (เหมือนเดิม) -->
+    <!-- Header (ปรับปรุง: เพิ่มเมนูภายใน) -->
     <div class="header">
       <h1>
         <i class="fas fa-chart-bar"></i>
-        รายงาน Inventory TAG
+        RMT Inventory TAG Report
       </h1>
-      <p>ระบบจัดการและรายงานข้อมูล Inventory โรงงาน CHP </p>
+      <p>ระบบจัดการและรายงานข้อมูล Inventory ส่วนโรงงาน CHP </p>
+      
+      <!-- เมนูอยู่ใน header -->
+      <nav class="header-menu">
+        <button id="btnDashboard" class="header-menu-btn">
+          <i class="fas fa-tachometer-alt"></i> Dashboard
+        </button>
+        <button id="btnSearch" class="header-menu-btn active">
+          <i class="fas fa-search"></i> ค้นหา
+        </button>
+      </nav>
     </div>
 
-    <!-- Main Menu (ส่วนที่เพิ่มใหม่) -->
-    <nav class="main-menu">
-      <button id="btnDashboard" class="main-menu-btn">
-        <i class="fas fa-tachometer-alt"></i> Dashboard
-      </button>
-      <button id="btnSearch" class="main-menu-btn active">
-        <i class="fas fa-search"></i> ค้นหา
-      </button>
-    </nav>
-
-    <!-- Page Content (แยกเป็น 2 ส่วน) -->
+    <!-- เนื้อหาหลักแยกเป็น 2 หน้า -->
     <div id="pageDashboard" style="display: none;">
-      <!-- เนื้อหาสำหรับ Dashboard -->
       <div>
         <i class="fas fa-tools" style="font-size: 3rem; margin-bottom: 1rem; color: var(--secondary-blue);"></i>
         <p>ส่วนของ Dashboard กำลังอยู่ระหว่างการพัฒนา กรุณากลับมาใหม่ภายหลัง</p>
@@ -545,21 +555,21 @@
     </div>
 
     <div id="pageSearch" style="display: block;">
-      <!-- Controls Section (เหมือนเดิม) -->
+      <!-- Controls Section -->
       <div class="controls-section">
         <div class="controls-title">
           <i class="fas fa-filter"></i>
           ตัวกรองข้อมูล
         </div>
-        
+
         <div class="controls">
           <div class="input-group">
             <i class="fas fa-calendar-alt"></i>
-            <input type="text" id="startDate" placeholder="วันที่เริ่ม">
+            <input type="text" id="startDate" placeholder="วันที่เริ่ม" />
           </div>
           <div class="input-group">
             <i class="fas fa-calendar-alt"></i>
-            <input type="text" id="endDate" placeholder="วันที่สิ้นสุด">
+            <input type="text" id="endDate" placeholder="วันที่สิ้นสุด" />
           </div>
           <div class="input-group">
             <i class="fas fa-cogs"></i>
@@ -579,7 +589,7 @@
           </div>
           <div class="input-group">
             <i class="fas fa-barcode"></i>
-            <input type="text" id="barcodeSearch" placeholder="ค้นหา Barcode...">
+            <input type="text" id="barcodeSearch" placeholder="ค้นหา Barcode..." />
           </div>
         </div>
 
@@ -599,7 +609,7 @@
         </div>
       </div>
 
-      <!-- Tab Container (เหมือนเดิม) -->
+      <!-- Tab Container -->
       <div class="tab-container">
         <!-- Tab Header -->
         <div class="tab-header">
@@ -649,219 +659,183 @@
             </table>
           </div>
           <!-- Pagination Controls -->
-          <div id="paginationControls" class="pagination-controls" style="display: none;">
-            <!-- Pagination buttons will be inserted here by JavaScript -->
-          </div>
+          <div id="paginationControls" class="pagination-controls" style="display: none;"></div>
         </div>
       </div>
     </div>
   </div>
 
-<script>
-  const { createClient } = supabase;
-  const supabaseClient = createClient("https://fvjminqjxfracpvdbjly.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2am1pbnFqeGZyYWNwdmRiamx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMxNTY4NTMsImV4cCI6MjA2ODczMjg1M30.N3X8-qSRQHa7FPIpbDlfL5ewY5_JeCShAuARczfmLgE");
+  <script>
+    const { createClient } = supabase;
+    const supabaseClient = createClient(
+      'https://fvjminqjxfracpvdbjly.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2am1pbnFqeGZyYWNwdmRiamx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMxNTY4NTMsImV4cCI6MjA2ODczMjg1M30.N3X8-qSRQHa7FPIpbDlfL5ewY5_JeCShAuARczfmLgE'
+    );
 
-  let allFilteredData = []; // เก็บข้อมูลที่ถูกกรองทั้งหมด
-  let currentPage = 1;
-  const rowsPerPage = 20;
+    let allFilteredData = []; // ข้อมูลกรองทั้งหมด
+    let currentPage = 1;
+    const rowsPerPage = 20;
 
-  // Function to switch main pages (Dashboard/Search)
-  function switchMainPage(pageId) {
-    const pages = ['pageDashboard', 'pageSearch'];
-    pages.forEach(id => {
-      document.getElementById(id).style.display = 'none';
-    });
-    document.getElementById(pageId).style.display = 'block';
+    // สลับหน้าเมนูหลัก
+    function switchMainPage(pageId) {
+      const pages = ['pageDashboard', 'pageSearch'];
+      pages.forEach((id) => {
+        document.getElementById(id).style.display = 'none';
+      });
+      document.getElementById(pageId).style.display = 'block';
 
-    // Update active button state
-    document.querySelectorAll('.main-menu-btn').forEach(btn => {
-      btn.classList.remove('active');
-    });
-    document.getElementById('btn' + pageId.replace('page', '')).classList.add('active');
+      // อัปเดตปุ่ม active
+      document.querySelectorAll('.header-menu-btn').forEach((btn) => {
+        btn.classList.remove('active');
+      });
+      document.getElementById('btn' + pageId.replace('page', '')).classList.add('active');
 
-    // If switching to Search page, ensure data is loaded
-    if (pageId === 'pageSearch') {
-        loadData(); // Reload data if coming from dashboard to ensure up-to-date filtered data
+      if (pageId === 'pageSearch') {
+        loadData();
+      }
     }
-  }
 
-  // Event Listeners for Main Menu Buttons
-  document.getElementById('btnDashboard').addEventListener('click', () => switchMainPage('pageDashboard'));
-  document.getElementById('btnSearch').addEventListener('click', () => switchMainPage('pageSearch'));
+    // ปุ่มเมนูหลัก
+    document.getElementById('btnDashboard').addEventListener('click', () => switchMainPage('pageDashboard'));
+    document.getElementById('btnSearch').addEventListener('click', () => switchMainPage('pageSearch'));
 
+    // สลับแท็บในหน้าค้นหา
+    function switchTab(tabName, event) {
+      document.querySelectorAll('.tab-button').forEach((btn) => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach((content) => content.classList.remove('active'));
 
-  // Tab switching function (within the Search page)
-  function switchTab(tabName, event) { // เพิ่ม event parameter
-    // Remove active class from all tabs
-    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      event.currentTarget.classList.add('active');
 
-    // Add active class to selected tab
-    event.currentTarget.classList.add('active'); // ใช้ currentTarget แทน target
-    
-    if (tabName === 'summary') {
-      document.getElementById('summaryTab').classList.add('active');
-      document.getElementById('paginationControls').style.display = 'none'; // ซ่อน pagination เมื่ออยู่หน้าสรุป
-    } else if (tabName === 'details') {
-      document.getElementById('detailsTab').classList.add('active');
-      document.getElementById('paginationControls').style.display = 'flex'; // แสดง pagination เมื่ออยู่หน้าตาราง
-      displayTablePage(currentPage); // แสดงข้อมูลหน้าปัจจุบันเมื่อสลับมาที่ Details
+      if (tabName === 'summary') {
+        document.getElementById('summaryTab').classList.add('active');
+        document.getElementById('paginationControls').style.display = 'none';
+      } else if (tabName === 'details') {
+        document.getElementById('detailsTab').classList.add('active');
+        document.getElementById('paginationControls').style.display = 'flex';
+        displayTablePage(currentPage);
+      }
     }
-  }
 
-  // Initialize date pickers
-  flatpickr("#startDate", { 
-    dateFormat: "Y-m-d",
-    theme: "light"
-  });
-  flatpickr("#endDate", { 
-    dateFormat: "Y-m-d",
-    theme: "light"
-  });
+    flatpickr('#startDate', {
+      dateFormat: 'Y-m-d',
+      theme: 'light',
+    });
+    flatpickr('#endDate', {
+      dateFormat: 'Y-m-d',
+      theme: 'light',
+    });
 
-  // Clear filters function
-  function clearFilters() {
-    document.getElementById("startDate").value = "";
-    document.getElementById("endDate").value = "";
-    document.getElementById("mainProcess").value = "";
-    document.getElementById("barcodeSearch").value = "";
-    
-    // Clear flatpickr instances
-    document.getElementById("startDate")._flatpickr?.clear();
-    document.getElementById("endDate")._flatpickr?.clear();
-    
-    // Load default data (all data)
-    currentPage = 1; // รีเซ็ตหน้าเป็นหน้าแรก
-    loadData();
-  }
+    function clearFilters() {
+      document.getElementById('startDate').value = '';
+      document.getElementById('endDate').value = '';
+      document.getElementById('mainProcess').value = '';
+      document.getElementById('barcodeSearch').value = '';
 
-  // Helper function to adjust time by -7 hours
-  function adjustTimeByHours(dateString, hours) {
-    const date = new Date(dateString);
-    date.setHours(date.getHours() + hours);
-    return date;
-  }
+      document.getElementById('startDate')._flatpickr?.clear();
+      document.getElementById('endDate')._flatpickr?.clear();
 
-  // Helper function to extract barcode before slash
-  function extractBarcodeBeforeSlash(barcode) {
-    if (!barcode) return '-';
-    const slashIndex = barcode.indexOf('/');
-    return slashIndex !== -1 ? barcode.substring(0, slashIndex) : barcode;
-  }
+      currentPage = 1;
+      loadData();
+    }
 
-  async function loadData() {
-    const tbody = document.getElementById("tableBody");
-    const summaryDiv = document.getElementById("summary");
-    const paginationControls = document.getElementById("paginationControls");
-    
-    // Show loading state for both sections
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="7" class="loading">
-          <i class="fas fa-spinner"></i>
-          <div>กำลังโหลดข้อมูล...</div>
-        </td>
-      </tr>
-    `;
-    summaryDiv.innerHTML = `
-      <div class="loading">
-        <i class="fas fa-spinner"></i>
-        <div>กำลังโหลดข้อมูล...</div>
-      </div>
-    `;
-    paginationControls.style.display = 'none'; // ซ่อน pagination ขณะโหลด
+    function adjustTimeByHours(dateString, hours) {
+      const date = new Date(dateString);
+      date.setHours(date.getHours() + hours);
+      return date;
+    }
 
-    try {
-      let { data, error } = await supabaseClient
-        .from("inventory_tags")
-        .select("*")
-        .order("created_at", { ascending: false });
+    function extractBarcodeBeforeSlash(barcode) {
+      if (!barcode) return '-';
+      const slashIndex = barcode.indexOf('/');
+      return slashIndex !== -1 ? barcode.substring(0, slashIndex) : barcode;
+    }
 
-      if (error) throw error;
+    async function loadData() {
+      const tbody = document.getElementById('tableBody');
+      const summaryDiv = document.getElementById('summary');
+      const paginationControls = document.getElementById('paginationControls');
 
-      const start = document.getElementById("startDate").value;
-      const end = document.getElementById("endDate").value;
-      const selectedProcess = document.getElementById("mainProcess").value;
-      const barcodeKeyword = document.getElementById("barcodeSearch").value.toLowerCase();
+      tbody.innerHTML = `<tr><td colspan="7" class="loading"><i class="fas fa-spinner"></i><div>กำลังโหลดข้อมูล...</div></td></tr>`;
+      summaryDiv.innerHTML = `<div class="loading"><i class="fas fa-spinner"></i><div>กำลังโหลดข้อมูล...</div></div>`;
+      paginationControls.style.display = 'none';
 
-      // Filter data
-      allFilteredData = data.filter(item => { // เก็บข้อมูลที่กรองแล้วไว้ใน allFilteredData
-        const date = item.created_at.split("T")[0];
-        const matchDate = (!start || date >= start) && (!end || date <= end);
-        const matchProcess = !selectedProcess || item.main_process === selectedProcess;
-        const matchBarcode = !barcodeKeyword || (item.barcode && item.barcode.toLowerCase().includes(barcodeKeyword));
-        return matchDate && matchProcess && matchBarcode;
+      try {
+        let { data, error } = await supabaseClient.from('inventory_tags').select('*').order('created_at', { ascending: false });
+        if (error) throw error;
+
+        const start = document.getElementById('startDate').value;
+        const end = document.getElementById('endDate').value;
+        const selectedProcess = document.getElementById('mainProcess').value;
+        const barcodeKeyword = document.getElementById('barcodeSearch').value.toLowerCase();
+
+        allFilteredData = data.filter((item) => {
+          const date = item.created_at.split('T')[0];
+          const matchDate = (!start || date >= start) && (!end || date <= end);
+          const matchProcess = !selectedProcess || item.main_process === selectedProcess;
+          const matchBarcode = !barcodeKeyword || (item.barcode && item.barcode.toLowerCase().includes(barcodeKeyword));
+          return matchDate && matchProcess && matchBarcode;
+        });
+
+        updateSummary(allFilteredData);
+
+        currentPage = 1;
+        displayTablePage(currentPage);
+      } catch (error) {
+        console.error('Error loading data:', error);
+        tbody.innerHTML = `<tr><td colspan="7" class="error"><i class="fas fa-exclamation-triangle"></i><div>เกิดข้อผิดพลาดในการโหลดข้อมูล</div></td></tr>`;
+        summaryDiv.innerHTML = `<div class="error"><i class="fas fa-exclamation-triangle"></i><div>เกิดข้อผิดพลาดในการโหลดข้อมูล</div></div>`;
+        paginationControls.style.display = 'none';
+      }
+    }
+
+    function updateSummary(data) {
+      const summaryDiv = document.getElementById('summary');
+      if (data.length === 0) {
+        summaryDiv.innerHTML = `<div class="no-data"><i class="fas fa-inbox"></i><div>ไม่พบข้อมูลที่ตรงกับเงื่อนไข</div></div>`;
+        return;
+      }
+
+      const totalQty = data.reduce((sum, row) => sum + Number(row.quantity || 0), 0);
+      const uniqueScanner = [...new Set(data.map((row) => row.scanner))].length;
+
+      const allProcesses = [
+        'ผสมผง',
+        'Compact',
+        'Sinter & Steam',
+        'Finishing',
+        'Machining',
+        'Sub Store',
+        'Magna flux',
+        'Sort',
+        'Pack',
+        'Rework',
+      ];
+
+      const processCount = {};
+      allProcesses.forEach((process) => {
+        processCount[process] = 0;
       });
 
-      // Update summary section (always based on allFilteredData)
-      updateSummary(allFilteredData);
+      data.forEach((row) => {
+        const proc = row.main_process || 'อื่นๆ';
+        if (allProcesses.includes(proc)) {
+          processCount[proc] += Number(row.quantity || 0);
+        }
+      });
 
-      // Display the first page of details table
-      currentPage = 1; // รีเซ็ตหน้าเป็นหน้าแรกเสมอเมื่อมีการค้นหา/กรองใหม่
-      displayTablePage(currentPage);
-
-    } catch (error) {
-      console.error("Error loading data:", error);
-      tbody.innerHTML = `
-        <tr>
-          <td colspan="7" class="error">
-            <i class="fas fa-exclamation-triangle"></i>
-            <div>เกิดข้อผิดพลาดในการโหลดข้อมูล</div>
-          </td>
-        </tr>
-      `;
-      summaryDiv.innerHTML = `
-        <div class="error">
-          <i class="fas fa-exclamation-triangle"></i>
-          <div>เกิดข้อผิดพลาดในการโหลดข้อมูล</div>
+      const processCards = allProcesses
+        .map(
+          (process) => `
+        <div class="summary-card">
+          <div class="icon"><i class="fas fa-cog"></i></div>
+          <div class="title">${process}</div>
+          <div class="value">${processCount[process].toLocaleString()}</div>
         </div>
-      `;
-      paginationControls.style.display = 'none';
-    }
-  }
+      `
+        )
+        .join('');
 
-  // Function to update summary cards
-  function updateSummary(data) {
-    const summaryDiv = document.getElementById("summary");
-    if (data.length === 0) {
-        summaryDiv.innerHTML = `
-          <div class="no-data">
-            <i class="fas fa-inbox"></i>
-            <div>ไม่พบข้อมูลที่ตรงกับเงื่อนไข</div>
-          </div>
-        `;
-        return;
-    }
-
-    const totalQty = data.reduce((sum, row) => sum + Number(row.quantity || 0), 0);
-    const uniqueScanner = [...new Set(data.map(row => row.scanner))].length;
-    
-    const allProcesses = [
-      "ผสมผง", "Compact", "Sinter & Steam", "Finishing", "Machining",
-      "Sub Store", "Magna flux", "Sort", "Pack", "Rework"
-    ];
-    
-    const processCount = {};
-    allProcesses.forEach(process => {
-      processCount[process] = 0;
-    });
-    
-    data.forEach(row => {
-      const proc = row.main_process || "อื่นๆ";
-      if (allProcesses.includes(proc)) {
-        processCount[proc] += Number(row.quantity || 0);
-      }
-    });
-
-    const processCards = allProcesses.map(process => `
-      <div class="summary-card">
-        <div class="icon"><i class="fas fa-cog"></i></div>
-        <div class="title">${process}</div>
-        <div class="value">${processCount[process].toLocaleString()}</div>
-      </div>
-    `).join("");
-
-    summaryDiv.innerHTML = `
+      summaryDiv.innerHTML = `
       <div class="summary-card">
         <div class="icon"><i class="fas fa-list"></i></div>
         <div class="title">รายการทั้งหมด</div>
@@ -879,202 +853,189 @@
       </div>
       ${processCards}
     `;
-  }
-
-  // Function to display data for a specific page
-  function displayTablePage(page) {
-    currentPage = page;
-    const tbody = document.getElementById("tableBody");
-    const paginationControls = document.getElementById("paginationControls");
-
-    const startIndex = (currentPage - 1) * rowsPerPage;
-    const endIndex = startIndex + rowsPerPage;
-    const dataToDisplay = allFilteredData.slice(startIndex, endIndex);
-
-    if (dataToDisplay.length === 0) {
-      tbody.innerHTML = `
-        <tr>
-          <td colspan="7" class="no-data">
-            <i class="fas fa-inbox"></i>
-            <div>ไม่พบข้อมูลในหน้านี้</div>
-          </td>
-        </tr>
-      `;
-      paginationControls.style.display = 'none'; // ซ่อน pagination หากไม่มีข้อมูล
-      return;
     }
 
-    tbody.innerHTML = dataToDisplay.map(row => {
-      const adjustedDate = adjustTimeByHours(row.created_at, -7);
-      const displayBarcode = extractBarcodeBeforeSlash(row.barcode);
-      
-      return `
-        <tr>
-          <td>${adjustedDate.toLocaleDateString("th-TH", {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-            hour: "2-digit",
-            minute: "2-digit"
-          })}</td>
-          <td><code>${displayBarcode}</code></td>
-          <td>${row.main_process || '-'}</td>
-          <td>${row.sub_process || '-'}</td>
-          <td><span class="status">${row.status || '-'}</span></td>
-          <td><strong>${(row.quantity || 0).toLocaleString()}</strong></td>
-          <td>${row.scanner || '-'}</td>
-        </tr>
-      `;
-    }).join("");
+    function displayTablePage(page) {
+      currentPage = page;
+      const tbody = document.getElementById('tableBody');
+      const paginationControls = document.getElementById('paginationControls');
 
-    setupPagination(); // สร้างปุ่ม pagination
-    
-    // ตรวจสอบว่าแท็บ details ถูกเลือกอยู่หรือไม่ ก่อนที่จะแสดง pagination
-    if (document.getElementById('detailsTab').classList.contains('active')) {
-      paginationControls.style.display = 'flex';
+      const startIndex = (currentPage - 1) * rowsPerPage;
+      const endIndex = startIndex + rowsPerPage;
+      const dataToDisplay = allFilteredData.slice(startIndex, endIndex);
+
+      if (dataToDisplay.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="no-data"><i class="fas fa-inbox"></i><div>ไม่พบข้อมูลในหน้านี้</div></td></tr>`;
+        paginationControls.style.display = 'none';
+        return;
+      }
+
+      tbody.innerHTML = dataToDisplay
+        .map((row) => {
+          const adjustedDate = adjustTimeByHours(row.created_at, -7);
+          const displayBarcode = extractBarcodeBeforeSlash(row.barcode);
+
+          return `
+          <tr>
+            <td>${adjustedDate.toLocaleDateString('th-TH', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+            })}</td>
+            <td><code>${displayBarcode}</code></td>
+            <td>${row.main_process || '-'}</td>
+            <td>${row.sub_process || '-'}</td>
+            <td><span class="status">${row.status || '-'}</span></td>
+            <td><strong>${(row.quantity || 0).toLocaleString()}</strong></td>
+            <td>${row.scanner || '-'}</td>
+          </tr>
+        `;
+        })
+        .join('');
+
+      setupPagination();
+
+      if (document.getElementById('detailsTab').classList.contains('active')) {
+        paginationControls.style.display = 'flex';
+      }
     }
-  }
 
-  // Function to set up pagination buttons
-  function setupPagination() {
-    const paginationControls = document.getElementById("paginationControls");
-    paginationControls.innerHTML = ''; // Clear previous buttons
+    function setupPagination() {
+      const paginationControls = document.getElementById('paginationControls');
+      paginationControls.innerHTML = '';
 
-    const totalPages = Math.ceil(allFilteredData.length / rowsPerPage);
+      const totalPages = Math.ceil(allFilteredData.length / rowsPerPage);
 
-    if (totalPages <= 1) {
-      paginationControls.style.display = 'none'; // ซ่อน pagination ถ้ามีแค่หน้าเดียว
-      return;
-    }
+      if (totalPages <= 1) {
+        paginationControls.style.display = 'none';
+        return;
+      }
 
-    // Previous button
-    const prevBtn = document.createElement('button');
-    prevBtn.classList.add('pagination-btn');
-    prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i> Previous';
-    prevBtn.disabled = currentPage === 1;
-    prevBtn.onclick = () => displayTablePage(currentPage - 1);
-    paginationControls.appendChild(prevBtn);
+      const prevBtn = document.createElement('button');
+      prevBtn.classList.add('pagination-btn');
+      prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i> Previous';
+      prevBtn.disabled = currentPage === 1;
+      prevBtn.onclick = () => displayTablePage(currentPage - 1);
+      paginationControls.appendChild(prevBtn);
 
-    // Page number buttons
-    let startPage = Math.max(1, currentPage - 2);
-    let endPage = Math.min(totalPages, currentPage + 2);
+      let startPage = Math.max(1, currentPage - 2);
+      let endPage = Math.min(totalPages, currentPage + 2);
 
-    if (endPage - startPage < 4) { // Adjust range if not enough pages around current
+      if (endPage - startPage < 4) {
         if (startPage === 1) endPage = Math.min(totalPages, 5);
         if (endPage === totalPages) startPage = Math.max(1, totalPages - 4);
-    }
-    
-    if (startPage > 1) {
+      }
+
+      if (startPage > 1) {
         const firstPageBtn = document.createElement('button');
         firstPageBtn.classList.add('pagination-btn');
         firstPageBtn.textContent = '1';
         firstPageBtn.onclick = () => displayTablePage(1);
         paginationControls.appendChild(firstPageBtn);
         if (startPage > 2) {
-            const ellipsis = document.createElement('span');
-            ellipsis.textContent = '...';
-            ellipsis.classList.add('pagination-info');
-            paginationControls.appendChild(ellipsis);
+          const ellipsis = document.createElement('span');
+          ellipsis.textContent = '...';
+          ellipsis.classList.add('pagination-info');
+          paginationControls.appendChild(ellipsis);
         }
-    }
+      }
 
-    for (let i = startPage; i <= endPage; i++) {
+      for (let i = startPage; i <= endPage; i++) {
         const pageBtn = document.createElement('button');
         pageBtn.classList.add('pagination-btn');
         pageBtn.textContent = i;
         if (i === currentPage) {
-            pageBtn.classList.add('active');
+          pageBtn.classList.add('active');
         }
         pageBtn.onclick = () => displayTablePage(i);
         paginationControls.appendChild(pageBtn);
-    }
+      }
 
-    if (endPage < totalPages) {
+      if (endPage < totalPages) {
         if (endPage < totalPages - 1) {
-            const ellipsis = document.createElement('span');
-            ellipsis.textContent = '...';
-            ellipsis.classList.add('pagination-info');
-            paginationControls.appendChild(ellipsis);
+          const ellipsis = document.createElement('span');
+          ellipsis.textContent = '...';
+          ellipsis.classList.add('pagination-info');
+          paginationControls.appendChild(ellipsis);
         }
         const lastPageBtn = document.createElement('button');
         lastPageBtn.classList.add('pagination-btn');
         lastPageBtn.textContent = totalPages;
         lastPageBtn.onclick = () => displayTablePage(totalPages);
         paginationControls.appendChild(lastPageBtn);
+      }
+
+      const nextBtn = document.createElement('button');
+      nextBtn.classList.add('pagination-btn');
+      nextBtn.innerHTML = 'Next <i class="fas fa-chevron-right"></i>';
+      nextBtn.disabled = currentPage === totalPages;
+      nextBtn.onclick = () => displayTablePage(currentPage + 1);
+      paginationControls.appendChild(nextBtn);
     }
 
-    // Next button
-    const nextBtn = document.createElement('button');
-    nextBtn.classList.add('pagination-btn');
-    nextBtn.innerHTML = 'Next <i class="fas fa-chevron-right"></i>';
-    nextBtn.disabled = currentPage === totalPages;
-    nextBtn.onclick = () => displayTablePage(currentPage + 1);
-    paginationControls.appendChild(nextBtn);
-  }
-
-
-  function exportExcel() {
-    try {
-      const wb = XLSX.utils.book_new();
-      // ใช้ allFilteredData สำหรับการส่งออกทั้งหมด ไม่ใช่แค่ที่แสดงในหน้าปัจจุบัน
-      const rows = allFilteredData.map(row => {
+    function exportExcel() {
+      try {
+        const wb = XLSX.utils.book_new();
+        const rows = allFilteredData.map((row) => {
           const adjustedDate = adjustTimeByHours(row.created_at, -7);
           const displayBarcode = extractBarcodeBeforeSlash(row.barcode);
           return [
-              adjustedDate.toLocaleDateString("th-TH", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit"
-              }),
-              displayBarcode,
-              row.main_process || '-',
-              row.sub_process || '-',
-              row.status || '-',
-              (row.quantity || 0).toLocaleString(),
-              row.scanner || '-'
+            adjustedDate.toLocaleDateString('th-TH', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+            }),
+            displayBarcode,
+            row.main_process || '-',
+            row.sub_process || '-',
+            row.status || '-',
+            (row.quantity || 0).toLocaleString(),
+            row.scanner || '-',
           ];
-      });
-      
-      if (rows.length === 0) {
-        Swal.fire({
-          icon: 'warning',
-          title: 'ไม่มีข้อมูล',
-          text: 'ไม่พบข้อมูลที่ตรงตามเงื่อนไขสำหรับการส่งออก',
-          confirmButtonColor: '#1e40af'
         });
-        return;
+
+        if (rows.length === 0) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'ไม่มีข้อมูล',
+            text: 'ไม่พบข้อมูลที่ตรงตามเงื่อนไขสำหรับการส่งออก',
+            confirmButtonColor: '#1e40af',
+          });
+          return;
+        }
+
+        const ws = XLSX.utils.aoa_to_sheet([
+          ['วันที่', 'Barcode', 'กระบวนการหลัก', 'กระบวนการย่อย', 'สถานะ', 'จำนวน', 'ผู้สแกน'],
+          ...rows,
+        ]);
+
+        XLSX.utils.book_append_sheet(wb, ws, 'Inventory TAG Report');
+        XLSX.writeFile(wb, `Inventory_Report_${new Date().toISOString().slice(0, 10)}.xlsx`);
+
+        Swal.fire({
+          icon: 'success',
+          title: 'ส่งออกสำเร็จ',
+          text: 'ไฟล์ Excel ได้ถูกดาวน์โหลดแล้ว',
+          confirmButtonColor: '#1e40af',
+          timer: 2000,
+        });
+      } catch (error) {
+        console.error('Export error:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาด',
+          text: 'ไม่สามารถส่งออกไฟล์ได้',
+          confirmButtonColor: '#1e40af',
+        });
       }
-
-      const ws = XLSX.utils.aoa_to_sheet([
-        ["วันที่", "Barcode", "กระบวนการหลัก", "กระบวนการย่อย", "สถานะ", "จำนวน", "ผู้สแกน"],
-        ...rows
-      ]);
-      
-      XLSX.utils.book_append_sheet(wb, ws, "Inventory TAG Report");
-      XLSX.writeFile(wb, `Inventory_Report_${new Date().toISOString().slice(0, 10)}.xlsx`);
-      
-      Swal.fire({
-        icon: 'success',
-        title: 'ส่งออกสำเร็จ',
-        text: 'ไฟล์ Excel ได้ถูกดาวน์โหลดแล้ว',
-        confirmButtonColor: '#1e40af',
-        timer: 2000
-      });
-    } catch (error) {
-      console.error("Export error:", error);
-      Swal.fire({
-        icon: 'error',
-        title: 'เกิดข้อผิดพลาด',
-        text: 'ไม่สามารถส่งออกไฟล์ได้',
-        confirmButtonColor: '#1e40af'
-      });
     }
-  }
 
-  // Initial load: Set default page to Search and load data
-  switchMainPage('pageSearch');
-</script>
+    // เริ่มโค้ดโดยเปิดที่หน้าค้นหาและโหลดข้อมูล
+    switchMainPage('pageSearch');
+  </script>
 </body>
 </html>
