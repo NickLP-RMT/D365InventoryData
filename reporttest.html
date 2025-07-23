@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
   <style>
-    /* CSS ส่วนเดิม + ปรับแก้เพิ่มสไตล์ลูกศรย่อ/ขยาย + กรอบ Controls เหลือเส้นเมื่อย่อ */
+    /* CSS ส่วนเดิม + ปรับแก้เพิ่มสไตล์ลูกศรย่อ/ขยาย */
     * {
       margin: 0;
       padding: 0;
@@ -119,27 +119,15 @@
       box-shadow: var(--shadow);
       margin-bottom: 2rem;
       border: 1px solid var(--border-gray);
-      max-height: 1000px; /* พอสำหรับขยายตอนเปิด */
+      transition: max-height 0.3s ease;
       overflow: hidden;
-      transition: max-height 0.3s ease, padding 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    /* เมื่อ collapsed ให้เหลือเส้นบางๆ */
-    .controls-section.collapsed-on {
-      max-height: 4px;
-      padding-top: 0;
-      padding-bottom: 0;
-      border-color: var(--primary-blue);
-      box-shadow: none;
-      border-radius: 8px;
     }
 
     /* ปุ่มลูกศรสำหรับย่อ/ขยาย */
     .toggle-controls-btn {
       position: absolute;
-      top: 50%;
+      top: 1rem;
       right: 1rem;
-      transform: translateY(-50%);
       background: transparent;
       border: none;
       color: var(--primary-blue);
@@ -155,22 +143,11 @@
 
     /* หมุน 180 องศาเมื่อย่อ */
     .toggle-controls-btn.collapsed {
-      transform: translateY(-50%) rotate(180deg);
+      transform: rotate(180deg);
     }
 
-    /* Controls และ Button Group */
-    #filterAndButtons {
-      transition: opacity 0.3s ease;
-    }
-
-    /* ซ่อนเนื้อหาภายในเวลาย่อ */
-    .controls-section.collapsed-on #filterAndButtons {
-      opacity: 0;
-      pointer-events: none;
-      height: 0;
-      overflow: hidden;
-      margin: 0;
-      padding: 0;
+    .controls, .button-group {
+      transition: max-height 0.3s ease;
     }
 
     .controls {
@@ -1042,24 +1019,23 @@
       }
     }
 
+    // Toggle controls ส่วนฟิลเตอร์และปุ่ม
     const toggleControlsBtn = document.getElementById('toggleControlsBtn');
-    const controlsSectionDiv = document.querySelector('.controls-section');
+    const filterAndButtonsDiv = document.getElementById('filterAndButtons');
 
     toggleControlsBtn.addEventListener('click', () => {
-      const isCollapsed = controlsSectionDiv.classList.contains('collapsed-on');
+      const isCollapsed = filterAndButtonsDiv.style.display === 'none';
 
       if (isCollapsed) {
-        // ขยาย
-        controlsSectionDiv.classList.remove('collapsed-on');
+        filterAndButtonsDiv.style.display = 'block';
         toggleControlsBtn.classList.remove('collapsed');
       } else {
-        // ย่อเหลือเส้นบาง
-        controlsSectionDiv.classList.add('collapsed-on');
+        filterAndButtonsDiv.style.display = 'none';
         toggleControlsBtn.classList.add('collapsed');
       }
     });
 
-    // เปิดหน้าแรกที่ "ค้นหา"
+    // โหลดหน้าแรกที่ "ค้นหา"
     switchMainPage('pageSearch');
   </script>
 </body>
