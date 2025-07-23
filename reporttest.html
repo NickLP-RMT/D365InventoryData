@@ -12,6 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <style>
+    /* ... (CSS ส่วนเดิมทั้งหมด) ... */
     * {
       margin: 0;
       padding: 0;
@@ -292,7 +293,7 @@
 
     .table-container {
       overflow-x: auto;
-      max-height: 600px;
+      max-height: 600px; /* ยังคงเก็บ max-height สำหรับ scrollbar กรณีข้อมูลน้อยกว่า 20 แถวแต่ไม่พอดีหน้าจอ */
       overflow-y: auto;
     }
 
@@ -412,6 +413,54 @@
       background: var(--primary-blue) !important;
       border-color: var(--primary-blue) !important;
     }
+
+    /* New CSS for Pagination */
+    .pagination-controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-gray);
+    }
+
+    .pagination-btn {
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--border-gray);
+      border-radius: 8px;
+      background-color: var(--white);
+      color: var(--primary-blue);
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .pagination-btn:hover:not(.active):not(:disabled) {
+      background-color: var(--light-blue);
+      border-color: var(--secondary-blue);
+      color: var(--dark-blue);
+    }
+
+    .pagination-btn.active {
+      background-color: var(--primary-blue);
+      color: var(--white);
+      border-color: var(--primary-blue);
+      font-weight: 600;
+      cursor: default;
+    }
+
+    .pagination-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .pagination-info {
+      font-size: 0.9rem;
+      color: var(--text-light);
+      margin: 0 1rem;
+    }
   </style>
 </head>
 <body>
@@ -528,6 +577,10 @@
             </tbody>
           </table>
         </div>
+        <!-- Pagination Controls -->
+        <div id="paginationControls" class="pagination-controls" style="display: none;">
+          <!-- Pagination buttons will be inserted here by JavaScript -->
+        </div>
       </div>
     </div>
   </div>
@@ -536,6 +589,10 @@
   const { createClient } = supabase;
   const supabaseClient = createClient("https://fvjminqjxfracpvdbjly.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2am1pbnFqeGZyYWNwdmRiamx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMxNTY4NTMsImV4cCI6MjA2ODczMjg1M30.N3X8-qSRQHa7FPIpbDlfL5ewY5_JeCShAuARczfmLgE");
 
+  let allFilteredData = []; // เก็บข้อมูลที่ถูกกรองทั้งหมด
+  let currentPage = 1;
+  const rowsPerPage = 20;
+
   // Tab switching function
   function switchTab(tabName) {
     // Remove active class from all tabs
@@ -543,12 +600,17 @@
     document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
 
     // Add active class to selected tab
-    event.target.classList.add('active');
+    // ต้องใช้วิธีหาปุ่มที่ถูกคลิก หรือส่ง parameter ที่ถูกต้อง
+    // currentTarget แทน target เพราะ target อาจเป็น i element ภายใน button
+    document.querySelector(`.tab-button[onclick="switchTab('${tabName}')"]`).classList.add('active');
     
     if (tabName === 'summary') {
       document.getElementById('summaryTab').classList.add('active');
+      document.getElementById('paginationControls').style.display = 'none'; // ซ่อน pagination เมื่ออยู่หน้าสรุป
     } else if (tabName === 'details') {
       document.getElementById('detailsTab').classList.add('active');
+      document.getElementById('paginationControls').style.display = 'flex'; // แสดง pagination เมื่ออยู่หน้าตาราง
+      displayTablePage(currentPage); // แสดงข้อมูลหน้าปัจจุบันเมื่อสลับมาที่ Details
     }
   }
 
@@ -574,6 +636,7 @@
     document.getElementById("endDate")._flatpickr?.clear();
     
     // Load default data (all data)
+    currentPage = 1; // รีเซ็ตหน้าเป็นหน้าแรก
     loadData();
   }
 
@@ -594,8 +657,9 @@
   async function loadData() {
     const tbody = document.getElementById("tableBody");
     const summaryDiv = document.getElementById("summary");
+    const paginationControls = document.getElementById("paginationControls");
     
-    // Show loading state
+    // Show loading state for both sections
     tbody.innerHTML = `
       <tr>
         <td colspan="7" class="loading">
@@ -604,13 +668,13 @@
         </td>
       </tr>
     `;
-    
     summaryDiv.innerHTML = `
       <div class="loading">
         <i class="fas fa-spinner"></i>
         <div>กำลังโหลดข้อมูล...</div>
       </div>
     `;
+    paginationControls.style.display = 'none'; // ซ่อน pagination ขณะโหลด
 
     try {
       let { data, error } = await supabaseClient
@@ -625,7 +689,8 @@
       const selectedProcess = document.getElementById("mainProcess").value;
       const barcodeKeyword = document.getElementById("barcodeSearch").value.toLowerCase();
 
-      const filtered = data.filter(item => {
+      // Filter data
+      allFilteredData = data.filter(item => { // เก็บข้อมูลที่กรองแล้วไว้ใน allFilteredData
         const date = item.created_at.split("T")[0];
         const matchDate = (!start || date >= start) && (!end || date <= end);
         const matchProcess = !selectedProcess || item.main_process === selectedProcess;
@@ -633,93 +698,12 @@
         return matchDate && matchProcess && matchBarcode;
       });
 
-      // Update table
-      if (filtered.length === 0) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="7" class="no-data">
-              <i class="fas fa-inbox"></i>
-              <div>ไม่พบข้อมูลที่ตรงกับเงื่อนไข</div>
-            </td>
-          </tr>
-        `;
-      } else {
-        tbody.innerHTML = filtered.map(row => {
-          // Adjust time by -7 hours
-          const adjustedDate = adjustTimeByHours(row.created_at, -7);
-          
-          // Extract barcode before slash
-          const displayBarcode = extractBarcodeBeforeSlash(row.barcode);
-          
-          return `
-            <tr>
-              <td>${adjustedDate.toLocaleDateString("th-TH", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit"
-              })}</td>
-              <td><code>${displayBarcode}</code></td>
-              <td>${row.main_process || '-'}</td>
-              <td>${row.sub_process || '-'}</td>
-              <td><span class="status">${row.status || '-'}</span></td>
-              <td><strong>${(row.quantity || 0).toLocaleString()}</strong></td>
-              <td>${row.scanner || '-'}</td>
-            </tr>
-          `;
-        }).join("");
-      }
+      // Update summary section (always based on allFilteredData)
+      updateSummary(allFilteredData);
 
-      // Update summary
-      const totalQty = filtered.reduce((sum, row) => sum + Number(row.quantity || 0), 0);
-      const uniqueScanner = [...new Set(filtered.map(row => row.scanner))].length;
-      
-      // Define all processes and initialize with 0
-      const allProcesses = [
-        "ผสมผง", "Compact", "Sinter & Steam", "Finishing", "Machining",
-        "Sub Store", "Magna flux", "Sort", "Pack", "Rework"
-      ];
-      
-      const processCount = {};
-      allProcesses.forEach(process => {
-        processCount[process] = 0;
-      });
-      
-      // Count actual data - sum quantities instead of count items
-      filtered.forEach(row => {
-        const proc = row.main_process || "อื่นๆ";
-        if (allProcesses.includes(proc)) {
-          processCount[proc] += Number(row.quantity || 0);
-        }
-      });
-
-      const processCards = allProcesses.map(process => `
-        <div class="summary-card">
-          <div class="icon"><i class="fas fa-cog"></i></div>
-          <div class="title">${process}</div>
-          <div class="value">${processCount[process].toLocaleString()}</div>
-        </div>
-      `).join("");
-
-      summaryDiv.innerHTML = `
-        <div class="summary-card">
-          <div class="icon"><i class="fas fa-list"></i></div>
-          <div class="title">รายการทั้งหมด</div>
-          <div class="value">${filtered.length.toLocaleString()}</div>
-        </div>
-        <div class="summary-card">
-          <div class="icon"><i class="fas fa-boxes"></i></div>
-          <div class="title">รวมจำนวน</div>
-          <div class="value">${totalQty.toLocaleString()}</div>
-        </div>
-        <div class="summary-card">
-          <div class="icon"><i class="fas fa-users"></i></div>
-          <div class="title">ผู้สแกน</div>
-          <div class="value">${uniqueScanner}</div>
-        </div>
-        ${processCards}
-      `;
+      // Display the first page of details table
+      currentPage = 1; // รีเซ็ตหน้าเป็นหน้าแรกเสมอเมื่อมีการค้นหา/กรองใหม่
+      displayTablePage(currentPage);
 
     } catch (error) {
       console.error("Error loading data:", error);
@@ -737,21 +721,232 @@
           <div>เกิดข้อผิดพลาดในการโหลดข้อมูล</div>
         </div>
       `;
+      paginationControls.style.display = 'none';
     }
   }
+
+  // Function to update summary cards
+  function updateSummary(data) {
+    const summaryDiv = document.getElementById("summary");
+    if (data.length === 0) {
+        summaryDiv.innerHTML = `
+          <div class="no-data">
+            <i class="fas fa-inbox"></i>
+            <div>ไม่พบข้อมูลที่ตรงกับเงื่อนไข</div>
+          </div>
+        `;
+        return;
+    }
+
+    const totalQty = data.reduce((sum, row) => sum + Number(row.quantity || 0), 0);
+    const uniqueScanner = [...new Set(data.map(row => row.scanner))].length;
+    
+    const allProcesses = [
+      "ผสมผง", "Compact", "Sinter & Steam", "Finishing", "Machining",
+      "Sub Store", "Magna flux", "Sort", "Pack", "Rework"
+    ];
+    
+    const processCount = {};
+    allProcesses.forEach(process => {
+      processCount[process] = 0;
+    });
+    
+    data.forEach(row => {
+      const proc = row.main_process || "อื่นๆ";
+      if (allProcesses.includes(proc)) {
+        processCount[proc] += Number(row.quantity || 0);
+      }
+    });
+
+    const processCards = allProcesses.map(process => `
+      <div class="summary-card">
+        <div class="icon"><i class="fas fa-cog"></i></div>
+        <div class="title">${process}</div>
+        <div class="value">${processCount[process].toLocaleString()}</div>
+      </div>
+    `).join("");
+
+    summaryDiv.innerHTML = `
+      <div class="summary-card">
+        <div class="icon"><i class="fas fa-list"></i></div>
+        <div class="title">รายการทั้งหมด</div>
+        <div class="value">${data.length.toLocaleString()}</div>
+      </div>
+      <div class="summary-card">
+        <div class="icon"><i class="fas fa-boxes"></i></div>
+        <div class="title">รวมจำนวน</div>
+        <div class="value">${totalQty.toLocaleString()}</div>
+      </div>
+      <div class="summary-card">
+        <div class="icon"><i class="fas fa-users"></i></div>
+        <div class="title">ผู้สแกน</div>
+        <div class="value">${uniqueScanner}</div>
+      </div>
+      ${processCards}
+    `;
+  }
+
+  // Function to display data for a specific page
+  function displayTablePage(page) {
+    currentPage = page;
+    const tbody = document.getElementById("tableBody");
+    const paginationControls = document.getElementById("paginationControls");
+
+    const startIndex = (currentPage - 1) * rowsPerPage;
+    const endIndex = startIndex + rowsPerPage;
+    const dataToDisplay = allFilteredData.slice(startIndex, endIndex);
+
+    if (dataToDisplay.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="7" class="no-data">
+            <i class="fas fa-inbox"></i>
+            <div>ไม่พบข้อมูลในหน้านี้</div>
+          </td>
+        </tr>
+      `;
+      paginationControls.style.display = 'none'; // ซ่อน pagination หากไม่มีข้อมูล
+      return;
+    }
+
+    tbody.innerHTML = dataToDisplay.map(row => {
+      const adjustedDate = adjustTimeByHours(row.created_at, -7);
+      const displayBarcode = extractBarcodeBeforeSlash(row.barcode);
+      
+      return `
+        <tr>
+          <td>${adjustedDate.toLocaleDateString("th-TH", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+          })}</td>
+          <td><code>${displayBarcode}</code></td>
+          <td>${row.main_process || '-'}</td>
+          <td>${row.sub_process || '-'}</td>
+          <td><span class="status">${row.status || '-'}</span></td>
+          <td><strong>${(row.quantity || 0).toLocaleString()}</strong></td>
+          <td>${row.scanner || '-'}</td>
+        </tr>
+      `;
+    }).join("");
+
+    setupPagination(); // สร้างปุ่ม pagination
+    
+    // ตรวจสอบว่าแท็บ details ถูกเลือกอยู่หรือไม่ ก่อนที่จะแสดง pagination
+    if (document.getElementById('detailsTab').classList.contains('active')) {
+      paginationControls.style.display = 'flex';
+    }
+  }
+
+  // Function to set up pagination buttons
+  function setupPagination() {
+    const paginationControls = document.getElementById("paginationControls");
+    paginationControls.innerHTML = ''; // Clear previous buttons
+
+    const totalPages = Math.ceil(allFilteredData.length / rowsPerPage);
+
+    if (totalPages <= 1) {
+      paginationControls.style.display = 'none'; // ซ่อน pagination ถ้ามีแค่หน้าเดียว
+      return;
+    }
+
+    // Previous button
+    const prevBtn = document.createElement('button');
+    prevBtn.classList.add('pagination-btn');
+    prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i> Previous';
+    prevBtn.disabled = currentPage === 1;
+    prevBtn.onclick = () => displayTablePage(currentPage - 1);
+    paginationControls.appendChild(prevBtn);
+
+    // Page number buttons
+    let startPage = Math.max(1, currentPage - 2);
+    let endPage = Math.min(totalPages, currentPage + 2);
+
+    if (endPage - startPage < 4) { // Adjust range if not enough pages around current
+        if (startPage === 1) endPage = Math.min(totalPages, 5);
+        if (endPage === totalPages) startPage = Math.max(1, totalPages - 4);
+    }
+    
+    if (startPage > 1) {
+        const firstPageBtn = document.createElement('button');
+        firstPageBtn.classList.add('pagination-btn');
+        firstPageBtn.textContent = '1';
+        firstPageBtn.onclick = () => displayTablePage(1);
+        paginationControls.appendChild(firstPageBtn);
+        if (startPage > 2) {
+            const ellipsis = document.createElement('span');
+            ellipsis.textContent = '...';
+            ellipsis.classList.add('pagination-info');
+            paginationControls.appendChild(ellipsis);
+        }
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+        const pageBtn = document.createElement('button');
+        pageBtn.classList.add('pagination-btn');
+        pageBtn.textContent = i;
+        if (i === currentPage) {
+            pageBtn.classList.add('active');
+        }
+        pageBtn.onclick = () => displayTablePage(i);
+        paginationControls.appendChild(pageBtn);
+    }
+
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+            const ellipsis = document.createElement('span');
+            ellipsis.textContent = '...';
+            ellipsis.classList.add('pagination-info');
+            paginationControls.appendChild(ellipsis);
+        }
+        const lastPageBtn = document.createElement('button');
+        lastPageBtn.classList.add('pagination-btn');
+        lastPageBtn.textContent = totalPages;
+        lastPageBtn.onclick = () => displayTablePage(totalPages);
+        paginationControls.appendChild(lastPageBtn);
+    }
+
+    // Next button
+    const nextBtn = document.createElement('button');
+    nextBtn.classList.add('pagination-btn');
+    nextBtn.innerHTML = 'Next <i class="fas fa-chevron-right"></i>';
+    nextBtn.disabled = currentPage === totalPages;
+    nextBtn.onclick = () => displayTablePage(currentPage + 1);
+    paginationControls.appendChild(nextBtn);
+  }
+
 
   function exportExcel() {
     try {
       const wb = XLSX.utils.book_new();
-      const rows = [...document.querySelectorAll("#tableBody tr")]
-        .filter(tr => !tr.querySelector('.loading, .error, .no-data'))
-        .map(tr => [...tr.children].map(td => td.textContent.trim()));
+      // ใช้ allFilteredData สำหรับการส่งออกทั้งหมด ไม่ใช่แค่ที่แสดงในหน้าปัจจุบัน
+      const rows = allFilteredData.map(row => {
+          const adjustedDate = adjustTimeByHours(row.created_at, -7);
+          const displayBarcode = extractBarcodeBeforeSlash(row.barcode);
+          return [
+              adjustedDate.toLocaleDateString("th-TH", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit"
+              }),
+              displayBarcode,
+              row.main_process || '-',
+              row.sub_process || '-',
+              row.status || '-',
+              (row.quantity || 0).toLocaleString(),
+              row.scanner || '-'
+          ];
+      });
       
       if (rows.length === 0) {
         Swal.fire({
           icon: 'warning',
           title: 'ไม่มีข้อมูล',
-          text: 'ไม่มีข้อมูลสำหรับการส่งออก',
+          text: 'ไม่พบข้อมูลที่ตรงตามเงื่อนไขสำหรับการส่งออก',
           confirmButtonColor: '#1e40af'
         });
         return;
