@@ -30,10 +30,16 @@
       background: linear-gradient(135deg, var(--light-gray) 0%, #e0f2fe 100%);
       min-height: 100vh;
       color: var(--text-dark);
-      padding: 1rem;
+      padding: 0; /* ตามต้นฉบับ Inventory Report */
       user-select: none;
     }
-    .dashboard-container { max-width: 1600px; margin: 0 auto; }
+
+    /* ทำให้ container เหมือนกันใน 2 หน้า */
+    .container, .dashboard-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
 
     /* Header แบบต้นฉบับ (2 แถว) */
     .header {
@@ -103,9 +109,10 @@
       box-shadow: var(--shadow-lg);
     }
 
-    /* ปรับ CSS ส่วนที่เหลือยังคงเดิม */
-
-    /* factory-layout และเนื้อหา */
+    /* เนื้อหา Factory Layout */
+    .dashboard-container {
+      /* ใช้คลาสเดียวกับ container เพื่อความสม่ำเสมอ */
+    }
     .factory-layout {
       background: var(--white);
       border-radius: 20px;
@@ -133,7 +140,7 @@
       overflow: hidden;
     }
 
-    /* (ส่วน CSS อื่นๆ จากโค้ดเดิมรวมไว้ตรงนี้โดยไม่เปลี่ยนแปลง) */
+    /* CSS ส่วนอื่น ๆ คงเดิมทั้งหมด */
     .process-area {
       position: absolute;
       border: 2px solid var(--border-gray);
@@ -188,7 +195,6 @@
       0%,100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
       50% { box-shadow: 0 0 0 10px rgba(239,68,68,0); }
     }
-
     .process-icon { font-size:2rem; margin-bottom:0.5rem; pointer-events:none; }
     .high-volume .process-icon{color:var(--success-green);}
     .medium-volume .process-icon{color:var(--warning-orange);}
@@ -404,21 +410,25 @@
         transform-origin:top left;
       }
       .header {
-        flex-direction:column;
-        text-align:center;
-        gap:1rem;
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
       }
       .header h1 {
-        font-size:1.5rem;
+        font-size: 1.5rem;
       }
       .instructions {
         display:none;
+      }
+      .container, .dashboard-container {
+        padding: 1rem;
       }
     }
   </style>
 </head>
 <body>
-  <div class="dashboard-container">
+  <div class="dashboard-container container">
+    <!-- ปรับชื่อคลาสให้ใช้ทั้ง 2 เพื่อความสอดคล้อง -->
     <div class="header">
       <!-- บรรทัดบน -->
       <div class="header-row">
@@ -441,6 +451,7 @@
         </nav>
       </div>
     </div>
+
     <div class="factory-layout">
       <div class="layout-title">
         <i class="fas fa-map"></i> แผนผังโรงงานและการกระจายชิ้นงาน
