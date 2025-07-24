@@ -55,9 +55,13 @@
       margin-bottom: 2rem;
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
       color: #ffffff;
+    }
+    .header-top {
       display: flex;
-      flex-direction: column;
-      align-items: flex-start;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
     }
     .header h1 {
       font-size: 2rem;
@@ -65,12 +69,32 @@
       display: flex;
       align-items: center;
       gap: 1rem;
+      margin: 0;
+    }
+    .header .actions {
+      display: flex;
+      gap: 1rem;
+    }
+    .header .actions button {
+      background: #ffffff;
+      color: #1e40af;
+      border: none;
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      font-family: 'Kanit', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    .header .actions button:hover {
+      background: #e0e7ff;
     }
     .header p {
       font-size: 0.9rem;
       opacity: 0.9;
       font-weight: 300;
-      margin-top: 0.25rem;
+      margin-top: 0.5rem;
     }
 
     /* เมนูปุ่มที่อยู่ใน header */
@@ -526,11 +550,15 @@
   <div class="container">
     <!-- Header (ปรับปรุง: เพิ่มเมนูภายใน) -->
     <div class="header">
-      <h1>
-        <i class="fas fa-chart-bar"></i>
-        RMT Inventory TAG Report
-      </h1>
-      <p>ระบบจัดการและรายงานข้อมูล Inventory ส่วนโรงงาน CHP </p>
+    <div class="header-top">
+      <h1><i class="fas fa-chart-bar"></i> RMT Inventory TAG Report</h1>
+      <div class="actions">
+        <button onclick="goToDashboard()"><i class="fas fa-home"></i> Dashboard</button>
+        <button onclick="loadData()"><i class="fas fa-search"></i> ค้นหา</button>
+      </div>
+    </div>
+    <p>ระบบจัดการและรายงานข้อมูล Inventory ส่วนโรงงาน CHP</p>
+  </div>
       
       <!-- เมนูอยู่ใน header -->
       <nav class="header-menu">
