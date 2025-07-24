@@ -486,6 +486,20 @@
   </div>
 
   <script>
+    function updateDatetime() {
+  const el = document.getElementById('currentDatetime');
+  const now = new Date();
+  el.textContent = now.toLocaleString('th-TH', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  });
+}
+setInterval(updateDatetime, 1000);
+updateDatetime();
     // แสดงเวลาปัจจุบันใน #currentTime ทุกวินาที
     function updateTime() {
       const now = new Date();
