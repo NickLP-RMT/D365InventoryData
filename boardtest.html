@@ -5,11 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>🏭 Factory Layout Dashboard</title>
 
-  <!-- Font Kanit -->
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <!-- Font Awesome -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
-  <!-- Flatpickr CSS -->
   <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet" />
 
   <style>
@@ -184,7 +181,7 @@
       box-shadow: var(--shadow-lg);
       position: relative;
       min-height: 80vh;
-      overflow: visible;
+      overflow: hidden; /* Changed from visible to hidden to ensure children respect bounds */
     }
     .layout-title {
       text-align: center;
@@ -205,7 +202,7 @@
       background-size: cover;
       border: 3px solid var(--border-gray);
       border-radius: 12px;
-      overflow: visible;
+      overflow: hidden; /* Changed from visible to hidden for correct drag behavior */
     }
 
     /* Process Area styles */
@@ -215,7 +212,7 @@
       border-radius: 12px;
       background-color: rgba(255, 255, 255, 0.85);
       box-shadow: var(--shadow);
-      transition: transform 0.1s ease, box-shadow 0.3s ease;
+      transition: box-shadow 0.3s ease; /* Removed transform from transition */
       cursor: grab;
       display: flex;
       flex-direction: column;
@@ -227,7 +224,7 @@
       min-height: 120px;
       user-select: none;
       touch-action: none;
-      transform: translate(0px, 0px);
+      /* transform property will be set by JavaScript */
     }
     .process-area.dragging {
       box-shadow: 0 10px 25px rgba(0,0,0,0.2);
@@ -262,6 +259,19 @@
       opacity: 0.8;
       pointer-events: none;
     }
+
+    /* กำหนดตำแหน่งเริ่มต้นให้แต่ละการ์ดเพื่อไม่ให้ซ้อนทับกัน */
+    .powder-mixing { top: 50px; left: 50px; }
+    .compact { top: 50px; left: 250px; }
+    .sinter-steam { top: 50px; left: 450px; }
+    .finishing { top: 50px; left: 650px; }
+    .machining { top: 250px; left: 50px; }
+    .sub-store { top: 250px; left: 250px; }
+    .final-inspection { top: 250px; left: 450px; }
+    .magna-flux { top: 250px; left: 650px; }
+    .sort { top: 450px; left: 50px; }
+    .pack { top: 450px; left: 250px; }
+    .rework { top: 450px; left: 450px; }
 
     /* สีและ animation ตามปริมาณงาน */
     .high-volume {
@@ -317,9 +327,14 @@
     /* Responsive */
     @media (max-width: 768px) {
       .factory-floor {
-        height: 500px;
+        /*
         transform: scale(0.8);
         transform-origin: top left;
+        Removing scale might provide more predictable drag/resize behavior
+        on small screens if combined with specific element positioning adjustments.
+        Otherwise, restrictRect in interact.js might need adjustment.
+        */
+        height: 500px;
       }
       .header {
         flex-direction: column;
@@ -337,7 +352,6 @@
 </head>
 <body>
   <div class="container">
-    <!-- Header -->
     <div class="header">
       <div class="header-row">
         <h1><i class="fas fa-industry"></i> Factory Layout Dashboard</h1>
@@ -352,7 +366,6 @@
       </div>
     </div>
 
-    <!-- Controls (date filter) -->
     <div class="controls">
       <div class="input-group">
         <i class="fas fa-calendar-alt"></i>
@@ -369,78 +382,77 @@
     <div class="factory-layout">
       <div class="layout-title"><i class="fas fa-map"></i> แผนผังโรงงานและการกระจายชิ้นงาน</div>
       <div class="factory-floor">
-        <!-- Process Areas -->
-        <div class="process-area powder-mixing high-volume" data-id="powder-mixing" data-x="0" data-y="0">
+        <div class="process-area powder-mixing high-volume" data-id="powder-mixing">
           <div class="process-icon"><i class="fas fa-flask"></i></div>
           <div class="process-name">ผสมผง</div>
           <div class="process-count">0</div>
           <div class="process-status">สถานะ</div>
           <div class="resize-handle"></div>
         </div>
-        <div class="process-area compact medium-volume" data-id="compact" data-x="0" data-y="0">
+        <div class="process-area compact medium-volume" data-id="compact">
           <div class="process-icon"><i class="fas fa-compress-arrows-alt"></i></div>
           <div class="process-name">Compact</div>
           <div class="process-count">0</div>
           <div class="process-status">สถานะ</div>
           <div class="resize-handle"></div>
         </div>
-        <div class="process-area sinter-steam high-volume" data-id="sinter-steam" data-x="0" data-y="0">
+        <div class="process-area sinter-steam high-volume" data-id="sinter-steam">
           <div class="process-icon"><i class="fas fa-fire"></i></div>
           <div class="process-name">Sinter & Steam</div>
           <div class="process-count">0</div>
           <div class="process-status">สถานะ</div>
           <div class="resize-handle"></div>
         </div>
-        <div class="process-area finishing medium-volume" data-id="finishing" data-x="0" data-y="0">
+        <div class="process-area finishing medium-volume" data-id="finishing">
           <div class="process-icon"><i class="fas fa-gem"></i></div>
           <div class="process-name">Finishing</div>
           <div class="process-count">0</div>
           <div class="process-status">สถานะ</div>
           <div class="resize-handle"></div>
         </div>
-        <div class="process-area machining high-volume" data-id="machining" data-x="0" data-y="0">
+        <div class="process-area machining high-volume" data-id="machining">
           <div class="process-icon"><i class="fas fa-cog"></i></div>
           <div class="process-name">Machining</div>
           <div class="process-count">0</div>
           <div class="process-status">สถานะ</div>
           <div class="resize-handle"></div>
         </div>
-        <div class="process-area sub-store medium-volume" data-id="sub-store" data-x="0" data-y="0">
+        <div class="process-area sub-store medium-volume" data-id="sub-store">
           <div class="process-icon"><i class="fas fa-warehouse"></i></div>
           <div class="process-name">Sub Store</div>
           <div class="process-count">0</div>
           <div class="process-status">สถานะ</div>
           <div class="resize-handle"></div>
         </div>
-        <div class="process-area final-inspection medium-volume" data-id="final-inspection" data-x="0" data-y="0">
+        <div class="process-area final-inspection medium-volume" data-id="final-inspection">
           <div class="process-icon"><i class="fas fa-clipboard-check"></i></div>
           <div class="process-name">Final Inspection</div>
           <div class="process-count">0</div>
           <div class="process-status">สถานะ</div>
           <div class="resize-handle"></div>
         </div>
-        <div class="process-area magna-flux low-volume" data-id="magna-flux" data-x="0" data-y="0">
+        <div class="process-area magna-flux low-volume" data-id="magna-flux">
           <div class="process-icon"><i class="fas fa-magnet"></i></div>
           <div class="process-name">Magna flux</div>
           <div class="process-count">0</div>
           <div class="process-status">สถานะ</div>
           <div class="resize-handle"></div>
         </div>
-        <div class="process-area sort medium-volume" data-id="sort" data-x="0" data-y="0">
+        <div class="process-area sort medium-volume" data-id="sort">
           <div class="process-icon"><i class="fas fa-sort-amount-down"></i></div>
           <div class="process-name">Sort</div>
           <div class="process-count">0</div>
           <div class="process-status">สถานะ</div>
           <div class="resize-handle"></div>
         </div>
-        <div class="process-area pack medium-volume" data-id="pack" data-x="0" data-y="0">
+        <div class="process-area pack medium-volume" data-id="pack">
           <div class="process-icon"><i class="fas fa-box"></i></div>
           <div class="process-name">Pack</div>
           <div class="process-count">0</div>
           <div class="process-status">สถานะ</div>
           <div class="resize-handle"></div>
         </div>
-        <div class="process-area rework low-volume" data-id="rework" data-x="0" data-y="0">
+        <div class="process-area rework low-volume" data-id="rework">
           <div class="process-icon"><i class="fas fa-tools"></i></div>
           <div class="process-name">Rework</div>
           <div class="process-count">0</div>
@@ -451,7 +463,6 @@
     </div>
   </div>
 
-  <!-- Dependencies -->
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script src="https://cdn.jsdelivr.net/npm/@interactjs/interactjs/dist/interact.min.js"></script>
   <script src="https://unpkg.com/@supabase/supabase-js"></script>
@@ -570,55 +581,60 @@
 
     // ปุ่มรีเซ็ตตำแหน่ง
     document.getElementById('btnResetLayout').addEventListener('click', () => {
-      localStorage.clear();
+      localStorage.clear(); // ลบข้อมูลทั้งหมดที่บันทึกไว้ใน localStorage
       document.querySelectorAll('.process-area').forEach(card => {
-        card.style.transform = 'translate(0px, 0px)';
-        card.setAttribute('data-x', '0');
-        card.setAttribute('data-y', '0');
+        // ดึงค่า top, left เริ่มต้นจาก CSS ของแต่ละการ์ด
+        const style = window.getComputedStyle(card);
+        const initialTop = parseFloat(style.top);
+        const initialLeft = parseFloat(style.left);
+
+        // รีเซ็ต transform และ data-x, data-y ให้ตรงกับตำแหน่งเริ่มต้นใน CSS
+        card.style.transform = `translate(0px, 0px)`; // รีเซ็ต translate ให้เป็น 0,0 ก่อน
+        card.setAttribute('data-x', '0'); // รีเซ็ต data-x ให้เป็น 0
+        card.setAttribute('data-y', '0'); // รีเซ็ต data-y ให้เป็น 0
+
+        // เนื่องจาก interact.js จะใช้ transform: translate() เราจึงกำหนด top/left ผ่าน CSS ไว้
+        // และให้ interact.js จัดการ transform ต่อไป
+        // หากต้องการให้กลับไปที่ตำแหน่ง CSS โดยตรงต้องใช้ top/left แทน transform แต่จะขัดแย้งกับ interact.js
+        // วิธีที่ดีที่สุดคือใช้ transform และให้ค่า data-x, data-y เริ่มต้นเป็น 0
+        // และให้ CSS top/left เป็นตัวกำหนดตำแหน่งเริ่มต้นของ element
+
+        // รีเซ็ตขนาดกลับไปเป็นค่าเริ่มต้น (ถ้ามี)
         card.style.width = '';
         card.style.height = '';
-        
-        // รีเซ็ตตำแหน่งเริ่มต้นจาก CSS class
-        const id = card.dataset.id;
-        const defaultPos = getDefaultPosition(id);
-        if (defaultPos) {
-          card.style.top = defaultPos.top;
-          card.style.left = defaultPos.left;
-        }
       });
+      console.log('Layout reset to default positions.');
     });
 
-    // ฟังก์ชันดึงตำแหน่งเริ่มต้นจาก CSS
-    function getDefaultPosition(id) {
-      const element = document.querySelector(`.${id}`);
-      if (element) {
-        const style = window.getComputedStyle(element);
-        return {
-          top: style.top,
-          left: style.left
-        };
-      }
-      return null;
-    }
 
     // โหลดข้อมูลครั้งแรก (ไม่มี filter)
     loadProcessDataWithDateFilter();
 
     // เริ่มใช้งาน interact.js สำหรับ draggable และ resizable
     document.addEventListener('DOMContentLoaded', () => {
-      // โหลดตำแหน่งและขนาดที่บันทึกไว้
+      // โหลดตำแหน่งและขนาดที่บันทึกไว้เมื่อ DOM โหลดเสร็จ
       document.querySelectorAll('.process-area').forEach(card => {
-        // โหลดตำแหน่ง
-        const savedPos = localStorage.getItem(`card-pos-${card.dataset.id}`);
+        const id = card.dataset.id;
+        const savedPos = localStorage.getItem(`card-pos-${id}`);
+        const savedSize = localStorage.getItem(`card-size-${id}`);
+
+        // ดึงค่า top, left เริ่มต้นจาก CSS
+        const style = window.getComputedStyle(card);
+        let x = 0; // interact.js will manage x,y based on translate()
+        let y = 0;
+
         if (savedPos) {
-          const { x, y } = JSON.parse(savedPos);
-          card.style.transform = `translate(${x}px, ${y}px)`;
-          card.setAttribute('data-x', x);
-          card.setAttribute('data-y', y);
+          const loadedPos = JSON.parse(savedPos);
+          x = loadedPos.x;
+          y = loadedPos.y;
         }
-        
-        // โหลดขนาด
-        const savedSize = localStorage.getItem(`card-size-${card.dataset.id}`);
+        // ไม่ต้องใช้ else if (defaultPositions[id]) เพราะตำแหน่งเริ่มต้นถูกกำหนดใน CSS แล้ว
+        // และ interact.js จะเริ่มต้น translate จาก 0,0 เสมอ หากไม่มี savedPos
+
+        card.style.transform = `translate(${x}px, ${y}px)`;
+        card.setAttribute('data-x', x);
+        card.setAttribute('data-y', y);
+
         if (savedSize) {
           const { width, height } = JSON.parse(savedSize);
           card.style.width = width;
@@ -632,7 +648,7 @@
           inertia: true,
           modifiers: [
             interact.modifiers.restrictRect({
-              restriction: 'parent',
+              restriction: 'parent', // จำกัดให้อยู่ภายใน parent (factory-floor)
               endOnly: true
             })
           ],
@@ -644,18 +660,24 @@
             },
             move(event) {
               const target = event.target;
-              const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
-              const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+              // ดึงค่า x, y ปัจจุบันจากการ์ด
+              const currentX = parseFloat(target.getAttribute('data-x')) || 0;
+              const currentY = parseFloat(target.getAttribute('data-y')) || 0;
 
+              // คำนวณตำแหน่งใหม่
+              const x = currentX + event.dx;
+              const y = currentY + event.dy;
+
+              // อัปเดต transform และ data attributes
               target.style.transform = `translate(${x}px, ${y}px)`;
               target.setAttribute('data-x', x);
               target.setAttribute('data-y', y);
             },
             end(event) {
-              document.body.style.overflow = '';
+              document.body.style.overflow = ''; // คืนค่า overflow
               event.target.classList.remove('dragging');
-              
-              // บันทึกตำแหน่ง
+
+              // บันทึกตำแหน่งสุดท้ายลง localStorage
               const target = event.target;
               const pos = {
                 x: parseFloat(target.getAttribute('data-x')) || 0,
@@ -670,11 +692,11 @@
           inertia: true,
           modifiers: [
             interact.modifiers.restrictEdges({
-              outer: 'parent',
+              outer: 'parent', // จำกัดให้อยู่ภายใน parent
               endOnly: true
             }),
             interact.modifiers.restrictSize({
-              min: { width: 100, height: 80 }
+              min: { width: 100, height: 80 } // กำหนดขนาดขั้นต่ำ
             })
           ],
           listeners: {
@@ -683,28 +705,38 @@
               let x = (parseFloat(target.getAttribute('data-x')) || 0);
               let y = (parseFloat(target.getAttribute('data-y')) || 0);
 
+              // อัปเดตขนาด
               target.style.width = event.rect.width + 'px';
               target.style.height = event.rect.height + 'px';
 
+              // อัปเดตตำแหน่ง (สำหรับกรณีที่ปรับขนาดจากขอบบนหรือซ้าย)
               x += event.deltaRect.left;
               y += event.deltaRect.top;
 
+              // อัปเดต transform และ data attributes
               target.style.transform = `translate(${x}px, ${y}px)`;
               target.setAttribute('data-x', x);
               target.setAttribute('data-y', y);
             },
             end(event) {
-              // บันทึกขนาด
+              // บันทึกขนาดสุดท้ายลง localStorage
               const target = event.target;
               const size = {
                 width: target.style.width,
                 height: target.style.height
               };
               localStorage.setItem(`card-size-${target.dataset.id}`, JSON.stringify(size));
+
+              // บันทึกตำแหน่งล่าสุดด้วย (เพราะการปรับขนาดอาจเปลี่ยนตำแหน่ง)
+              const pos = {
+                x: parseFloat(target.getAttribute('data-x')) || 0,
+                y: parseFloat(target.getAttribute('data-y')) || 0
+              };
+              localStorage.setItem(`card-pos-${target.dataset.id}`, JSON.stringify(pos));
             }
           }
         })
-        .styleCursor(false);
+        .styleCursor(false); // ให้ interact.js ไม่จัดการ cursor เพื่อให้ CSS cursor: grab ทำงาน
     });
   </script>
 </body>
