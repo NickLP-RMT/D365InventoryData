@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
   <style>
-     * {
+    * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -115,39 +115,72 @@ body {
   display: flex;
   gap: 1.5rem;
   align-items: flex-start;
-  min-height: 60vh;
+  /* ความสูงเต็ม viewport - header (ปรับได้ตาม header จริง) */
+  height: calc(100vh - 110px);
+  min-height: 420px;
 }
+
+/* Controls Section สูงเต็มจอ */
 .controls-section {
   flex: 0 0 20%;
   max-width: 22%;
   min-width: 200px;
+  height: 100%;
   margin-bottom: 0;
   background: var(--white);
   padding: 1rem 1rem 0.75rem 1rem;
   border-radius: 12px;
   box-shadow: var(--shadow);
   border: 1px solid var(--border-gray);
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  overflow-y: auto;
 }
+
+/* Tab Container สูงเต็มจอและ scroll เฉพาะด้านขวา */
 .tab-container {
   flex: 1 1 0;
   min-width: 0;
   max-width: 78%;
+  height: 100%;
   background: var(--white);
   border-radius: 16px;
   box-shadow: var(--shadow);
   border: 1px solid var(--border-gray);
   overflow: hidden;
   padding: 0;
+  display: flex;
+  flex-direction: column;
 }
 
+.tab-content {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 2rem;
+  min-height: 0;
+}
+
+.table-container {
+  max-height: unset;
+  overflow-y: unset;
+}
+
+/* Responsive */
 @media (max-width: 900px) {
   .main-flex {
     flex-direction: column;
-    gap: 1rem;
+    height: auto;
+    min-height: unset;
   }
   .controls-section, .tab-container {
     max-width: 100%;
     width: 100%;
+    height: auto;
+  }
+  .tab-content {
+    max-height: unset;
+    overflow-y: unset;
   }
 }
 
@@ -206,47 +239,27 @@ body {
   font-size: 0.8rem;
 }
 
-.button-group {
+.button-group.vertical-buttons {
   display: flex;
+  flex-direction: column;
   gap: 0.6rem;
-  flex-wrap: wrap;
+  margin-top: 0.6rem;
 }
 
-.btn {
-  padding: 0.6rem 1.1rem;
-  border: none;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
+.button-group.vertical-buttons .btn {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
-  gap: 0.35rem;
-  text-decoration: none;
-  font-family: inherit;
+  justify-content: center;
+  text-align: center;
 }
-
-.btn-primary {
-  background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
-  color: var(--white);
-}
-
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
-}
-
-.btn-secondary {
-  background: var(--white);
-  color: var(--primary-blue);
-  border: 2px solid var(--primary-blue);
-}
-
-.btn-secondary:hover {
-  background: var(--primary-blue);
-  color: var(--white);
-  transform: translateY(-2px);
+.button-group .btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 /* Tab Styles */
@@ -357,8 +370,8 @@ body {
 
 .table-container {
   overflow-x: auto;
-  max-height: 600px;
-  overflow-y: auto;
+  max-height: unset;
+  overflow-y: unset;
 }
 
 table {
@@ -434,6 +447,23 @@ tbody tr:hover {
   padding: 3rem;
   color: var(--text-light);
   font-size: 1.1rem;
+}
+
+@media (max-width: 900px) {
+  .main-flex {
+    flex-direction: column;
+    height: auto;
+    min-height: unset;
+  }
+  .controls-section, .tab-container {
+    max-width: 100%;
+    width: 100%;
+    height: auto;
+  }
+  .tab-content {
+    max-height: unset;
+    overflow-y: unset;
+  }
 }
 
 @media (max-width: 768px) {
@@ -545,24 +575,7 @@ tbody tr:hover {
   font-size: 1.2rem;
   color: var(--text-light);
 }
-    .button-group.vertical-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  margin-top: 0.6rem;
-}
 
-.button-group.vertical-buttons .btn {
-  width: 100%;          /* กว้างสุดเท่ากับ parent */
-  min-width: 0;
-  box-sizing: border-box;
-}
-.button-group .btn {
-  display: flex;
-  align-items: center;
-  justify-content: center; /* กลางแนวนอน */
-  text-align: center;      /* กลางข้อความ */
-}
 
   </style>
 </head>
