@@ -526,25 +526,18 @@
   </style>
 </head>
 <body>
-  <div class="container">
-    <!-- Header (ปรับปรุง: เพิ่มเมนูภายใน) -->
+ <div class="container">
     <div class="header">
-      <h1>
-        <i class="fas fa-chart-bar"></i>
-        RMT Inventory TAG Report
-      </h1>
-      <p>ระบบจัดการและรายงานข้อมูล Inventory ส่วนโรงงาน CHP </p>
-      
-      <!-- เมนูอยู่ใน header -->
-      <nav class="header-menu">
-        <button id="btnDashboard" class="header-menu-btn">
-          <i class="fas fa-tachometer-alt"></i> Dashboard
-        </button>
-        <button id="btnSearch" class="header-menu-btn active">
-          <i class="fas fa-search"></i> ค้นหา
-        </button>
-      </nav>
+      <div class="header-top">
+        <h1><i class="fas fa-chart-bar"></i> RMT Inventory TAG Report</h1>
+        <div class="actions">
+          <button onclick="goToDashboard()"><i class="fas fa-home"></i> Dashboard</button>
+          <button onclick="loadData()"><i class="fas fa-search"></i> ค้นหา</button>
+        </div>
+      </div>
+      <p>ระบบจัดการและรายงานข้อมูล Inventory ส่วนโรงงาน CHP</p>
     </div>
+  </div>
 
     <!-- เนื้อหาหลักแยกเป็น 2 หน้า -->
     <div id="pageDashboard" style="display: none;">
