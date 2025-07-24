@@ -628,22 +628,30 @@ tbody tr:hover {
   <div class="container">
     <!-- Header (ลดขนาด) -->
     <div class="header">
-      <div class="header-top" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-        <h1>
-          <i class="fas fa-chart-bar" style="font-size: 2rem; margin-top: 2px;"></i>
-          RMT Inventory TAG Report
-        </h1>
-        <nav class="header-menu" style="display: flex; gap: 1rem;">
-          <button id="btnDashboard" class="header-menu-btn">
-            <i class="fas fa-tachometer-alt"></i> Dashboard
-          </button>
-          <button id="btnSearch" class="header-menu-btn active">
-            <i class="fas fa-search"></i> ค้นหา
-          </button>
-        </nav>
-      </div>
-      <p>ระบบจัดการและรายงานข้อมูล Inventory ส่วนโรงงาน CHP </p>
-    </div>
+  <!-- บรรทัดบน -->
+  <div class="header-row" style="display: flex; justify-content: space-between; align-items: center;">
+    <h1 style="font-size:1.4rem;display:flex;align-items:center;gap:0.75rem;margin:0;line-height:1;">
+      <i class="fas fa-chart-bar" style="font-size: 1.2rem; margin-top: 2px;"></i>
+      RMT Inventory TAG Report
+    </h1>
+    <div id="currentDatetime" style="font-size:1rem;font-weight:500;opacity:0.9"></div>
+  </div>
+  <!-- บรรทัดล่าง -->
+  <div class="header-row" style="display: flex; justify-content: space-between; align-items: center;">
+    <p style="font-size:1rem; margin:0;">
+      ระบบจัดการและรายงานข้อมูล Inventory ส่วนโรงงาน CHP
+    </p>
+    <nav class="header-menu" style="display: flex; gap: 1rem;">
+      <button id="btnDashboard" class="header-menu-btn">
+        <i class="fas fa-tachometer-alt"></i> Dashboard
+      </button>
+      <button id="btnSearch" class="header-menu-btn active">
+        <i class="fas fa-search"></i> ค้นหา
+      </button>
+    </nav>
+  </div>
+</div>
+
 
     <!-- เนื้อหาหลักแยกเป็น 2 หน้า -->
     <div id="pageDashboard" style="display: none;">
@@ -954,6 +962,20 @@ tbody tr:hover {
       ${processCards}
     `;
     }
+function updateDatetime() {
+  const el = document.getElementById('currentDatetime');
+  const now = new Date();
+  el.textContent = now.toLocaleString('th-TH', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  });
+}
+setInterval(updateDatetime, 1000);
+updateDatetime();
 
     function displayTablePage(page) {
       currentPage = page;
