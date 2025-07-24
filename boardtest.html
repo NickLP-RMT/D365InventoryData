@@ -7,7 +7,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
   <style>
+    /* ตั้งค่าเริ่มต้นสำหรับทุก element */
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    /* Variables (ควรเป็นชุดเดียวกันทั่วทั้งโปรเจกต์) */
     :root {
       --primary-blue: #1e40af;
       --secondary-blue: #3b82f6;
@@ -25,23 +27,31 @@
       --warning-orange: #f59e0b;
       --danger-red: #ef4444;
     }
+    /* Base Body Styles */
     body {
       font-family: 'Kanit', sans-serif;
       background: linear-gradient(135deg, var(--light-gray) 0%, #e0f2fe 100%);
       min-height: 100vh;
       color: var(--text-dark);
-      padding: 0; /* ตามต้นฉบับ Inventory Report */
+      padding: 0; /* body ไม่มี padding เหมือน Inventory Report */
       user-select: none;
     }
 
-    /* ทำให้ container เหมือนกันใน 2 หน้า */
-    .container, .dashboard-container {
+    /* Container หลักของเนื้อหา - ทำให้เหมือนกัน 100% ในทั้งสองหน้า */
+    .container {
       max-width: 1400px;
       margin: 0 auto;
       padding: 2rem;
     }
+    /* สำหรับหน้า Factory Layout ใช้คลาส .dashboard-container ร่วมด้วยและรวมคุณสมบัติเดียวกัน */
+    .dashboard-container { /* สามารถลบ .dashboard-container ออกได้ถ้าจะใช้ .container อย่างเดียว */
+      max-width: 1400px; /* ย้ำเพื่อความชัวร์ (ถ้าใช้ .container แล้วไม่ต้องมีอันนี้ก็ได้) */
+      margin: 0 auto;    /* ย้ำเพื่อความชัวร์ */
+      padding: 2rem;     /* ย้ำเพื่อความชัวร์ */
+    }
 
-    /* Header แบบต้นฉบับ (2 แถว) */
+
+    /* Header (เหมือนต้นฉบับทุกประการ) */
     .header {
       background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
       padding: 1rem 2rem 1.2rem 2rem;
@@ -53,7 +63,7 @@
       flex-direction: column;
       gap: 1rem;
     }
-    .header-row {
+    .header-row { /* เพื่อควบคุมการจัดวางของเนื้อหาในแต่ละแถวของ Header */
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -63,8 +73,8 @@
       font-weight: 700;
       display: flex;
       align-items: center;
-      gap: 0.75rem;
-      margin: 0;
+      gap: 0.75rem; /* ลด gap จาก 1rem ในโค้ดเดิมของคุณ เป็น 0.75rem เหมือน Inventory Report */
+      margin: 0; /* ลบ margin-bottom ที่เคยมีในโค้ด Inventory Report */
       line-height: 1;
     }
     .header h1 i {
@@ -75,11 +85,12 @@
       font-size: 1rem;
       opacity: 0.9;
       font-weight: 300;
-      margin: 0;
+      margin: 0; /* ลบ margin-bottom ที่เคยมีในโค้ด Inventory Report */
     }
     .header-menu {
       display: flex;
       gap: 1rem;
+      /* margin-top: auto; - ลบออกเพื่อให้จัดตำแหน่งเหมือนต้นฉบับเป๊ะๆ */
     }
     .header-menu-btn {
       background: rgba(255,255,255,0.2);
@@ -110,9 +121,6 @@
     }
 
     /* เนื้อหา Factory Layout */
-    .dashboard-container {
-      /* ใช้คลาสเดียวกับ container เพื่อความสม่ำเสมอ */
-    }
     .factory-layout {
       background: var(--white);
       border-radius: 20px;
@@ -140,7 +148,7 @@
       overflow: hidden;
     }
 
-    /* CSS ส่วนอื่น ๆ คงเดิมทั้งหมด */
+    /* CSS ส่วนอื่น ๆ คงเดิมทั้งหมด (รวมจากโค้ดเดิมของคุณ) */
     .process-area {
       position: absolute;
       border: 2px solid var(--border-gray);
@@ -403,6 +411,7 @@
       color:var(--text-dark);
     }
 
+    /* Responsive ปรับ Header และ Container */
     @media(max-width:768px) {
       .factory-floor {
         height:500px;
@@ -415,30 +424,33 @@
         gap: 1rem;
       }
       .header h1 {
-        font-size: 1.5rem;
+        font-size: 1.5rem; /* ปรับขนาด H1 ใน Header สำหรับ Mobile */
       }
       .instructions {
         display:none;
       }
-      .container, .dashboard-container {
+      /* ในโหมด mobile, container ควรมี padding 1rem เหมือน Inventory Report */
+      .container { /* ไม่ต้องมี .dashboard-container แยกก็ได้ถ้าใช้ class .container ที่ HTML */
         padding: 1rem;
       }
     }
   </style>
 </head>
 <body>
-  <div class="dashboard-container container">
-    <!-- ปรับชื่อคลาสให้ใช้ทั้ง 2 เพื่อความสอดคล้อง -->
+  <!-- ใช้ .container อย่างเดียวก็เพียงพอ เพราะ CSS .dashboard-container มีคุณสมบัติเหมือน .container แล้ว -->
+  <div class="container">
+    <!-- Header -->
     <div class="header">
-      <!-- บรรทัดบน -->
+      <!-- บรรทัดบน - ลบ inline styles ออกไปอยู่ใน CSS class header-row -->
       <div class="header-row">
         <h1>
           <i class="fas fa-industry"></i>
           Factory Layout Dashboard
         </h1>
+        <!-- เปลี่ยน ID เป็น currentDatetime เพื่อให้ตรงกับฟังก์ชัน updateDatetime() -->
         <div id="currentDatetime" style="font-size:1rem;font-weight:500;opacity:0.9;"></div>
       </div>
-      <!-- บรรทัดล่าง -->
+      <!-- บรรทัดล่าง - ลบ inline styles ออกไปอยู่ใน CSS class header-row และ header-menu -->
       <div class="header-row">
         <p>แสดงผังโรงงานและกระบวนการทำงาน CHP</p>
         <nav class="header-menu">
