@@ -575,18 +575,20 @@
           <div class="input-group">
             <i class="fas fa-cogs"></i>
             <select id="mainProcess">
-              <option value="">ทุกกระบวนการ</option>
-              <option value="ผสมผง">ผสมผง</option>
-              <option value="Compact">Compact</option>
-              <option value="Sinter & Steam">Sinter & Steam</option>
-              <option value="Finishing">Finishing</option>
-              <option value="Machining">Machining</option>
-              <option value="Sub Store">Sub Store</option>
-              <option value="Magna flux">Magna flux</option>
-              <option value="Sort">Sort</option>
-              <option value="Pack">Pack</option>
-              <option value="Rework">Rework</option>
-            </select>
+  <option value="">ทุกกระบวนการ</option>
+  <option value="ผสมผง">ผสมผง</option>
+  <option value="Compact">Compact</option>
+  <option value="Sinter & Steam">Sinter & Steam</option>
+  <option value="Finishing">Finishing</option>
+  <option value="Machining">Machining</option>
+  <option value="Sub Store">Sub Store</option>
+  <option value="Final Inspection">Final Inspection</option> <!-- ข้อ 7 -->
+  <option value="Magna flux">Magna flux</option>
+  <option value="Sort">Sort</option>
+  <option value="Pack">Pack</option>
+  <option value="Rework">Rework</option>
+</select>
+
           </div>
           <div class="input-group">
             <i class="fas fa-barcode"></i>
@@ -800,17 +802,19 @@
       const uniqueScanner = [...new Set(data.map((row) => row.scanner))].length;
 
       const allProcesses = [
-        'ผสมผง',
-        'Compact',
-        'Sinter & Steam',
-        'Finishing',
-        'Machining',
-        'Sub Store',
-        'Magna flux',
-        'Sort',
-        'Pack',
-        'Rework',
-      ];
+  'ผสมผง',
+  'Compact',
+  'Sinter & Steam',
+  'Finishing',
+  'Machining',
+  'Sub Store',
+  'Final Inspection', // ข้อ 7 แทรกเพิ่มตรงนี้
+  'Magna flux',
+  'Sort',
+  'Pack',
+  'Rework',
+];
+
 
       const processCount = {};
       allProcesses.forEach((process) => {
