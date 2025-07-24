@@ -77,27 +77,17 @@
       width: 100%;
       height: 700px;
 
-      /* เปลี่ยนเป็นภาพ background โรงงาน */
+      /* รูปพื้นหลัง layout โรงงาน */
       background: url('https://nicklp-rmt.github.io/D365InventoryData/pic/layout.jpg') no-repeat center center;
       background-size: cover;
       border: 3px solid var(--border-gray);
       border-radius: 12px;
       overflow: hidden;
-
-      /* ถ้าต้องการซ้อนกริดเบาๆ ใช้ background-image ชั้นสองพร้อม blend mode */
-      /* background-image:
-         url('path/to/your-factory-layout.jpg'),
-         linear-gradient(45deg,#f8fafc 25%,#e2e8f0 25%,#e2e8f0 50%,#f8fafc 50%,#f8fafc 75%,#e2e8f0 75%);
-      background-size: cover, 20px 20px;
-      background-repeat: no-repeat, repeat;
-      background-position: center, 0 0;
-      background-blend-mode: multiply; */
     }
     .process-area {
       position: absolute;
       border: 2px solid var(--border-gray);
       border-radius: 12px;
-      /* พื้นหลังโปร่งแสง เห็นรูปด้านหลัง */
       background-color: rgba(255, 255, 255, 0.85);
       box-shadow: var(--shadow);
       transition: box-shadow .3s ease;
@@ -121,8 +111,6 @@
       transform: rotate(2deg);
       box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
     }
-
-    /* ปรับ background gradient ของแต่ละสถานะให้โปร่งแสงด้วย alpha ใน rgba */
     .high-volume {
       border-color: var(--success-green);
       background: linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(236, 253, 245, 0.85) 100%);
@@ -194,20 +182,31 @@
     .finishing     { top:200px; left:50px; width:150px; height:120px; }
     .machining     { top:200px; left:250px; width:150px; height:120px; }
 
-    /* สำหรับลูกเล่นลูกศรแสดง flow */
+    /* ลูกศร flow */
     .flow-arrow {
       position:absolute;
       color:var(--primary-blue);
       font-size:1.5rem;
       opacity:.6;
       animation:flow 3s ease-in-out infinite;
+      user-select: none;
+      cursor: grab;
+      z-index: 1000;
       pointer-events:none;
+    }
+    .flow-arrow.selected {
+      color: #dc2626 !important;
+      filter: drop-shadow(0 0 4px rgba(220,38,38,0.7));
+      pointer-events: auto;
+    }
+    .flow-arrow.dragging {
+      cursor: grabbing;
     }
     @keyframes flow {
       0%,100%{opacity:.3;}
       50%{opacity:.8;}
     }
-    /* เพิ่มตำแหน่งลูกศร flow ตามต้องการ */
+    /* ลูกศรตำแหน่งเริ่มต้น */
     .arrow1{top:100px; left:210px;}
     .arrow2{top:100px; left:410px;}
     .arrow3{top:180px; left:500px; transform:rotate(90deg);}
@@ -216,6 +215,22 @@
     .arrow6{top:330px; left:125px; transform:rotate(90deg);}
     .arrow7{top:330px; left:295px; transform:rotate(90deg);}
     .arrow8{top:330px; left:465px; transform:rotate(90deg);}
+
+    /* จุดจับปรับขนาดของลูกศร */
+    .arrow-resize-handle {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: var(--primary-blue);
+      border-radius: 50%;
+      opacity: 0.7;
+      cursor: nwse-resize;
+      z-index: 1001;
+      user-select: none;
+    }
+    .arrow-resize-handle:hover {
+      opacity: 1;
+    }
 
     .legend {
       position:absolute;
@@ -228,6 +243,7 @@
       border:1px solid var(--border-gray);
       font-size: 0.8rem;
       user-select:none;
+      z-index: 10000;
     }
     .legend-title {
       font-size:.9rem;
@@ -262,6 +278,7 @@
       min-width:200px;
       font-size: 0.85rem;
       user-select:none;
+      z-index: 10000;
     }
     .stats-title {
       font-size:.9rem;
@@ -281,6 +298,9 @@
       left:20px;
       display:flex;
       gap:10px;
+      flex-wrap: wrap;
+      z-index: 10000;
+      align-items: center;
     }
     .control-btn {
       background:var(--primary-blue);
@@ -303,6 +323,15 @@
     .control-btn.active {
       background:var(--success-green);
     }
+    /* Select ทิศทางลูกศร */
+    #arrowDirectionSelect {
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      border: none;
+      font-size: 0.9rem;
+      cursor: pointer;
+      user-select:none;
+    }
 
     .instructions {
       position:absolute;
@@ -313,10 +342,11 @@
       border-radius:12px;
       box-shadow:var(--shadow);
       border:1px solid var(--border-gray);
-      max-width:250px;
+      max-width:300px;
       font-size:.8rem;
       line-height:1.4;
       user-select:none;
+      z-index: 10000;
     }
     .instructions-title {
       font-weight:600;
@@ -361,6 +391,15 @@
           <button class="control-btn" onclick="refreshData()"><i class="fas fa-sync-alt"></i> รีเฟรช</button>
           <button class="control-btn" id="editMode" onclick="toggleEditMode()"><i class="fas fa-edit"></i> แก้ไขเลย์เอาต์</button>
           <button class="control-btn" onclick="resetLayout()"><i class="fas fa-undo"></i> รีเซ็ต</button>
+          <button class="control-btn" id="addArrowBtn"><i class="fas fa-plus"></i> เพิ่มลูกศร</button>
+          <button class="control-btn" id="deleteArrowModeBtn"><i class="fas fa-trash"></i> โหมดลบลูกศร</button>
+          <select id="arrowDirectionSelect" title="เลือกทิศทางลูกศร">
+            <option value="right">ขวา</option>
+            <option value="left">ซ้าย</option>
+            <option value="up">ขึ้น</option>
+            <option value="down">ลง</option>
+          </select>
+          <button class="control-btn" id="saveArrowBtn"><i class="fas fa-save"></i> บันทึกลูกศร</button>
         </div>
         <div class="legend">
           <div class="legend-title">สถานะปริมาณงาน</div>
@@ -382,6 +421,11 @@
           <div>• ลากมุมล่างขวาเพื่อปรับขนาด</div>
           <div>• ลากขอบเพื่อปรับความกว้าง/สูง</div>
           <div>• คลิก "รีเซ็ต" เพื่อกลับสู่ตำแหน่งเดิม</div>
+          <div>• กด "เพิ่มลูกศร" เพื่อสร้างลูกศรในแผนผัง</div>
+          <div>• กด "โหมดลบลูกศร" แล้วคลิกลูกศรที่ต้องการลบ</div>
+          <div>• เลือกลูกศรเพื่อเปลี่ยนทิศทางจากกล่องเลือก</div>
+          <div>• ลากลูกศรเพื่อย้ายตำแหน่ง กดมุมของลูกศรเพื่อปรับขนาด</div>
+          <div>• กด "บันทึกลูกศร" เพื่อเก็บตำแหน่งและขนาด (ในเครื่อง)</div>
         </div>
 
         <!-- Process Areas -->
@@ -431,7 +475,7 @@
           <div class="resize-handle resize-e"></div>
         </div>
 
-        <!-- ตัวอย่างลูกศร Flow -->
+        <!-- ลูกศร Flow ที่มีอยู่ -->
         <i class="fas fa-long-arrow-alt-right flow-arrow arrow1"></i>
         <i class="fas fa-long-arrow-alt-right flow-arrow arrow2"></i>
         <i class="fas fa-long-arrow-alt-down flow-arrow arrow3"></i>
@@ -504,12 +548,12 @@
       // สามารถใส่โค้ดดึงข้อมูล API มาทดแทนที่นี้ได้
     }
 
-    // Drag support
+    // Drag support สำหรับ process-area
     function enableDrag(element) {
       let offsetX, offsetY;
       function onMouseDown(e) {
         if(!editMode) return;
-        if(e.target.classList.contains('resize-handle')) return; // ป้องกัน conflict กับ resize
+        if(e.target.classList.contains('resize-handle')) return;
         e.preventDefault();
         offsetX = e.clientX - element.getBoundingClientRect().left;
         offsetY = e.clientY - element.getBoundingClientRect().top;
@@ -522,7 +566,6 @@
         let newLeft = e.clientX - offsetX - parentRect.left;
         let newTop = e.clientY - offsetY - parentRect.top;
 
-        // จำกัดไม่ให้ลากออกนอกพื้นที่
         newLeft = Math.max(0, Math.min(newLeft, element.parentElement.clientWidth - element.offsetWidth));
         newTop = Math.max(0, Math.min(newTop, element.parentElement.clientHeight - element.offsetHeight));
 
@@ -538,13 +581,13 @@
       element._onMouseDownDrag = onMouseDown;
     }
     function disableDrag(element) {
-      if(element._onMouseDownDrag) {
+      if(element._onMouseDownDrag){
         element.removeEventListener('mousedown', element._onMouseDownDrag);
         element._onMouseDownDrag = null;
       }
     }
 
-    // Resize support
+    // Resize support สำหรับ process-area
     function enableResize(element) {
       if(element._resizeEnabled) return;
       let currentHandle = null;
@@ -562,11 +605,11 @@
         document.addEventListener('mouseup', onMouseUp);
       }
       function onMouseMove(e) {
-        if (!currentHandle) return;
+        if(!currentHandle) return;
         let dx = e.clientX - startX;
         let dy = e.clientY - startY;
 
-        if(currentHandle.classList.contains('resize-se')) {
+        if(currentHandle.classList.contains('resize-se')){
           element.style.width = (startWidth + dx) + 'px';
           element.style.height = (startHeight + dy) + 'px';
         } else if(currentHandle.classList.contains('resize-s')) {
@@ -591,8 +634,232 @@
       element._resizeEnabled = false;
     }
 
-    // เริ่มต้นสถานะโหมดแก้ไขเป็นปิด (ป้องกันการแก้ไขเลย์เอาต์ทันที)
+    // เริ่มต้นโหมดแก้ไขปิด
     editMode = false;
+
+    // --- ฟีเจอร์สำหรับลูกศร flow-arrow ---
+
+    (() => {
+      const factoryFloor = document.querySelector('.factory-floor');
+      const addArrowBtn = document.getElementById('addArrowBtn');
+      const deleteArrowBtn = document.getElementById('deleteArrowModeBtn');
+      const directionSelect = document.getElementById('arrowDirectionSelect');
+      const saveArrowBtn = document.getElementById('saveArrowBtn');
+
+      let deleteMode = false;
+      let selectedArrow = null;
+
+      // สร้างลูกศรใหม่
+      function createArrow(x = 100, y = 100, size = 24, direction = 'right') {
+        const arrow = document.createElement('i');
+        arrow.classList.add('fas', `fa-long-arrow-alt-${direction}`, 'flow-arrow');
+        arrow.style.position = 'absolute';
+        arrow.style.left = x + 'px';
+        arrow.style.top = y + 'px';
+        arrow.style.fontSize = size + 'px';
+        arrow.style.zIndex = 1000;
+
+        enableArrowDrag(arrow);
+        addResizeHandle(arrow);
+
+        arrow.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (deleteMode) {
+            arrow.remove();
+            selectedArrow = null;
+          } else {
+            selectArrow(arrow);
+          }
+        });
+
+        factoryFloor.appendChild(arrow);
+      }
+
+      // เลือกลูกศร
+      function selectArrow(arrow) {
+        if (selectedArrow) selectedArrow.classList.remove('selected');
+        selectedArrow = arrow;
+        selectedArrow.classList.add('selected');
+
+        // แสดงทิศทางใน select
+        const classes = ['fa-long-arrow-alt-right', 'fa-long-arrow-alt-left', 'fa-long-arrow-alt-up', 'fa-long-arrow-alt-down'];
+        const foundClass = classes.find(c => arrow.classList.contains(c));
+        const dir = foundClass ? foundClass.replace('fa-long-arrow-alt-', '') : 'right';
+        directionSelect.value = dir;
+      }
+
+      // ยกเลิกเลือก ลูกศร เมื่อคลิกพื้นหลัง
+      factoryFloor.addEventListener('click', () => {
+        if (selectedArrow) {
+          selectedArrow.classList.remove('selected');
+          selectedArrow = null;
+        }
+      });
+
+      // ปุ่มเพิ่มลูกศร
+      addArrowBtn.addEventListener('click', () => {
+        createArrow(100, 100, 24, 'right');
+        deleteMode = false;
+        deleteArrowBtn.classList.remove('active');
+      });
+
+      // โหมดลบลูกศร
+      deleteArrowBtn.addEventListener('click', (e) => {
+        deleteMode = !deleteMode;
+        e.target.classList.toggle('active', deleteMode);
+        if (deleteMode) {
+          alert('โหมดลบลูกศรถูกเปิด: คลิกลูกศรที่ต้องการลบได้เลย');
+          if (selectedArrow) {
+            selectedArrow.classList.remove('selected');
+            selectedArrow = null;
+          }
+        }
+      });
+
+      // เปลี่ยนทิศทางลูกศรที่เลือก
+      directionSelect.addEventListener('change', () => {
+        if (selectedArrow) {
+          setArrowDirection(selectedArrow, directionSelect.value);
+        }
+      });
+
+      // ฟังก์ชันเปลี่ยนทิศทาง
+      function setArrowDirection(arrow, direction) {
+        arrow.classList.remove('fa-long-arrow-alt-right', 'fa-long-arrow-alt-left', 'fa-long-arrow-alt-up', 'fa-long-arrow-alt-down');
+        arrow.classList.add('fa-long-arrow-alt-' + direction);
+      }
+
+      // ลากลูกศร
+      function enableArrowDrag(arrow) {
+        let offsetX, offsetY;
+        function onMouseDown(e) {
+          if(deleteMode) return;
+          e.preventDefault();
+          offsetX = e.clientX - arrow.getBoundingClientRect().left;
+          offsetY = e.clientY - arrow.getBoundingClientRect().top;
+          arrow.classList.add('dragging');
+
+          document.addEventListener('mousemove', onMouseMove);
+          document.addEventListener('mouseup', onMouseUp);
+        }
+        function onMouseMove(e) {
+          let parentRect = factoryFloor.getBoundingClientRect();
+
+          let newLeft = e.clientX - offsetX - parentRect.left;
+          let newTop = e.clientY - offsetY - parentRect.top;
+
+          newLeft = Math.max(0, Math.min(newLeft, factoryFloor.clientWidth - arrow.offsetWidth));
+          newTop = Math.max(0, Math.min(newTop, factoryFloor.clientHeight - arrow.offsetHeight));
+
+          arrow.style.left = newLeft + 'px';
+          arrow.style.top = newTop + 'px';
+        }
+        function onMouseUp() {
+          arrow.classList.remove('dragging');
+          document.removeEventListener('mousemove', onMouseMove);
+          document.removeEventListener('mouseup', onMouseUp);
+        }
+        arrow.addEventListener('mousedown', onMouseDown);
+      }
+
+      // เพิ่มจุดจับมุม resize ลูกศร
+      function addResizeHandle(arrow) {
+        // ป้องกันสร้าง handle ซ้ำ
+        if (arrow.querySelector('.arrow-resize-handle')) return;
+
+        const handle = document.createElement('div');
+        handle.className = 'arrow-resize-handle';
+
+        function updateHandlePos() {
+          handle.style.left = (arrow.offsetWidth - 8) + 'px';
+          handle.style.top = (arrow.offsetHeight - 8) + 'px';
+        }
+        updateHandlePos();
+        arrow.appendChild(handle);
+
+        let startX, startY, startSize;
+
+        function onMouseDown(e) {
+          e.stopPropagation();
+          e.preventDefault();
+
+          startX = e.clientX;
+          startY = e.clientY;
+          startSize = parseFloat(window.getComputedStyle(arrow).fontSize);
+
+          document.addEventListener('mousemove', onMouseMove);
+          document.addEventListener('mouseup', onMouseUp);
+        }
+        function onMouseMove(e) {
+          const dx = e.clientX - startX;
+          let newSize = Math.max(12, startSize + dx);
+          arrow.style.fontSize = newSize + 'px';
+          updateHandlePos();
+        }
+        function onMouseUp() {
+          document.removeEventListener('mousemove', onMouseMove);
+          document.removeEventListener('mouseup', onMouseUp);
+        }
+
+        handle.addEventListener('mousedown', onMouseDown);
+      }
+
+      // บันทึกลูกศรลง localStorage
+      function saveArrowsToStorage() {
+        const arrows = document.querySelectorAll('.flow-arrow');
+        const arrowData = [];
+        arrows.forEach(arrow => {
+          const left = parseFloat(arrow.style.left) || 0;
+          const top = parseFloat(arrow.style.top) || 0;
+          const fontSize = parseFloat(window.getComputedStyle(arrow).fontSize);
+          const dirClass = [...arrow.classList].find(c => c.startsWith('fa-long-arrow-alt-'));
+          const direction = dirClass ? dirClass.replace('fa-long-arrow-alt-', '') : 'right';
+
+          arrowData.push({left, top, fontSize, direction});
+        });
+        localStorage.setItem('factoryArrows', JSON.stringify(arrowData));
+        alert('บันทึกตำแหน่งลูกศรเรียบร้อย');
+      }
+
+      // โหลดลูกศรจาก localStorage
+      function loadArrowsFromStorage() {
+        const saved = localStorage.getItem('factoryArrows');
+        if (saved) {
+          try {
+            const arrowData = JSON.parse(saved);
+            arrowData.forEach(data => {
+              createArrow(data.left, data.top, data.fontSize, data.direction);
+            });
+          } catch (e) {
+            console.warn('ข้อมูลลูกศรที่บันทึกมีปัญหา:', e);
+          }
+        }
+      }
+
+      // event บันทึกลูกศร
+      saveArrowBtn.addEventListener('click', saveArrowsToStorage);
+
+      // โหลดลูกศรตอนหน้าโหลดเสร็จ
+      window.addEventListener('load', () => {
+        loadArrowsFromStorage();
+      });
+
+      // สำหรับลูกศรที่มีอยู่ในหน้า (static) ปรับให้ลากและปรับขนาดได้ทันที
+      document.querySelectorAll('.flow-arrow').forEach(arrow => {
+        enableArrowDrag(arrow);
+        addResizeHandle(arrow);
+        arrow.addEventListener('click', (e) => {
+          if(deleteMode) {
+            arrow.remove();
+            selectedArrow = null;
+          } else {
+            selectArrow(arrow);
+          }
+          e.stopPropagation();
+        });
+      });
+
+    })();
   </script>
 </body>
 </html>
