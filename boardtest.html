@@ -161,6 +161,20 @@
     #btnFilter:hover {
       background: var(--secondary-blue);
     }
+    #btnResetLayout {
+      background: var(--warning-orange);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background-color 0.3s ease;
+      margin-left: auto;
+    }
+    #btnResetLayout:hover {
+      background: #e67e22;
+    }
 
     /* Factory Layout Section */
     .factory-layout {
@@ -201,7 +215,7 @@
       border-radius: 12px;
       background-color: rgba(255, 255, 255, 0.85);
       box-shadow: var(--shadow);
-      transition: box-shadow 0.3s ease;
+      transition: transform 0.1s ease, box-shadow 0.3s ease;
       cursor: grab;
       display: flex;
       flex-direction: column;
@@ -215,7 +229,9 @@
       touch-action: none;
       transform: translate(0px, 0px);
     }
-    .process-area:active {
+    .process-area.dragging {
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      z-index: 100;
       cursor: grabbing;
     }
     .process-area:hover {
@@ -276,20 +292,7 @@
       50% { box-shadow: 0 0 0 10px rgba(239,68,68,0); }
     }
 
-    /* ตำแหน่ง process area เริ่มต้น */
-    .powder-mixing { top: 50px; left: 50px; }
-    .compact       { top: 50px; left: 250px; }
-    .sinter-steam  { top: 50px; left: 450px; }
-    .finishing     { top: 200px; left: 50px; }
-    .machining     { top: 200px; left: 250px; }
-    .sub-store     { top: 200px; left: 450px; }
-    .final-inspection { top: 350px; left: 50px; }
-    .magna-flux    { top: 350px; left: 250px; }
-    .sort          { top: 350px; left: 450px; }
-    .pack          { top: 500px; left: 50px; }
-    .rework        { top: 500px; left: 250px; }
-
-    /* Resize handles (แค่แสดงปุ่ม resize - แต่ interact.js จะควบคุมเอง) */
+    /* Resize handles */
     .resize-handle {
       position: absolute;
       width: 12px;
@@ -360,90 +363,90 @@
         <input type="text" id="endDate" placeholder="วันที่สิ้นสุด" autocomplete="off" />
       </div>
       <button id="btnFilter">ใช้ตัวกรอง</button>
+      <button id="btnResetLayout">รีเซ็ตตำแหน่ง</button>
     </div>
 
     <div class="factory-layout">
       <div class="layout-title"><i class="fas fa-map"></i> แผนผังโรงงานและการกระจายชิ้นงาน</div>
       <div class="factory-floor">
         <!-- Process Areas -->
-        <div class="process-area powder-mixing high-volume" data-id="powder-mixing" data-x="0" data-y="0" style="transform: translate(0px, 0px);">
+        <div class="process-area powder-mixing high-volume" data-id="powder-mixing" data-x="0" data-y="0">
           <div class="process-icon"><i class="fas fa-flask"></i></div>
           <div class="process-name">ผสมผง</div>
           <div class="process-count">0</div>
           <div class="process-status">สถานะ</div>
           <div class="resize-handle"></div>
         </div>
-        <div class="process-area compact medium-volume" data-id="compact" data-x="0" data-y="0" style="transform: translate(0px, 0px);">
+        <div class="process-area compact medium-volume" data-id="compact" data-x="0" data-y="0">
           <div class="process-icon"><i class="fas fa-compress-arrows-alt"></i></div>
           <div class="process-name">Compact</div>
           <div class="process-count">0</div>
           <div class="process-status">สถานะ</div>
           <div class="resize-handle"></div>
         </div>
-        <div class="process-area sinter-steam high-volume" data-id="sinter-steam" data-x="0" data-y="0" style="transform: translate(0px, 0px);">
+        <div class="process-area sinter-steam high-volume" data-id="sinter-steam" data-x="0" data-y="0">
           <div class="process-icon"><i class="fas fa-fire"></i></div>
           <div class="process-name">Sinter & Steam</div>
           <div class="process-count">0</div>
           <div class="process-status">สถานะ</div>
           <div class="resize-handle"></div>
         </div>
-        <div class="process-area finishing medium-volume" data-id="finishing" data-x="0" data-y="0" style="transform: translate(0px, 0px);">
+        <div class="process-area finishing medium-volume" data-id="finishing" data-x="0" data-y="0">
           <div class="process-icon"><i class="fas fa-gem"></i></div>
           <div class="process-name">Finishing</div>
           <div class="process-count">0</div>
           <div class="process-status">สถานะ</div>
           <div class="resize-handle"></div>
         </div>
-        <div class="process-area machining high-volume" data-id="machining" data-x="0" data-y="0" style="transform: translate(0px, 0px);">
+        <div class="process-area machining high-volume" data-id="machining" data-x="0" data-y="0">
           <div class="process-icon"><i class="fas fa-cog"></i></div>
           <div class="process-name">Machining</div>
           <div class="process-count">0</div>
           <div class="process-status">สถานะ</div>
           <div class="resize-handle"></div>
         </div>
-        <div class="process-area sub-store medium-volume" data-id="sub-store" data-x="0" data-y="0" style="transform: translate(0px, 0px);">
+        <div class="process-area sub-store medium-volume" data-id="sub-store" data-x="0" data-y="0">
           <div class="process-icon"><i class="fas fa-warehouse"></i></div>
           <div class="process-name">Sub Store</div>
           <div class="process-count">0</div>
           <div class="process-status">สถานะ</div>
           <div class="resize-handle"></div>
         </div>
-        <div class="process-area final-inspection medium-volume" data-id="final-inspection" data-x="0" data-y="0" style="transform: translate(0px, 0px);">
+        <div class="process-area final-inspection medium-volume" data-id="final-inspection" data-x="0" data-y="0">
           <div class="process-icon"><i class="fas fa-clipboard-check"></i></div>
           <div class="process-name">Final Inspection</div>
           <div class="process-count">0</div>
           <div class="process-status">สถานะ</div>
           <div class="resize-handle"></div>
         </div>
-        <div class="process-area magna-flux low-volume" data-id="magna-flux" data-x="0" data-y="0" style="transform: translate(0px, 0px);">
+        <div class="process-area magna-flux low-volume" data-id="magna-flux" data-x="0" data-y="0">
           <div class="process-icon"><i class="fas fa-magnet"></i></div>
           <div class="process-name">Magna flux</div>
           <div class="process-count">0</div>
           <div class="process-status">สถานะ</div>
           <div class="resize-handle"></div>
         </div>
-        <div class="process-area sort medium-volume" data-id="sort" data-x="0" data-y="0" style="transform: translate(0px, 0px);">
+        <div class="process-area sort medium-volume" data-id="sort" data-x="0" data-y="0">
           <div class="process-icon"><i class="fas fa-sort-amount-down"></i></div>
           <div class="process-name">Sort</div>
           <div class="process-count">0</div>
           <div class="process-status">สถานะ</div>
           <div class="resize-handle"></div>
         </div>
-        <div class="process-area pack medium-volume" data-id="pack" data-x="0" data-y="0" style="transform: translate(0px, 0px);">
+        <div class="process-area pack medium-volume" data-id="pack" data-x="0" data-y="0">
           <div class="process-icon"><i class="fas fa-box"></i></div>
           <div class="process-name">Pack</div>
           <div class="process-count">0</div>
           <div class="process-status">สถานะ</div>
           <div class="resize-handle"></div>
         </div>
-        <div class="process-area rework low-volume" data-id="rework" data-x="0" data-y="0" style="transform: translate(0px, 0px);">
+        <div class="process-area rework low-volume" data-id="rework" data-x="0" data-y="0">
           <div class="process-icon"><i class="fas fa-tools"></i></div>
           <div class="process-name">Rework</div>
           <div class="process-count">0</div>
           <div class="process-status">สถานะ</div>
           <div class="resize-handle"></div>
         </div>
-
       </div>
     </div>
   </div>
@@ -454,7 +457,7 @@
   <script src="https://unpkg.com/@supabase/supabase-js"></script>
 
   <script>
-    // สร้าง client Supabase (ตรวจสอบว่าคีย์นี้ใช้งานได้จริง)
+    // สร้าง client Supabase
     const supabaseClient = supabase.createClient(
       'https://fvjminqjxfracpvdbjly.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2am1pbnFqeGZyYWNwdmRiamx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMxNTY4NTMsImV4cCI6MjA2ODczMjg1M30.N3X8-qSRQHa7FPIpbDlfL5ewY5_JeCShAuARczfmLgE'
@@ -565,12 +568,65 @@
     // ปุ่มตัวกรอง
     document.getElementById('btnFilter').addEventListener('click', loadProcessDataWithDateFilter);
 
+    // ปุ่มรีเซ็ตตำแหน่ง
+    document.getElementById('btnResetLayout').addEventListener('click', () => {
+      localStorage.clear();
+      document.querySelectorAll('.process-area').forEach(card => {
+        card.style.transform = 'translate(0px, 0px)';
+        card.setAttribute('data-x', '0');
+        card.setAttribute('data-y', '0');
+        card.style.width = '';
+        card.style.height = '';
+        
+        // รีเซ็ตตำแหน่งเริ่มต้นจาก CSS class
+        const id = card.dataset.id;
+        const defaultPos = getDefaultPosition(id);
+        if (defaultPos) {
+          card.style.top = defaultPos.top;
+          card.style.left = defaultPos.left;
+        }
+      });
+    });
+
+    // ฟังก์ชันดึงตำแหน่งเริ่มต้นจาก CSS
+    function getDefaultPosition(id) {
+      const element = document.querySelector(`.${id}`);
+      if (element) {
+        const style = window.getComputedStyle(element);
+        return {
+          top: style.top,
+          left: style.left
+        };
+      }
+      return null;
+    }
+
     // โหลดข้อมูลครั้งแรก (ไม่มี filter)
     loadProcessDataWithDateFilter();
 
-
     // เริ่มใช้งาน interact.js สำหรับ draggable และ resizable
     document.addEventListener('DOMContentLoaded', () => {
+      // โหลดตำแหน่งและขนาดที่บันทึกไว้
+      document.querySelectorAll('.process-area').forEach(card => {
+        // โหลดตำแหน่ง
+        const savedPos = localStorage.getItem(`card-pos-${card.dataset.id}`);
+        if (savedPos) {
+          const { x, y } = JSON.parse(savedPos);
+          card.style.transform = `translate(${x}px, ${y}px)`;
+          card.setAttribute('data-x', x);
+          card.setAttribute('data-y', y);
+        }
+        
+        // โหลดขนาด
+        const savedSize = localStorage.getItem(`card-size-${card.dataset.id}`);
+        if (savedSize) {
+          const { width, height } = JSON.parse(savedSize);
+          card.style.width = width;
+          card.style.height = height;
+        }
+      });
+
+      // กำหนดการทำงานของ interact.js
       interact('.process-area')
         .draggable({
           inertia: true,
@@ -581,7 +637,12 @@
             })
           ],
           listeners: {
-            move (event) {
+            start(event) {
+              // ป้องกันการเลื่อนหน้าเว็บขณะลากบนอุปกรณ์สัมผัส
+              document.body.style.overflow = 'hidden';
+              event.target.classList.add('dragging');
+            },
+            move(event) {
               const target = event.target;
               const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
               const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
@@ -589,6 +650,18 @@
               target.style.transform = `translate(${x}px, ${y}px)`;
               target.setAttribute('data-x', x);
               target.setAttribute('data-y', y);
+            },
+            end(event) {
+              document.body.style.overflow = '';
+              event.target.classList.remove('dragging');
+              
+              // บันทึกตำแหน่ง
+              const target = event.target;
+              const pos = {
+                x: parseFloat(target.getAttribute('data-x')) || 0,
+                y: parseFloat(target.getAttribute('data-y')) || 0
+              };
+              localStorage.setItem(`card-pos-${target.dataset.id}`, JSON.stringify(pos));
             }
           }
         })
@@ -605,7 +678,7 @@
             })
           ],
           listeners: {
-            move (event) {
+            move(event) {
               const target = event.target;
               let x = (parseFloat(target.getAttribute('data-x')) || 0);
               let y = (parseFloat(target.getAttribute('data-y')) || 0);
@@ -619,12 +692,20 @@
               target.style.transform = `translate(${x}px, ${y}px)`;
               target.setAttribute('data-x', x);
               target.setAttribute('data-y', y);
+            },
+            end(event) {
+              // บันทึกขนาด
+              const target = event.target;
+              const size = {
+                width: target.style.width,
+                height: target.style.height
+              };
+              localStorage.setItem(`card-size-${target.dataset.id}`, JSON.stringify(size));
             }
           }
         })
         .styleCursor(false);
     });
-
   </script>
 </body>
 </html>
