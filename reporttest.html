@@ -248,7 +248,7 @@ body {
 }
 
 .button-group.vertical-buttons .btn {
-  width: 100%;
+  width: 100% !important;      /* ปรับให้ปุ่มกว้างเท่ากัน */
   min-width: 0;
   box-sizing: border-box;
   display: flex;
@@ -263,6 +263,8 @@ body {
   transition: background 0.2s, box-shadow 0.2s;
   cursor: pointer;
   gap: 0.5rem;
+  /* เพื่อให้ไอคอนกับข้อความตรงกลางจริงๆ */
+  white-space: nowrap;
 }
 
 .button-group.vertical-buttons .btn.btn-primary {
@@ -628,7 +630,7 @@ tbody tr:hover {
     <div class="header">
       <div class="header-top" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
         <h1>
-          <i class="fas fa-chart-bar" style="font-size: 1.7rem; margin-top: 2px;"></i>
+          <i class="fas fa-chart-bar" style="font-size: 2rem; margin-top: 2px;"></i>
           RMT Inventory TAG Report
         </h1>
         <nav class="header-menu" style="display: flex; gap: 1rem;">
