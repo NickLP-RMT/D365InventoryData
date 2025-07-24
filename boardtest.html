@@ -368,15 +368,30 @@
   </style>
 </head>
 <body>
-  <div class="dashboard-container">
+   <div class="dashboard-container">
+    <!-- Header (ปรับใหม่ให้เหมือน reporttest.html) -->
     <div class="header">
-      <h1><i class="fas fa-industry"></i> Factory Layout Dashboard</h1>
-      <div class="status-info">
-        <div>โรงงาน CHP</div>
-        <div id="currentTime"></div>
-        <div>🟢 ระบบทำงานปกติ</div>
+      <!-- บรรทัดที่ 1: ชื่อ dashboard + วันเวลา -->
+      <div class="header-row" style="display: flex; justify-content: space-between; align-items: center;">
+        <h1 style="font-size:1.4rem;display:flex;align-items:center;gap:0.75rem;margin:0;line-height:1;">
+          <i class="fas fa-industry"></i> Factory Layout Dashboard
+        </h1>
+        <div id="currentDatetime" style="font-size:1rem;font-weight:500;opacity:0.9"></div>
       </div>
-    </div>
+      <!-- บรรทัดที่ 2: คำอธิบาย + ปุ่มเมนู -->
+      <div class="header-row" style="display: flex; justify-content: space-between; align-items: center;">
+        <p style="font-size:1rem; margin:0;">
+          ระบบจัดการและรายงานข้อมูล Inventory ส่วนโรงงาน CHP
+        </p>
+        <nav class="header-menu" style="display: flex; gap: 1rem;">
+          <a href="boardtest.html" class="header-menu-btn active" id="btnDashboard" style="text-decoration:none;">
+            <i class="fas fa-tachometer-alt"></i> Dashboard
+          </a>
+          <a href="reporttest.html" class="header-menu-btn" id="btnSearch" style="text-decoration:none;">
+            <i class="fas fa-search"></i> ค้นหา
+          </a>
+        </nav>
+      </div>
     <div class="factory-layout">
       <div class="layout-title"><i class="fas fa-map"></i> แผนผังโรงงานและการกระจายชิ้นงาน</div>
       <div class="factory-floor">
