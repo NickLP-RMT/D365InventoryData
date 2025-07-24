@@ -4,13 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>🏭 Factory Layout Dashboard</title>
+
   <!-- Font Kanit -->
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <!-- Font Awesome -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
   <!-- Flatpickr CSS -->
   <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet" />
-  <!-- Styles -->
+
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
@@ -30,6 +31,7 @@
       --warning-orange: #f59e0b;
       --danger-red: #ef4444;
     }
+
     body {
       font-family: 'Kanit', sans-serif;
       background: linear-gradient(135deg, var(--light-gray) 0%, #e0f2fe 100%);
@@ -210,7 +212,8 @@
       min-width: 150px;
       min-height: 120px;
       user-select: none;
-      touch-action: none; /* ป้องกัน scroll ระหว่างลาก */
+      touch-action: none;
+      transform: translate(0px, 0px);
     }
     .process-area:active {
       cursor: grabbing;
@@ -286,7 +289,7 @@
     .pack          { top: 500px; left: 50px; }
     .rework        { top: 500px; left: 250px; }
 
-    /* Resize handles (คล้ายเดิม แต่ใช้ interact.js จัดการ) */
+    /* Resize handles (แค่แสดงปุ่ม resize - แต่ interact.js จะควบคุมเอง) */
     .resize-handle {
       position: absolute;
       width: 12px;
@@ -350,11 +353,11 @@
     <div class="controls">
       <div class="input-group">
         <i class="fas fa-calendar-alt"></i>
-        <input type="text" id="startDate" placeholder="วันที่เริ่มต้น" />
+        <input type="text" id="startDate" placeholder="วันที่เริ่มต้น" autocomplete="off" />
       </div>
       <div class="input-group">
         <i class="fas fa-calendar-alt"></i>
-        <input type="text" id="endDate" placeholder="วันที่สิ้นสุด" />
+        <input type="text" id="endDate" placeholder="วันที่สิ้นสุด" autocomplete="off" />
       </div>
       <button id="btnFilter">ใช้ตัวกรอง</button>
     </div>
@@ -362,101 +365,102 @@
     <div class="factory-layout">
       <div class="layout-title"><i class="fas fa-map"></i> แผนผังโรงงานและการกระจายชิ้นงาน</div>
       <div class="factory-floor">
-
         <!-- Process Areas -->
-        <div class="process-area powder-mixing high-volume" data-id="powder-mixing" style="transform: translate(0px, 0px);">
+        <div class="process-area powder-mixing high-volume" data-id="powder-mixing" data-x="0" data-y="0" style="transform: translate(0px, 0px);">
           <div class="process-icon"><i class="fas fa-flask"></i></div>
           <div class="process-name">ผสมผง</div>
           <div class="process-count">0</div>
           <div class="process-status">สถานะ</div>
           <div class="resize-handle"></div>
         </div>
-        <div class="process-area compact medium-volume" data-id="compact" style="transform: translate(0px, 0px);">
+        <div class="process-area compact medium-volume" data-id="compact" data-x="0" data-y="0" style="transform: translate(0px, 0px);">
           <div class="process-icon"><i class="fas fa-compress-arrows-alt"></i></div>
           <div class="process-name">Compact</div>
           <div class="process-count">0</div>
           <div class="process-status">สถานะ</div>
           <div class="resize-handle"></div>
         </div>
-        <div class="process-area sinter-steam high-volume" data-id="sinter-steam" style="transform: translate(0px, 0px);">
+        <div class="process-area sinter-steam high-volume" data-id="sinter-steam" data-x="0" data-y="0" style="transform: translate(0px, 0px);">
           <div class="process-icon"><i class="fas fa-fire"></i></div>
           <div class="process-name">Sinter & Steam</div>
           <div class="process-count">0</div>
           <div class="process-status">สถานะ</div>
           <div class="resize-handle"></div>
         </div>
-        <div class="process-area finishing medium-volume" data-id="finishing" style="transform: translate(0px, 0px);">
+        <div class="process-area finishing medium-volume" data-id="finishing" data-x="0" data-y="0" style="transform: translate(0px, 0px);">
           <div class="process-icon"><i class="fas fa-gem"></i></div>
           <div class="process-name">Finishing</div>
           <div class="process-count">0</div>
           <div class="process-status">สถานะ</div>
           <div class="resize-handle"></div>
         </div>
-        <div class="process-area machining high-volume" data-id="machining" style="transform: translate(0px, 0px);">
+        <div class="process-area machining high-volume" data-id="machining" data-x="0" data-y="0" style="transform: translate(0px, 0px);">
           <div class="process-icon"><i class="fas fa-cog"></i></div>
           <div class="process-name">Machining</div>
           <div class="process-count">0</div>
           <div class="process-status">สถานะ</div>
           <div class="resize-handle"></div>
         </div>
-        <div class="process-area sub-store medium-volume" data-id="sub-store" style="transform: translate(0px, 0px);">
+        <div class="process-area sub-store medium-volume" data-id="sub-store" data-x="0" data-y="0" style="transform: translate(0px, 0px);">
           <div class="process-icon"><i class="fas fa-warehouse"></i></div>
           <div class="process-name">Sub Store</div>
           <div class="process-count">0</div>
           <div class="process-status">สถานะ</div>
           <div class="resize-handle"></div>
         </div>
-        <div class="process-area final-inspection medium-volume" data-id="final-inspection" style="transform: translate(0px, 0px);">
+        <div class="process-area final-inspection medium-volume" data-id="final-inspection" data-x="0" data-y="0" style="transform: translate(0px, 0px);">
           <div class="process-icon"><i class="fas fa-clipboard-check"></i></div>
           <div class="process-name">Final Inspection</div>
           <div class="process-count">0</div>
           <div class="process-status">สถานะ</div>
           <div class="resize-handle"></div>
         </div>
-        <div class="process-area magna-flux low-volume" data-id="magna-flux" style="transform: translate(0px, 0px);">
+        <div class="process-area magna-flux low-volume" data-id="magna-flux" data-x="0" data-y="0" style="transform: translate(0px, 0px);">
           <div class="process-icon"><i class="fas fa-magnet"></i></div>
           <div class="process-name">Magna flux</div>
           <div class="process-count">0</div>
           <div class="process-status">สถานะ</div>
           <div class="resize-handle"></div>
         </div>
-        <div class="process-area sort medium-volume" data-id="sort" style="transform: translate(0px, 0px);">
+        <div class="process-area sort medium-volume" data-id="sort" data-x="0" data-y="0" style="transform: translate(0px, 0px);">
           <div class="process-icon"><i class="fas fa-sort-amount-down"></i></div>
           <div class="process-name">Sort</div>
           <div class="process-count">0</div>
           <div class="process-status">สถานะ</div>
           <div class="resize-handle"></div>
         </div>
-        <div class="process-area pack medium-volume" data-id="pack" style="transform: translate(0px, 0px);">
+        <div class="process-area pack medium-volume" data-id="pack" data-x="0" data-y="0" style="transform: translate(0px, 0px);">
           <div class="process-icon"><i class="fas fa-box"></i></div>
           <div class="process-name">Pack</div>
           <div class="process-count">0</div>
           <div class="process-status">สถานะ</div>
           <div class="resize-handle"></div>
         </div>
-        <div class="process-area rework low-volume" data-id="rework" style="transform: translate(0px, 0px);">
+        <div class="process-area rework low-volume" data-id="rework" data-x="0" data-y="0" style="transform: translate(0px, 0px);">
           <div class="process-icon"><i class="fas fa-tools"></i></div>
           <div class="process-name">Rework</div>
           <div class="process-count">0</div>
           <div class="process-status">สถานะ</div>
           <div class="resize-handle"></div>
         </div>
+
       </div>
     </div>
   </div>
 
-  <!-- Script dependencies -->
+  <!-- Dependencies -->
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script src="https://cdn.jsdelivr.net/npm/@interactjs/interactjs/dist/interact.min.js"></script>
   <script src="https://unpkg.com/@supabase/supabase-js"></script>
 
   <script>
-    // สร้าง client Supabase
+    // สร้าง client Supabase (ตรวจสอบว่าคีย์นี้ใช้งานได้จริง)
     const supabaseClient = supabase.createClient(
       'https://fvjminqjxfracpvdbjly.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2am1pbnFqeGZyYWNwdmRiamx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMxNTY4NTMsImV4cCI6MjA2ODczMjg1M30.N3X8-qSRQHa7FPIpbDlfL5ewY5_JeCShAuARczfmLgE'
     );
 
+    // รายการกระบวนการ
     const processList = [
       'ผสมผง',
       'Compact',
@@ -471,6 +475,7 @@
       'Rework'
     ];
 
+    // แปลงชื่อกระบวนการ เป็น data-id
     function getDataIdFromProcessName(procName) {
       const map = {
         'ผสมผง': 'powder-mixing',
@@ -488,55 +493,60 @@
       return map[procName] || '';
     }
 
+    // โหลดข้อมูลและอัปเดต process counts พร้อม filter วันที่
     async function loadProcessDataWithDateFilter() {
       const start = document.getElementById('startDate').value;
       const end = document.getElementById('endDate').value;
 
-      let query = supabaseClient.from('inventory_tags').select('main_process, quantity');
+      try {
+        let query = supabaseClient.from('inventory_tags').select('main_process, quantity');
 
-      if (start) query = query.gte('created_at', start);
-      if (end) query = query.lte('created_at', end);
+        if (start) query = query.gte('created_at', start);
+        if (end) query = query.lte('created_at', end);
 
-      const { data, error } = await query;
+        const { data, error } = await query;
 
-      if (error) {
-        console.error('Error loading filtered data:', error);
-        return;
-      }
-
-      const countMap = {};
-      processList.forEach(p => countMap[p] = 0);
-
-      data.forEach(row => {
-        if (row.main_process && countMap.hasOwnProperty(row.main_process)) {
-          countMap[row.main_process] += Number(row.quantity) || 0;
+        if (error) {
+          console.error('Error loading filtered data:', error);
+          return;
         }
-      });
 
-      processList.forEach(proc => {
-        const dataId = getDataIdFromProcessName(proc);
-        const el = document.querySelector(`.process-area[data-id="${dataId}"]`);
-        if (el) {
-          const countEl = el.querySelector('.process-count');
-          if (countEl) {
-            const qty = countMap[proc] || 0;
-            countEl.textContent = qty.toLocaleString();
+        const countMap = {};
+        processList.forEach(p => countMap[p] = 0);
 
-            // แสดงสถานะสีตามเงื่อนไข
-            el.classList.remove('high-volume', 'medium-volume', 'low-volume');
-            if (qty > 1000) {
-              el.classList.add('high-volume');
-            } else if (qty >= 500) {
-              el.classList.add('medium-volume');
-            } else {
-              el.classList.add('low-volume');
+        data.forEach(row => {
+          if (row.main_process && countMap.hasOwnProperty(row.main_process)) {
+            countMap[row.main_process] += Number(row.quantity) || 0;
+          }
+        });
+
+        processList.forEach(proc => {
+          const dataId = getDataIdFromProcessName(proc);
+          const el = document.querySelector(`.process-area[data-id="${dataId}"]`);
+          if (el) {
+            const countEl = el.querySelector('.process-count');
+            if (countEl) {
+              const qty = countMap[proc] || 0;
+              countEl.textContent = qty.toLocaleString();
+
+              // กำหนดสถานะสี
+              el.classList.remove('high-volume', 'medium-volume', 'low-volume');
+              if (qty > 1000) {
+                el.classList.add('high-volume');
+              } else if (qty >= 500) {
+                el.classList.add('medium-volume');
+              } else {
+                el.classList.add('low-volume');
+              }
             }
           }
-        }
-      });
+        });
+      } catch (err) {
+        console.error('Error querying supabase:', err);
+      }
     }
 
-    // อัปเดตวันที่เวลาปัจจุบันใน header
+    // อัปเดตเวลาปัจจุบันใน header
     function updateDatetime() {
       const el = document.getElementById('currentDatetime');
       const now = new Date();
@@ -548,70 +558,73 @@
     setInterval(updateDatetime, 1000);
     updateDatetime();
 
-    // กำหนด flatpickr บน input date
+    // กำหนด flatpickr บน input
     flatpickr('#startDate', { dateFormat: 'Y-m-d' });
     flatpickr('#endDate', { dateFormat: 'Y-m-d' });
 
-    // ฟังก์ชันปุ่มใช้ตัวกรอง
+    // ปุ่มตัวกรอง
     document.getElementById('btnFilter').addEventListener('click', loadProcessDataWithDateFilter);
 
-    // โหลดข้อมูลเริ่มต้น (ไม่มี filter)
+    // โหลดข้อมูลครั้งแรก (ไม่มี filter)
     loadProcessDataWithDateFilter();
 
-    // --- interact.js ใช้สำหรับ drag และ resize ---
-    interact('.process-area')
-      .draggable({
-        inertia: true,
-        modifiers: [
-          interact.modifiers.restrictRect({
-            restriction: 'parent',
-            endOnly: true
-          })
-        ],
-        listeners: {
-          move (event) {
-            const target = event.target;
-            const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
-            const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
 
-            target.style.transform = `translate(${x}px, ${y}px)`;
-            target.setAttribute('data-x', x);
-            target.setAttribute('data-y', y);
+    // เริ่มใช้งาน interact.js สำหรับ draggable และ resizable
+    document.addEventListener('DOMContentLoaded', () => {
+      interact('.process-area')
+        .draggable({
+          inertia: true,
+          modifiers: [
+            interact.modifiers.restrictRect({
+              restriction: 'parent',
+              endOnly: true
+            })
+          ],
+          listeners: {
+            move (event) {
+              const target = event.target;
+              const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+              const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+
+              target.style.transform = `translate(${x}px, ${y}px)`;
+              target.setAttribute('data-x', x);
+              target.setAttribute('data-y', y);
+            }
           }
-        }
-      })
-      .resizable({
-        edges: { left: true, right: true, bottom: true, top: true },
-        inertia: true,
-        modifiers: [
-          interact.modifiers.restrictEdges({
-            outer: 'parent',
-            endOnly: true
-          }),
-          interact.modifiers.restrictSize({
-            min: { width: 100, height: 80 }
-          })
-        ],
-        listeners: {
-          move (event) {
-            const target = event.target;
-            let x = (parseFloat(target.getAttribute('data-x')) || 0);
-            let y = (parseFloat(target.getAttribute('data-y')) || 0);
+        })
+        .resizable({
+          edges: { left: true, right: true, bottom: true, top: true },
+          inertia: true,
+          modifiers: [
+            interact.modifiers.restrictEdges({
+              outer: 'parent',
+              endOnly: true
+            }),
+            interact.modifiers.restrictSize({
+              min: { width: 100, height: 80 }
+            })
+          ],
+          listeners: {
+            move (event) {
+              const target = event.target;
+              let x = (parseFloat(target.getAttribute('data-x')) || 0);
+              let y = (parseFloat(target.getAttribute('data-y')) || 0);
 
-            target.style.width = event.rect.width + 'px';
-            target.style.height = event.rect.height + 'px';
+              target.style.width = event.rect.width + 'px';
+              target.style.height = event.rect.height + 'px';
 
-            x += event.deltaRect.left;
-            y += event.deltaRect.top;
+              x += event.deltaRect.left;
+              y += event.deltaRect.top;
 
-            target.style.transform = `translate(${x}px, ${y}px)`;
-            target.setAttribute('data-x', x);
-            target.setAttribute('data-y', y);
+              target.style.transform = `translate(${x}px, ${y}px)`;
+              target.setAttribute('data-x', x);
+              target.setAttribute('data-y', y);
+            }
           }
-        }
-      })
-      .styleCursor(false);
+        })
+        .styleCursor(false);
+    });
+
   </script>
-
 </body>
 </html>
