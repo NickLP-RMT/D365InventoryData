@@ -190,17 +190,15 @@
       opacity:.6;
       animation:flow 3s ease-in-out infinite;
       user-select: none;
-      cursor: grab;
+      cursor: default;
+      pointer-events: none;
       z-index: 1000;
-      pointer-events:none;
-    }
-    .flow-arrow.selected {
-      color: #dc2626 !important;
-      filter: drop-shadow(0 0 4px rgba(220,38,38,0.7));
-      pointer-events: auto;
+      transition: opacity 0.3s ease;
     }
     .flow-arrow.dragging {
       cursor: grabbing;
+      opacity: 1;
+      z-index: 10000;
     }
     @keyframes flow {
       0%,100%{opacity:.3;}
@@ -223,10 +221,14 @@
       height: 10px;
       background: var(--primary-blue);
       border-radius: 50%;
-      opacity: 0.7;
+      opacity: 0;
       cursor: nwse-resize;
-      z-index: 1001;
+      z-index: 10001;
       user-select: none;
+      transition: opacity 0.3s ease;
+    }
+    .flow-arrow.edit-mode:hover .arrow-resize-handle {
+      opacity: 0.7;
     }
     .arrow-resize-handle:hover {
       opacity: 1;
@@ -323,15 +325,6 @@
     .control-btn.active {
       background:var(--success-green);
     }
-    /* Select ทิศทางลูกศร */
-    #arrowDirectionSelect {
-      padding: 0.5rem 0.75rem;
-      border-radius: 6px;
-      border: none;
-      font-size: 0.9rem;
-      cursor: pointer;
-      user-select:none;
-    }
 
     .instructions {
       position:absolute;
@@ -391,15 +384,6 @@
           <button class="control-btn" onclick="refreshData()"><i class="fas fa-sync-alt"></i> รีเฟรช</button>
           <button class="control-btn" id="editMode" onclick="toggleEditMode()"><i class="fas fa-edit"></i> แก้ไขเลย์เอาต์</button>
           <button class="control-btn" onclick="resetLayout()"><i class="fas fa-undo"></i> รีเซ็ต</button>
-          <button class="control-btn" id="addArrowBtn"><i class="fas fa-plus"></i> เพิ่มลูกศร</button>
-          <button class="control-btn" id="deleteArrowModeBtn"><i class="fas fa-trash"></i> โหมดลบลูกศร</button>
-          <select id="arrowDirectionSelect" title="เลือกทิศทางลูกศร">
-            <option value="right">ขวา</option>
-            <option value="left">ซ้าย</option>
-            <option value="up">ขึ้น</option>
-            <option value="down">ลง</option>
-          </select>
-          <button class="control-btn" id="saveArrowBtn"><i class="fas fa-save"></i> บันทึกลูกศร</button>
         </div>
         <div class="legend">
           <div class="legend-title">สถานะปริมาณงาน</div>
@@ -421,11 +405,8 @@
           <div>• ลากมุมล่างขวาเพื่อปรับขนาด</div>
           <div>• ลากขอบเพื่อปรับความกว้าง/สูง</div>
           <div>• คลิก "รีเซ็ต" เพื่อกลับสู่ตำแหน่งเดิม</div>
-          <div>• กด "เพิ่มลูกศร" เพื่อสร้างลูกศรในแผนผัง</div>
-          <div>• กด "โหมดลบลูกศร" แล้วคลิกลูกศรที่ต้องการลบ</div>
-          <div>• เลือกลูกศรเพื่อเปลี่ยนทิศทางจากกล่องเลือก</div>
-          <div>• ลากลูกศรเพื่อย้ายตำแหน่ง กดมุมของลูกศรเพื่อปรับขนาด</div>
-          <div>• กด "บันทึกลูกศร" เพื่อเก็บตำแหน่งและขนาด (ในเครื่อง)</div>
+          <div>• ในโหมดแก้ไข: ลูกศรสามารถลากและปรับขนาดได้</div>
+          <div>• ปิดโหมดแก้ไขจะล็อกตำแหน่งและขนาดลูกศรและพื้นที่</div>
         </div>
 
         <!-- Process Areas -->
@@ -475,7 +456,7 @@
           <div class="resize-handle resize-e"></div>
         </div>
 
-        <!-- ลูกศร Flow ที่มีอยู่ -->
+        <!-- ลูกศร Flow -->
         <i class="fas fa-long-arrow-alt-right flow-arrow arrow1"></i>
         <i class="fas fa-long-arrow-alt-right flow-arrow arrow2"></i>
         <i class="fas fa-long-arrow-alt-down flow-arrow arrow3"></i>
@@ -490,7 +471,7 @@
   </div>
 
   <script>
-    // แสดงเวลาปัจจุบันใน #currentTime ทุกๆ วินาที
+    // แสดงเวลาปัจจุบันใน #currentTime ทุกวินาที
     function updateTime() {
       const now = new Date();
       const timeString = now.toLocaleTimeString('th-TH', {hour: '2-digit', minute: '2-digit', second: '2-digit'});
@@ -499,17 +480,22 @@
     setInterval(updateTime, 1000);
     updateTime();
 
+    // ตัวแปรโหมดแก้ไขสถานะ
     let editMode = false;
 
+    // อ้างอิง container
+    const factoryFloor = document.querySelector('.factory-floor');
+
+    // ปุ่ม toggle แก้ไขเลย์เอาต์
     function toggleEditMode() {
       editMode = !editMode;
       const btn = document.getElementById('editMode');
       btn.classList.toggle('active', editMode);
       btn.innerHTML = editMode ? '<i class="fas fa-check"></i> บันทึกเลย์เอาต์' : '<i class="fas fa-edit"></i> แก้ไขเลย์เอาต์';
 
-      const areas = document.querySelectorAll('.process-area');
-      areas.forEach(area => {
-        if (editMode) {
+      // process-area จัดการ
+      document.querySelectorAll('.process-area').forEach(area => {
+        if(editMode) {
           area.style.cursor = 'move';
           enableResize(area);
           enableDrag(area);
@@ -519,20 +505,36 @@
           disableDrag(area);
         }
       });
+
+      // flow-arrow จัดการ
+      document.querySelectorAll('.flow-arrow').forEach(arrow => {
+        if(editMode) {
+          arrow.style.pointerEvents = 'auto';
+          arrow.style.cursor = 'grab';
+          enableArrowDrag(arrow);
+          enableArrowResize(arrow);
+        } else {
+          arrow.style.pointerEvents = 'none';
+          arrow.style.cursor = 'default';
+          disableArrowDrag(arrow);
+          disableArrowResize(arrow);
+        }
+      });
     }
 
+    // รีเซ็ต layout ของ process-area ให้กลับตำแหน่งเดิม
     function resetLayout() {
-      if (confirm('คุณต้องการรีเซ็ตเลย์เอาต์กลับสู่ค่าเริ่มต้นใช่หรือไม่?')) {
+      if(confirm('คุณต้องการรีเซ็ตเลย์เอาต์กลับสู่ค่าเริ่มต้นใช่หรือไม่?')) {
         const defaults = {
           'powder-mixing': {top: '50px', left: '50px', width: '150px', height: '120px'},
           'compact': {top: '50px', left: '250px', width: '150px', height: '120px'},
           'sinter-steam': {top: '50px', left: '450px', width: '180px', height: '120px'},
           'finishing': {top: '200px', left: '50px', width: '150px', height: '120px'},
-          'machining': {top: '200px', left: '250px', width: '150px', height: '120px'}
+          'machining': {top: '200px', left: '250px', width: '150px', height: '120px'},
         };
         Object.keys(defaults).forEach(id => {
           const area = document.querySelector(`.process-area[data-id="${id}"]`);
-          if (area) {
+          if(area) {
             const style = defaults[id];
             area.style.top = style.top;
             area.style.left = style.left;
@@ -540,15 +542,17 @@
             area.style.height = style.height;
           }
         });
+        // รีเซ็ตตำแหน่งลูกศร (ถ้าต้องการ ให้แก้ไขหรือล้างเอง)
       }
     }
 
+    // ตัวอย่าง alert รีเฟรชข้อมูล
     function refreshData() {
       alert('กำลังรีเฟรชข้อมูล... (ตัวอย่าง)');
-      // สามารถใส่โค้ดดึงข้อมูล API มาทดแทนที่นี้ได้
+      // ต่อยอดดึง API ได้ที่นี่
     }
 
-    // Drag support สำหรับ process-area
+    // ฟังก์ชันเปิด/ปิดลาก process-area
     function enableDrag(element) {
       let offsetX, offsetY;
       function onMouseDown(e) {
@@ -565,10 +569,8 @@
         let parentRect = element.parentElement.getBoundingClientRect();
         let newLeft = e.clientX - offsetX - parentRect.left;
         let newTop = e.clientY - offsetY - parentRect.top;
-
         newLeft = Math.max(0, Math.min(newLeft, element.parentElement.clientWidth - element.offsetWidth));
         newTop = Math.max(0, Math.min(newTop, element.parentElement.clientHeight - element.offsetHeight));
-
         element.style.left = newLeft + 'px';
         element.style.top = newTop + 'px';
       }
@@ -581,18 +583,17 @@
       element._onMouseDownDrag = onMouseDown;
     }
     function disableDrag(element) {
-      if(element._onMouseDownDrag){
+      if(element._onMouseDownDrag) {
         element.removeEventListener('mousedown', element._onMouseDownDrag);
         element._onMouseDownDrag = null;
       }
     }
 
-    // Resize support สำหรับ process-area
+    // ฟังก์ชันเปิด/ปิด resize process-area
     function enableResize(element) {
       if(element._resizeEnabled) return;
       let currentHandle = null;
       let startX, startY, startWidth, startHeight;
-
       function onMouseDown(e) {
         e.stopPropagation();
         e.preventDefault();
@@ -608,8 +609,7 @@
         if(!currentHandle) return;
         let dx = e.clientX - startX;
         let dy = e.clientY - startY;
-
-        if(currentHandle.classList.contains('resize-se')){
+        if(currentHandle.classList.contains('resize-se')) {
           element.style.width = (startWidth + dx) + 'px';
           element.style.height = (startHeight + dy) + 'px';
         } else if(currentHandle.classList.contains('resize-s')) {
@@ -634,232 +634,93 @@
       element._resizeEnabled = false;
     }
 
-    // เริ่มต้นโหมดแก้ไขปิด
-    editMode = false;
-
-    // --- ฟีเจอร์สำหรับลูกศร flow-arrow ---
-
-    (() => {
-      const factoryFloor = document.querySelector('.factory-floor');
-      const addArrowBtn = document.getElementById('addArrowBtn');
-      const deleteArrowBtn = document.getElementById('deleteArrowModeBtn');
-      const directionSelect = document.getElementById('arrowDirectionSelect');
-      const saveArrowBtn = document.getElementById('saveArrowBtn');
-
-      let deleteMode = false;
-      let selectedArrow = null;
-
-      // สร้างลูกศรใหม่
-      function createArrow(x = 100, y = 100, size = 24, direction = 'right') {
-        const arrow = document.createElement('i');
-        arrow.classList.add('fas', `fa-long-arrow-alt-${direction}`, 'flow-arrow');
-        arrow.style.position = 'absolute';
-        arrow.style.left = x + 'px';
-        arrow.style.top = y + 'px';
-        arrow.style.fontSize = size + 'px';
-        arrow.style.zIndex = 1000;
-
-        enableArrowDrag(arrow);
-        addResizeHandle(arrow);
-
-        arrow.addEventListener('click', (e) => {
-          e.stopPropagation();
-          if (deleteMode) {
-            arrow.remove();
-            selectedArrow = null;
-          } else {
-            selectArrow(arrow);
-          }
-        });
-
-        factoryFloor.appendChild(arrow);
+    // ฟังก์ชันเปิด/ปิดลากลูกศร
+    function enableArrowDrag(arrow) {
+      if(arrow._onMouseDownDrag) return; // ป้องกันลงซ้ำ
+      let offsetX, offsetY;
+      function onMouseDown(e) {
+        if(!editMode) return;
+        e.preventDefault();
+        offsetX = e.clientX - arrow.getBoundingClientRect().left;
+        offsetY = e.clientY - arrow.getBoundingClientRect().top;
+        arrow.classList.add('dragging');
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
       }
-
-      // เลือกลูกศร
-      function selectArrow(arrow) {
-        if (selectedArrow) selectedArrow.classList.remove('selected');
-        selectedArrow = arrow;
-        selectedArrow.classList.add('selected');
-
-        // แสดงทิศทางใน select
-        const classes = ['fa-long-arrow-alt-right', 'fa-long-arrow-alt-left', 'fa-long-arrow-alt-up', 'fa-long-arrow-alt-down'];
-        const foundClass = classes.find(c => arrow.classList.contains(c));
-        const dir = foundClass ? foundClass.replace('fa-long-arrow-alt-', '') : 'right';
-        directionSelect.value = dir;
+      function onMouseMove(e) {
+        const parentRect = factoryFloor.getBoundingClientRect();
+        let newLeft = e.clientX - offsetX - parentRect.left;
+        let newTop = e.clientY - offsetY - parentRect.top;
+        newLeft = Math.max(0, Math.min(newLeft, factoryFloor.clientWidth - arrow.offsetWidth));
+        newTop = Math.max(0, Math.min(newTop, factoryFloor.clientHeight - arrow.offsetHeight));
+        arrow.style.left = newLeft + 'px';
+        arrow.style.top = newTop + 'px';
       }
-
-      // ยกเลิกเลือก ลูกศร เมื่อคลิกพื้นหลัง
-      factoryFloor.addEventListener('click', () => {
-        if (selectedArrow) {
-          selectedArrow.classList.remove('selected');
-          selectedArrow = null;
-        }
-      });
-
-      // ปุ่มเพิ่มลูกศร
-      addArrowBtn.addEventListener('click', () => {
-        createArrow(100, 100, 24, 'right');
-        deleteMode = false;
-        deleteArrowBtn.classList.remove('active');
-      });
-
-      // โหมดลบลูกศร
-      deleteArrowBtn.addEventListener('click', (e) => {
-        deleteMode = !deleteMode;
-        e.target.classList.toggle('active', deleteMode);
-        if (deleteMode) {
-          alert('โหมดลบลูกศรถูกเปิด: คลิกลูกศรที่ต้องการลบได้เลย');
-          if (selectedArrow) {
-            selectedArrow.classList.remove('selected');
-            selectedArrow = null;
-          }
-        }
-      });
-
-      // เปลี่ยนทิศทางลูกศรที่เลือก
-      directionSelect.addEventListener('change', () => {
-        if (selectedArrow) {
-          setArrowDirection(selectedArrow, directionSelect.value);
-        }
-      });
-
-      // ฟังก์ชันเปลี่ยนทิศทาง
-      function setArrowDirection(arrow, direction) {
-        arrow.classList.remove('fa-long-arrow-alt-right', 'fa-long-arrow-alt-left', 'fa-long-arrow-alt-up', 'fa-long-arrow-alt-down');
-        arrow.classList.add('fa-long-arrow-alt-' + direction);
+      function onMouseUp() {
+        arrow.classList.remove('dragging');
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
       }
-
-      // ลากลูกศร
-      function enableArrowDrag(arrow) {
-        let offsetX, offsetY;
-        function onMouseDown(e) {
-          if(deleteMode) return;
-          e.preventDefault();
-          offsetX = e.clientX - arrow.getBoundingClientRect().left;
-          offsetY = e.clientY - arrow.getBoundingClientRect().top;
-          arrow.classList.add('dragging');
-
-          document.addEventListener('mousemove', onMouseMove);
-          document.addEventListener('mouseup', onMouseUp);
-        }
-        function onMouseMove(e) {
-          let parentRect = factoryFloor.getBoundingClientRect();
-
-          let newLeft = e.clientX - offsetX - parentRect.left;
-          let newTop = e.clientY - offsetY - parentRect.top;
-
-          newLeft = Math.max(0, Math.min(newLeft, factoryFloor.clientWidth - arrow.offsetWidth));
-          newTop = Math.max(0, Math.min(newTop, factoryFloor.clientHeight - arrow.offsetHeight));
-
-          arrow.style.left = newLeft + 'px';
-          arrow.style.top = newTop + 'px';
-        }
-        function onMouseUp() {
-          arrow.classList.remove('dragging');
-          document.removeEventListener('mousemove', onMouseMove);
-          document.removeEventListener('mouseup', onMouseUp);
-        }
-        arrow.addEventListener('mousedown', onMouseDown);
+      arrow.addEventListener('mousedown', onMouseDown);
+      arrow._onMouseDownDrag = onMouseDown;
+    }
+    function disableArrowDrag(arrow) {
+      if(arrow._onMouseDownDrag) {
+        arrow.removeEventListener('mousedown', arrow._onMouseDownDrag);
+        arrow._onMouseDownDrag = null;
       }
+    }
 
-      // เพิ่มจุดจับมุม resize ลูกศร
-      function addResizeHandle(arrow) {
-        // ป้องกันสร้าง handle ซ้ำ
-        if (arrow.querySelector('.arrow-resize-handle')) return;
+    // ฟังก์ชันเปิด/ปิด resize ลูกศร
+    function enableArrowResize(arrow) {
+      if(arrow._resizeEnabled) return;
+      if(arrow.querySelector('.arrow-resize-handle')) return;
+      const handle = document.createElement('div');
+      handle.className = 'arrow-resize-handle';
 
-        const handle = document.createElement('div');
-        handle.className = 'arrow-resize-handle';
+      function updateHandlePos() {
+        handle.style.left = (arrow.offsetWidth - 8) + 'px';
+        handle.style.top = (arrow.offsetHeight - 8) + 'px';
+      }
+      updateHandlePos();
+      arrow.appendChild(handle);
 
-        function updateHandlePos() {
-          handle.style.left = (arrow.offsetWidth - 8) + 'px';
-          handle.style.top = (arrow.offsetHeight - 8) + 'px';
-        }
+      let startX, startSize;
+      function onMouseDown(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        if(!editMode) return;
+        startX = e.clientX;
+        startSize = parseFloat(window.getComputedStyle(arrow).fontSize);
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+      }
+      function onMouseMove(e) {
+        const dx = e.clientX - startX;
+        let newSize = Math.max(12, startSize + dx);
+        arrow.style.fontSize = newSize + 'px';
         updateHandlePos();
-        arrow.appendChild(handle);
-
-        let startX, startY, startSize;
-
-        function onMouseDown(e) {
-          e.stopPropagation();
-          e.preventDefault();
-
-          startX = e.clientX;
-          startY = e.clientY;
-          startSize = parseFloat(window.getComputedStyle(arrow).fontSize);
-
-          document.addEventListener('mousemove', onMouseMove);
-          document.addEventListener('mouseup', onMouseUp);
-        }
-        function onMouseMove(e) {
-          const dx = e.clientX - startX;
-          let newSize = Math.max(12, startSize + dx);
-          arrow.style.fontSize = newSize + 'px';
-          updateHandlePos();
-        }
-        function onMouseUp() {
-          document.removeEventListener('mousemove', onMouseMove);
-          document.removeEventListener('mouseup', onMouseUp);
-        }
-
-        handle.addEventListener('mousedown', onMouseDown);
       }
-
-      // บันทึกลูกศรลง localStorage
-      function saveArrowsToStorage() {
-        const arrows = document.querySelectorAll('.flow-arrow');
-        const arrowData = [];
-        arrows.forEach(arrow => {
-          const left = parseFloat(arrow.style.left) || 0;
-          const top = parseFloat(arrow.style.top) || 0;
-          const fontSize = parseFloat(window.getComputedStyle(arrow).fontSize);
-          const dirClass = [...arrow.classList].find(c => c.startsWith('fa-long-arrow-alt-'));
-          const direction = dirClass ? dirClass.replace('fa-long-arrow-alt-', '') : 'right';
-
-          arrowData.push({left, top, fontSize, direction});
-        });
-        localStorage.setItem('factoryArrows', JSON.stringify(arrowData));
-        alert('บันทึกตำแหน่งลูกศรเรียบร้อย');
+      function onMouseUp() {
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
       }
-
-      // โหลดลูกศรจาก localStorage
-      function loadArrowsFromStorage() {
-        const saved = localStorage.getItem('factoryArrows');
-        if (saved) {
-          try {
-            const arrowData = JSON.parse(saved);
-            arrowData.forEach(data => {
-              createArrow(data.left, data.top, data.fontSize, data.direction);
-            });
-          } catch (e) {
-            console.warn('ข้อมูลลูกศรที่บันทึกมีปัญหา:', e);
-          }
-        }
+      handle.addEventListener('mousedown', onMouseDown);
+      arrow._resizeEnabled = true;
+    }
+    function disableArrowResize(arrow) {
+      if(!arrow._resizeEnabled) return;
+      const handle = arrow.querySelector('.arrow-resize-handle');
+      if(handle){
+        handle.removeEventListener('mousedown', null);
+        arrow.removeChild(handle);
       }
+      arrow._resizeEnabled = false;
+    }
 
-      // event บันทึกลูกศร
-      saveArrowBtn.addEventListener('click', saveArrowsToStorage);
+    // เรียกเปิดโหมดแก้ไขปิดไว้ตอนโหลด
+    toggleEditMode();
 
-      // โหลดลูกศรตอนหน้าโหลดเสร็จ
-      window.addEventListener('load', () => {
-        loadArrowsFromStorage();
-      });
-
-      // สำหรับลูกศรที่มีอยู่ในหน้า (static) ปรับให้ลากและปรับขนาดได้ทันที
-      document.querySelectorAll('.flow-arrow').forEach(arrow => {
-        enableArrowDrag(arrow);
-        addResizeHandle(arrow);
-        arrow.addEventListener('click', (e) => {
-          if(deleteMode) {
-            arrow.remove();
-            selectedArrow = null;
-          } else {
-            selectArrow(arrow);
-          }
-          e.stopPropagation();
-        });
-      });
-
-    })();
   </script>
 </body>
 </html>
