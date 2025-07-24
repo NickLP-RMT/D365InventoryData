@@ -339,21 +339,22 @@
       
       <!-- 🔽 กระบวนการหลัก -->
       <div class="form-group">
-        <label class="form-label">กระบวนการหลัก</label>
-        <select id="mainProcess" class="form-control" onchange="handleMainProcessChange()">
-          <option value="">-- เลือกกระบวนการหลัก --</option>
-          <option value="ผสมผง">ผสมผง</option>
-          <option value="Compact">Compact</option>
-          <option value="Sinter & Steam">Sinter & Steam</option>
-          <option value="Finishing">Finishing</option>
-          <option value="Machining">Machining</option>
-          <option value="Sub Store">Sub Store</option>
-          <option value="Magna flux">Magna flux</option>
-          <option value="Sort">Sort</option>
-          <option value="Pack">Pack</option>
-          <option value="Rework">Rework</option>
-        </select>
-      </div>
+  <label class="form-label">กระบวนการหลัก</label>
+  <select id="mainProcess" class="form-control" onchange="handleMainProcessChange()">
+    <option value="">-- เลือกกระบวนการหลัก --</option>
+    <option value="ผสมผง">ผสมผง</option>
+    <option value="Compact">Compact</option>
+    <option value="Sinter & Steam">Sinter & Steam</option>
+    <option value="Finishing">Finishing</option>
+    <option value="Machining">Machining</option>
+    <option value="Sub Store">Sub Store</option>
+    <option value="Final Inspection">Final Inspection</option>
+    <option value="Magna flux">Magna flux</option>
+    <option value="Sort">Sort</option>
+    <option value="Pack">Pack</option>
+    <option value="Rework">Rework</option>
+  </select>
+</div>
 
       <!-- 🔽 กระบวนการย่อย -->
       <div class="form-group">
@@ -566,140 +567,140 @@ const { error } = await supabase.from('inventory_tags').insert([{
     }
 
     function handleMainProcessChange() {
-      const main = document.getElementById("mainProcess").value;
-      const sub = document.getElementById("subProcess");
-      const statusSelect = document.getElementById("status");
+  const main = document.getElementById("mainProcess").value;
+  const sub = document.getElementById("subProcess");
+  const statusSelect = document.getElementById("status");
 
-      // เคลียร์ค่าเดิม
-      sub.innerHTML = "";
-      statusSelect.innerHTML = "";
+  sub.innerHTML = "";
+  statusSelect.innerHTML = "";
 
-      const subOptions = {
-        "Compact": [["P", "P - Compact"]],
-        "Sinter & Steam": [
-          ["S", "S - Sinter"],
-          ["STE", "STE - Steam"],
-          ["TEMP", "TEMP - Temper"],
-          ["MW", "MW - MachineWash"]
-        ],
-        "Finishing": [
-          ["ESE", "ESE - Chk. Crack"],
-          ["OD", "OD - Oil Dip"],
-          ["BR", "BR - Barrel"],
-          ["H", "H - De-burring"],
-          ["DRY", "DRY - Drying"],
-          ["SB", "SB - Shot blast"],
-          ["R", "R - Impreganate"],
-          ["OG", "OG - Impreganate"],
-          ["U", "U - UitraSonicWash"],
-          ["DR", "DR - DrawingPress(Sizing)"],
-          ["RP", "RP - Sizing"],
-          ["RO", "RO - Rolling"]
-        ],
-        "Machining": [
-          ["MC", "MC - Machining"],
-          ["NCL", "NCL - NC Lath."],
-          ["L", "L - Lath."],
-          ["GC", "GC - Grinding"],
-          ["DP", "DP - Throuth Pin"],
-          ["UT", "UT - InductionHarden"],
-          ["F", "F - Buffing"],
-          ["D", "D - Drilling"],
-          ["AS", "AS - Assembly"],
-          ["WE", "WE - Welding"]
-        ],
-        "Magna flux": [
-          ["SEM", "SEM - Magna flux"],
-          ["SEMT", "SEMT - Magna flux"]
-        ],
-        "Sort": [["SEL", "SEL - Sort"]],
-        "Pack": [["KON", "KON - Pack"]],
-        "Rework": [["SELD", "SELD - Sort dimension"]]
-      };
+  const subOptions = {
+    "Compact": [["P", "P - Compact"]],
+    "Sinter & Steam": [
+      ["S", "S - Sinter"],
+      ["STE", "STE - Steam"],
+      ["TEMP", "TEMP - Temper"],
+      ["MW", "MW - MachineWash"]
+    ],
+    "Finishing": [
+      ["ESE", "ESE - Chk. Crack"],
+      ["OD", "OD - Oil Dip"],
+      ["BR", "BR - Barrel"],
+      ["H", "H - De-burring"],
+      ["DRY", "DRY - Drying"],
+      ["SB", "SB - Shot blast"],
+      ["R", "R - Impreganate"],
+      ["OG", "OG - Impreganate"],
+      ["U", "U - UitraSonicWash"],
+      ["DR", "DR - DrawingPress(Sizing)"],
+      ["RP", "RP - Sizing"],
+      ["RO", "RO - Rolling"]
+    ],
+    "Machining": [
+      ["MC", "MC - Machining"],
+      ["NCL", "NCL - NC Lath."],
+      ["L", "L - Lath."],
+      ["GC", "GC - Grinding"],
+      ["DP", "DP - Throuth Pin"],
+      ["UT", "UT - InductionHarden"],
+      ["F", "F - Buffing"],
+      ["D", "D - Drilling"],
+      ["AS", "AS - Assembly"],
+      ["WE", "WE - Welding"]
+    ],
+    "Magna flux": [
+      ["SEM", "SEM - Magna flux"],
+      ["SEMT", "SEMT - Magna flux"]
+    ],
+    "Sort": [["SEL", "SEL - Sort"]],
+    "Pack": [["KON", "KON - Pack"]],
+    "Rework": [["SELD", "SELD - Sort dimension"]],
+    "Final Inspection": [["K", "K - Final Inspection"]]
+  };
 
-      const statusOptions = {
-        "ผสมผง": ["ผงเหล็ก", "ผงปั่น"],
-        "Compact": ["Green Part", "Quarantine"],
-        "Sinter & Steam": [
-          "รอ Sinter", "Sinter O.K", "Quarantine Sinter",
-          "รอ Steam 1", "Steam 1 OK", "Quarantine Steam 1",
-          "รอ Steam 2", "Steam 2 OK", "Quarantine Steam 2"
-        ],
-        "Finishing": [
-          "รอ Sizing", "Sizing OK", "รอ Rolling", "Rolling OK",
-          "รอ Rumble - Oil - Dry", "รอ Check Crack",
-          "รอ Shot blast", "Shot blast OK", "OK", "Quarantine",
-          "รอ Rumble2", "Quarantine Rumble2"
-        ],
-        "Machining": [
-          "Blank รอM/C", "Blank รอส่ง Sub con", "Blank รอส่ง Steam",
-          "Quarantine", "รอส่ง Sorting", "Blank รอชุบแข็ง", "ชุบแข็ง OK ส่ง Magna"
-        ],
-        "Sub Store": [
-          "Blank Wait for Sub-Con", "งานรอส่ง M/F,Rumble,Steam,Sort G1P", "Quarantine Blank Wait for Sub-Con", "Wait for Sorting",
-          "Quarantine รอส่ง Rework"
-        ],
-        "Magna flux": [
-          "รอ M/F (Blank Part)", "รอ M/F (Sorting Part)", "M/F OK", "Quarantine M/F"
-        ],
-        "Sort": [
-          "รอ M/F (Blank Part)", "รอ M/F (Sorting Part)", "M/F OK", "Quarantine M/F",
-          "งานBlank รอ Sort", "รอ Sort", "Quarantine Sort", "งานรอทิ้ง Sort",
-          "รอ Pack", "Pack OK (FG1)", "Re-oil (FG1)"
-        ],
-        "Pack": [
-          "รอ Pack", "Pack OK (FG1)", "Re-oil (FG1)", "Quarantine Pack"
-        ],
-        "Rework": [
-          "Quarantine Compact", "Quarantine Sinter", "Quarantine Steam", "Quarantine Finishing",
-          "Quarantine Machining", "Rework Blank Part", "Rework Sorting Part",
-          "Judgement (Blank part)", "Judgement (Sorting part)",
-          "Scrap Blank Part", "Scrap Sorting Part"
-        ]
-      };
+  const statusOptions = {
+    "ผสมผง": ["ผงเหล็ก", "ผงปั่น"],
+    "Compact": ["Green Part", "Quarantine"],
+    "Sinter & Steam": [
+      "รอ Sinter", "Sinter O.K", "Quarantine Sinter",
+      "รอ Steam 1", "Steam 1 OK", "Quarantine Steam 1",
+      "รอ Steam 2", "Steam 2 OK", "Quarantine Steam 2"
+    ],
+    "Finishing": [
+      "รอ Sizing", "Sizing OK", "รอ Rolling", "Rolling OK",
+      "รอ Rumble - Oil - Dry", "รอ Check Crack",
+      "รอ Shot blast", "Shot blast OK", "OK", "Quarantine",
+      "รอ Rumble2", "Quarantine Rumble2"
+    ],
+    "Machining": [
+      "Blank รอM/C", "Blank รอส่ง Sub con", "Blank รอส่ง Steam",
+      "Quarantine", "รอส่ง Sorting", "Blank รอชุบแข็ง", "ชุบแข็ง OK ส่ง Magna"
+    ],
+    "Sub Store": [
+      "Blank Wait for Sub-Con", "งานรอส่ง M/F,Rumble,Steam,Sort G1P",
+      "Quarantine Blank Wait for Sub-Con", "Wait for Sorting",
+      "Quarantine รอส่ง Rework"
+    ],
+    "Sort": [
+      "รอ M/F (Blank Part)", "รอ M/F (Sorting Part)", "M/F OK", "Quarantine M/F",
+      "งานBlank รอ Sort", "รอ Sort", "Quarantine Sort", "งานรอทิ้ง Sort",
+      "รอ Pack", "Pack OK (FG1)", "Re-oil (FG1)"
+    ],
+    "Pack": [
+      "รอ Pack", "Pack OK (FG1)", "Re-oil (FG1)", "Quarantine Pack"
+    ],
+    "Rework": [
+      "Quarantine Compact", "Quarantine Sinter", "Quarantine Steam", "Quarantine Finishing",
+      "Quarantine Machining", "Rework Blank Part", "Rework Sorting Part",
+      "Judgement (Blank part)", "Judgement (Sorting part)",
+      "Scrap Blank Part", "Scrap Sorting Part"
+    ],
+    "Magna flux": [
+      "รอ M/F (Blank Part)", "รอ M/F (Sorting Part)", "M/F OK", "Quarantine M/F"
+    ]
+    // ❌ ไม่ต้องเพิ่ม Final Inspection ในที่นี้
+  };
 
-      // จัดการกระบวนการย่อย
-      if (main === "ผสมผง" || main === "Sub Store") {
-        sub.disabled = true;
-        sub.style.backgroundColor = "#e5e7eb";
-        const option = document.createElement("option");
-        option.value = "ไม่มี";
-        option.text = "ไม่มี";
-        sub.appendChild(option);
-      } else if (["Compact", "Sort", "Pack", "Rework"].includes(main)) {
-        sub.disabled = false;
-        sub.style.backgroundColor = "#ffffff";
-        if (subOptions[main] && subOptions[main].length > 0) {
-          const [code, label] = subOptions[main][0];
-          const option = document.createElement("option");
-          option.value = code;
-          option.text = label;
-          sub.appendChild(option);
-        }
-      } else if (subOptions[main]) {
-        sub.disabled = false;
-        sub.style.backgroundColor = "#ffffff";
-        const defaultOption = document.createElement("option");
-        defaultOption.text = "-- เลือกกระบวนการย่อย --";
-        defaultOption.value = "";
-        sub.appendChild(defaultOption);
-        subOptions[main].forEach(([code, label]) => {
-          const opt = document.createElement("option");
-          opt.value = code;
-          opt.textContent = label;
-          sub.appendChild(opt);
-        });
-      } else {
-        sub.disabled = true;
-        sub.style.backgroundColor = "#e5e7eb";
-        const fallback = document.createElement("option");
-        fallback.value = "ไม่มี";
-        fallback.text = "-- ไม่มีข้อมูล --";
-        sub.appendChild(fallback);
-      }
+  // 🔽 Sub Process Handling
+  if (main === "ผสมผง" || main === "Sub Store") {
+    sub.disabled = true;
+    sub.style.backgroundColor = "#e5e7eb";
+    const option = document.createElement("option");
+    option.text = "ไม่มี";
+    sub.appendChild(option);
+  } else if (["Compact", "Sort", "Pack", "Rework", "Final Inspection"].includes(main)) {
+    sub.disabled = false;
+    sub.style.backgroundColor = "#ffffff";
+    const [code, label] = subOptions[main][0];
+    const option = document.createElement("option");
+    option.value = code;
+    option.text = label;
+    sub.appendChild(option);
+  } else if (subOptions[main]) {
+    sub.disabled = false;
+    sub.style.backgroundColor = "#ffffff";
+    const defaultOption = document.createElement("option");
+    defaultOption.text = "-- เลือกกระบวนการย่อย --";
+    defaultOption.value = "";
+    sub.appendChild(defaultOption);
+    subOptions[main].forEach(([code, label]) => {
+      const opt = document.createElement("option");
+      opt.value = code;
+      opt.textContent = label;
+      sub.appendChild(opt);
+    });
+  } else {
+    sub.disabled = true;
+    sub.style.backgroundColor = "#e5e7eb";
+    const fallback = document.createElement("option");
+    fallback.text = "-- ไม่มีข้อมูล --";
+    sub.appendChild(fallback);
+  }
 
-  // จัดการสถานะ
+  // 🔽 Status Handling
   if (statusOptions[main]) {
+    statusSelect.disabled = false;
+    statusSelect.style.backgroundColor = "#ffffff";
     const defaultOption = document.createElement("option");
     defaultOption.value = "";
     defaultOption.text = "-- เลือกสถานะ --";
@@ -711,6 +712,8 @@ const { error } = await supabase.from('inventory_tags').insert([{
       statusSelect.appendChild(option);
     });
   } else {
+    statusSelect.disabled = true;
+    statusSelect.style.backgroundColor = "#e5e7eb";
     const none = document.createElement("option");
     none.text = "ไม่มี";
     statusSelect.appendChild(none);
