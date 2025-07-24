@@ -545,6 +545,19 @@ tbody tr:hover {
   font-size: 1.2rem;
   color: var(--text-light);
 }
+    .button-group.vertical-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-top: 0.6rem;
+}
+
+.button-group.vertical-buttons .btn {
+  width: 100%;          /* กว้างสุดเท่ากับ parent */
+  min-width: 0;
+  box-sizing: border-box;
+}
+
 
   </style>
 </head>
@@ -616,20 +629,20 @@ tbody tr:hover {
               <input type="text" id="barcodeSearch" placeholder="ค้นหา Barcode..." />
             </div>
           </div>
-          <div class="button-group">
-            <button class="btn btn-primary" onclick="loadData()">
-              <i class="fas fa-search"></i>
-              ค้นหา
-            </button>
-            <button class="btn btn-secondary" onclick="clearFilters()">
-              <i class="fas fa-eraser"></i>
-              Clear
-            </button>
-            <button class="btn btn-secondary" onclick="exportExcel()">
-              <i class="fas fa-file-excel"></i>
-              ดาวน์โหลด Excel
-            </button>
-          </div>
+          <div class="button-group vertical-buttons">
+  <button class="btn btn-primary" onclick="loadData()">
+    <i class="fas fa-search"></i>
+    ค้นหา
+  </button>
+  <button class="btn btn-secondary" onclick="clearFilters()">
+    <i class="fas fa-eraser"></i>
+    Clear
+  </button>
+  <button class="btn btn-secondary" onclick="exportExcel()">
+    <i class="fas fa-file-excel"></i>
+    ดาวน์โหลด Excel
+  </button>
+</div>
         </aside>
 
         <!-- Tab Container (ขวา 80%) -->
