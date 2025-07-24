@@ -8,6 +8,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <!-- Font Awesome -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+  <!-- Flatpickr CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet" />
+  <!-- Styles -->
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
@@ -40,7 +43,8 @@
       margin: 0 auto;
       padding: 2rem;
     }
-    /* Header แบบต้นฉบับ 2 แถว */
+
+    /* Header */
     .header {
       background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
       padding: 1rem 2rem 1.2rem 2rem;
@@ -108,7 +112,55 @@
       box-shadow: var(--shadow-lg);
     }
 
-    /* เนื้อหา */
+    /* Controls Section (date filters) */
+    .controls {
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .input-group {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .input-group i {
+      position: absolute;
+      left: 10px;
+      color: var(--text-light);
+      font-size: 1rem;
+      pointer-events: none;
+    }
+    .input-group input {
+      padding: 0.5rem 0.75rem 0.5rem 2.5rem;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 2px solid var(--border-gray);
+      outline: none;
+      font-family: 'Kanit', sans-serif;
+      transition: border-color 0.3s ease;
+      width: 150px;
+    }
+    .input-group input:focus {
+      border-color: var(--secondary-blue);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    #btnFilter {
+      background: var(--primary-blue);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background-color 0.3s ease;
+    }
+    #btnFilter:hover {
+      background: var(--secondary-blue);
+    }
+
+    /* Factory Layout Section */
     .factory-layout {
       background: var(--white);
       border-radius: 20px;
@@ -116,7 +168,7 @@
       box-shadow: var(--shadow-lg);
       position: relative;
       min-height: 80vh;
-      overflow: hidden;
+      overflow: visible;
     }
     .layout-title {
       text-align: center;
@@ -125,22 +177,22 @@
       margin-bottom: 2rem;
       color: var(--text-dark);
       display: flex;
-      align-items: center;
-      gap: 0.5rem;
       justify-content: center;
+      gap: 0.5rem;
+      align-items: center;
     }
     .factory-floor {
       position: relative;
       width: 100%;
-      height: 750px; /* เพิ่มความสูงเล็กน้อยสำหรับ process เพิ่ม */
+      height: 750px;
       background: url('https://nicklp-rmt.github.io/D365InventoryData/pic/layout.jpg') no-repeat center center;
       background-size: cover;
       border: 3px solid var(--border-gray);
       border-radius: 12px;
-      overflow: hidden;
+      overflow: visible;
     }
 
-    /* Process Area */
+    /* Process Area styles */
     .process-area {
       position: absolute;
       border: 2px solid var(--border-gray);
@@ -148,7 +200,7 @@
       background-color: rgba(255, 255, 255, 0.85);
       box-shadow: var(--shadow);
       transition: box-shadow 0.3s ease;
-      cursor: default;
+      cursor: grab;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -158,10 +210,14 @@
       min-width: 150px;
       min-height: 120px;
       user-select: none;
+      touch-action: none; /* ป้องกัน scroll ระหว่างลาก */
+    }
+    .process-area:active {
+      cursor: grabbing;
     }
     .process-area:hover {
       box-shadow: var(--shadow-lg);
-      z-index: 10;
+      z-index: 20;
     }
     .process-icon {
       font-size: 2rem;
@@ -204,7 +260,6 @@
       background: linear-gradient(135deg, rgba(254, 242, 242, 0.85) 0%, rgba(255, 255, 255, 0.85) 100%);
       animation: pulse-red 2s infinite;
     }
-
     @keyframes pulse-green {
       0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.4); }
       50% { box-shadow: 0 0 0 10px rgba(16,185,129,0); }
@@ -218,7 +273,7 @@
       50% { box-shadow: 0 0 0 10px rgba(239,68,68,0); }
     }
 
-    /* ตำแหน่งและขนาด process areas */
+    /* ตำแหน่ง process area เริ่มต้น */
     .powder-mixing { top: 50px; left: 50px; }
     .compact       { top: 50px; left: 250px; }
     .sinter-steam  { top: 50px; left: 450px; }
@@ -231,45 +286,26 @@
     .pack          { top: 500px; left: 50px; }
     .rework        { top: 500px; left: 250px; }
 
-    /* Resize handles (เหมือนต้นฉบับ) */
+    /* Resize handles (คล้ายเดิม แต่ใช้ interact.js จัดการ) */
     .resize-handle {
       position: absolute;
+      width: 12px;
+      height: 12px;
       background: var(--primary-blue);
       opacity: 0;
+      border-radius: 2px;
+      z-index: 25;
+      user-select: none;
       transition: opacity 0.3s ease;
-      z-index: 2;
+      cursor: nwse-resize;
+      right: -3px;
+      bottom: -3px;
     }
     .process-area:hover .resize-handle {
       opacity: 0.7;
     }
     .resize-handle:hover {
       opacity: 1 !important;
-    }
-    .resize-se {
-      bottom: -3px;
-      right: -3px;
-      width: 12px;
-      height: 12px;
-      cursor: se-resize;
-      border-radius: 0 0 12px 0;
-    }
-    .resize-s {
-      bottom: -3px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 20px;
-      height: 6px;
-      cursor: s-resize;
-      border-radius: 0 0 6px 6px;
-    }
-    .resize-e {
-      right: -3px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 6px;
-      height: 20px;
-      cursor: e-resize;
-      border-radius: 0 6px 6px 0;
     }
 
     /* Responsive */
@@ -286,6 +322,9 @@
       }
       .header h1 {
         font-size: 1.5rem;
+      }
+      .controls {
+        justify-content: center;
       }
     }
   </style>
@@ -307,216 +346,272 @@
       </div>
     </div>
 
+    <!-- Controls (date filter) -->
+    <div class="controls">
+      <div class="input-group">
+        <i class="fas fa-calendar-alt"></i>
+        <input type="text" id="startDate" placeholder="วันที่เริ่มต้น" />
+      </div>
+      <div class="input-group">
+        <i class="fas fa-calendar-alt"></i>
+        <input type="text" id="endDate" placeholder="วันที่สิ้นสุด" />
+      </div>
+      <button id="btnFilter">ใช้ตัวกรอง</button>
+    </div>
+
     <div class="factory-layout">
       <div class="layout-title"><i class="fas fa-map"></i> แผนผังโรงงานและการกระจายชิ้นงาน</div>
       <div class="factory-floor">
 
         <!-- Process Areas -->
-        <div class="process-area powder-mixing high-volume" data-id="powder-mixing">
+        <div class="process-area powder-mixing high-volume" data-id="powder-mixing" style="transform: translate(0px, 0px);">
           <div class="process-icon"><i class="fas fa-flask"></i></div>
           <div class="process-name">ผสมผง</div>
           <div class="process-count">0</div>
           <div class="process-status">สถานะ</div>
-          <div class="resize-handle resize-se"></div>
-          <div class="resize-handle resize-s"></div>
-          <div class="resize-handle resize-e"></div>
+          <div class="resize-handle"></div>
         </div>
-
-        <div class="process-area compact medium-volume" data-id="compact">
+        <div class="process-area compact medium-volume" data-id="compact" style="transform: translate(0px, 0px);">
           <div class="process-icon"><i class="fas fa-compress-arrows-alt"></i></div>
           <div class="process-name">Compact</div>
           <div class="process-count">0</div>
           <div class="process-status">สถานะ</div>
-          <div class="resize-handle resize-se"></div>
-          <div class="resize-handle resize-s"></div>
-          <div class="resize-handle resize-e"></div>
+          <div class="resize-handle"></div>
         </div>
-
-        <div class="process-area sinter-steam high-volume" data-id="sinter-steam">
+        <div class="process-area sinter-steam high-volume" data-id="sinter-steam" style="transform: translate(0px, 0px);">
           <div class="process-icon"><i class="fas fa-fire"></i></div>
           <div class="process-name">Sinter & Steam</div>
           <div class="process-count">0</div>
           <div class="process-status">สถานะ</div>
-          <div class="resize-handle resize-se"></div>
-          <div class="resize-handle resize-s"></div>
-          <div class="resize-handle resize-e"></div>
+          <div class="resize-handle"></div>
         </div>
-
-        <div class="process-area finishing medium-volume" data-id="finishing">
+        <div class="process-area finishing medium-volume" data-id="finishing" style="transform: translate(0px, 0px);">
           <div class="process-icon"><i class="fas fa-gem"></i></div>
           <div class="process-name">Finishing</div>
           <div class="process-count">0</div>
           <div class="process-status">สถานะ</div>
-          <div class="resize-handle resize-se"></div>
-          <div class="resize-handle resize-s"></div>
-          <div class="resize-handle resize-e"></div>
+          <div class="resize-handle"></div>
         </div>
-
-        <div class="process-area machining high-volume" data-id="machining">
+        <div class="process-area machining high-volume" data-id="machining" style="transform: translate(0px, 0px);">
           <div class="process-icon"><i class="fas fa-cog"></i></div>
           <div class="process-name">Machining</div>
           <div class="process-count">0</div>
           <div class="process-status">สถานะ</div>
-          <div class="resize-handle resize-se"></div>
-          <div class="resize-handle resize-s"></div>
-          <div class="resize-handle resize-e"></div>
+          <div class="resize-handle"></div>
         </div>
-
-        <div class="process-area sub-store medium-volume" data-id="sub-store">
+        <div class="process-area sub-store medium-volume" data-id="sub-store" style="transform: translate(0px, 0px);">
           <div class="process-icon"><i class="fas fa-warehouse"></i></div>
           <div class="process-name">Sub Store</div>
           <div class="process-count">0</div>
           <div class="process-status">สถานะ</div>
-          <div class="resize-handle resize-se"></div>
-          <div class="resize-handle resize-s"></div>
-          <div class="resize-handle resize-e"></div>
+          <div class="resize-handle"></div>
         </div>
-
-        <div class="process-area final-inspection medium-volume" data-id="final-inspection">
+        <div class="process-area final-inspection medium-volume" data-id="final-inspection" style="transform: translate(0px, 0px);">
           <div class="process-icon"><i class="fas fa-clipboard-check"></i></div>
           <div class="process-name">Final Inspection</div>
           <div class="process-count">0</div>
           <div class="process-status">สถานะ</div>
-          <div class="resize-handle resize-se"></div>
-          <div class="resize-handle resize-s"></div>
-          <div class="resize-handle resize-e"></div>
+          <div class="resize-handle"></div>
         </div>
-
-        <div class="process-area magna-flux low-volume" data-id="magna-flux">
+        <div class="process-area magna-flux low-volume" data-id="magna-flux" style="transform: translate(0px, 0px);">
           <div class="process-icon"><i class="fas fa-magnet"></i></div>
           <div class="process-name">Magna flux</div>
           <div class="process-count">0</div>
           <div class="process-status">สถานะ</div>
-          <div class="resize-handle resize-se"></div>
-          <div class="resize-handle resize-s"></div>
-          <div class="resize-handle resize-e"></div>
+          <div class="resize-handle"></div>
         </div>
-
-        <div class="process-area sort medium-volume" data-id="sort">
+        <div class="process-area sort medium-volume" data-id="sort" style="transform: translate(0px, 0px);">
           <div class="process-icon"><i class="fas fa-sort-amount-down"></i></div>
           <div class="process-name">Sort</div>
           <div class="process-count">0</div>
           <div class="process-status">สถานะ</div>
-          <div class="resize-handle resize-se"></div>
-          <div class="resize-handle resize-s"></div>
-          <div class="resize-handle resize-e"></div>
+          <div class="resize-handle"></div>
         </div>
-
-        <div class="process-area pack medium-volume" data-id="pack">
+        <div class="process-area pack medium-volume" data-id="pack" style="transform: translate(0px, 0px);">
           <div class="process-icon"><i class="fas fa-box"></i></div>
           <div class="process-name">Pack</div>
           <div class="process-count">0</div>
           <div class="process-status">สถานะ</div>
-          <div class="resize-handle resize-se"></div>
-          <div class="resize-handle resize-s"></div>
-          <div class="resize-handle resize-e"></div>
+          <div class="resize-handle"></div>
         </div>
-
-        <div class="process-area rework low-volume" data-id="rework">
+        <div class="process-area rework low-volume" data-id="rework" style="transform: translate(0px, 0px);">
           <div class="process-icon"><i class="fas fa-tools"></i></div>
           <div class="process-name">Rework</div>
           <div class="process-count">0</div>
           <div class="process-status">สถานะ</div>
-          <div class="resize-handle resize-se"></div>
-          <div class="resize-handle resize-s"></div>
-          <div class="resize-handle resize-e"></div>
+          <div class="resize-handle"></div>
         </div>
-
       </div>
     </div>
   </div>
 
-<script src="https://unpkg.com/@supabase/supabase-js"></script>
-<script>
-  // สร้าง client Supabase
-  const supabaseClient = supabase.createClient(
-    'https://fvjminqjxfracpvdbjly.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2am1pbnFqeGZyYWNwdmRiamx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMxNTY4NTMsImV4cCI6MjA2ODczMjg1M30.N3X8-qSRQHa7FPIpbDlfL5ewY5_JeCShAuARczfmLgE'
-  );
+  <!-- Script dependencies -->
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@interactjs/interactjs/dist/interact.min.js"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js"></script>
 
-  const processList = [
-    'ผสมผง',
-    'Compact',
-    'Sinter & Steam',
-    'Finishing',
-    'Machining',
-    'Sub Store',
-    'Final Inspection',
-    'Magna flux',
-    'Sort',
-    'Pack',
-    'Rework'
-  ];
+  <script>
+    // สร้าง client Supabase
+    const supabaseClient = supabase.createClient(
+      'https://fvjminqjxfracpvdbjly.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2am1pbnFqeGZyYWNwdmRiamx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMxNTY4NTMsImV4cCI6MjA2ODczMjg1M30.N3X8-qSRQHa7FPIpbDlfL5ewY5_JeCShAuARczfmLgE'
+    );
 
-  // แปลงชื่อ process เป็น data-id class
-  function getDataIdFromProcessName(procName) {
-    const map = {
-      'ผสมผง': 'powder-mixing',
-      'Compact': 'compact',
-      'Sinter & Steam': 'sinter-steam',
-      'Finishing': 'finishing',
-      'Machining': 'machining',
-      'Sub Store': 'sub-store',
-      'Final Inspection': 'final-inspection',
-      'Magna flux': 'magna-flux',
-      'Sort': 'sort',
-      'Pack': 'pack',
-      'Rework': 'rework'
-    };
-    return map[procName] || '';
-  }
+    const processList = [
+      'ผสมผง',
+      'Compact',
+      'Sinter & Steam',
+      'Finishing',
+      'Machining',
+      'Sub Store',
+      'Final Inspection',
+      'Magna flux',
+      'Sort',
+      'Pack',
+      'Rework'
+    ];
 
-  async function loadProcessData() {
-    try {
-      const { data, error } = await supabaseClient
-        .from('inventory_tags')
-        .select('main_process, quantity');
+    function getDataIdFromProcessName(procName) {
+      const map = {
+        'ผสมผง': 'powder-mixing',
+        'Compact': 'compact',
+        'Sinter & Steam': 'sinter-steam',
+        'Finishing': 'finishing',
+        'Machining': 'machining',
+        'Sub Store': 'sub-store',
+        'Final Inspection': 'final-inspection',
+        'Magna flux': 'magna-flux',
+        'Sort': 'sort',
+        'Pack': 'pack',
+        'Rework': 'rework'
+      };
+      return map[procName] || '';
+    }
+
+    async function loadProcessDataWithDateFilter() {
+      const start = document.getElementById('startDate').value;
+      const end = document.getElementById('endDate').value;
+
+      let query = supabaseClient.from('inventory_tags').select('main_process, quantity');
+
+      if (start) query = query.gte('created_at', start);
+      if (end) query = query.lte('created_at', end);
+
+      const { data, error } = await query;
 
       if (error) {
-        console.error('Error loading Supabase data:', error);
+        console.error('Error loading filtered data:', error);
         return;
       }
 
-      // รวมจำนวนต่อ process
       const countMap = {};
       processList.forEach(p => countMap[p] = 0);
 
       data.forEach(row => {
-        if(row.main_process && countMap.hasOwnProperty(row.main_process)) {
+        if (row.main_process && countMap.hasOwnProperty(row.main_process)) {
           countMap[row.main_process] += Number(row.quantity) || 0;
         }
       });
 
-      // อัปเดต UI
       processList.forEach(proc => {
         const dataId = getDataIdFromProcessName(proc);
         const el = document.querySelector(`.process-area[data-id="${dataId}"]`);
-        if(el) {
+        if (el) {
           const countEl = el.querySelector('.process-count');
-          if(countEl) {
-            countEl.textContent = countMap[proc].toLocaleString();
+          if (countEl) {
+            const qty = countMap[proc] || 0;
+            countEl.textContent = qty.toLocaleString();
+
+            // แสดงสถานะสีตามเงื่อนไข
+            el.classList.remove('high-volume', 'medium-volume', 'low-volume');
+            if (qty > 1000) {
+              el.classList.add('high-volume');
+            } else if (qty >= 500) {
+              el.classList.add('medium-volume');
+            } else {
+              el.classList.add('low-volume');
+            }
           }
         }
       });
-    } catch(e) {
-      console.error('Exception loading process data:', e);
     }
-  }
 
-  // อัปเดตวันที่เวลาปัจจุบันใน header
-  function updateDatetime() {
-    const el = document.getElementById('currentDatetime');
-    const now = new Date();
-    el.textContent = now.toLocaleString('th-TH', {
-      year: 'numeric', month: 'short', day: 'numeric',
-      hour: '2-digit', minute: '2-digit', second: '2-digit'
-    });
-  }
-  setInterval(updateDatetime, 1000);
-  updateDatetime();
+    // อัปเดตวันที่เวลาปัจจุบันใน header
+    function updateDatetime() {
+      const el = document.getElementById('currentDatetime');
+      const now = new Date();
+      el.textContent = now.toLocaleString('th-TH', {
+        year: 'numeric', month: 'short', day: 'numeric',
+        hour: '2-digit', minute: '2-digit', second: '2-digit'
+      });
+    }
+    setInterval(updateDatetime, 1000);
+    updateDatetime();
 
-  // โหลดข้อมูล process เมื่อโหลดหน้า
-  loadProcessData();
-</script>
+    // กำหนด flatpickr บน input date
+    flatpickr('#startDate', { dateFormat: 'Y-m-d' });
+    flatpickr('#endDate', { dateFormat: 'Y-m-d' });
+
+    // ฟังก์ชันปุ่มใช้ตัวกรอง
+    document.getElementById('btnFilter').addEventListener('click', loadProcessDataWithDateFilter);
+
+    // โหลดข้อมูลเริ่มต้น (ไม่มี filter)
+    loadProcessDataWithDateFilter();
+
+    // --- interact.js ใช้สำหรับ drag และ resize ---
+    interact('.process-area')
+      .draggable({
+        inertia: true,
+        modifiers: [
+          interact.modifiers.restrictRect({
+            restriction: 'parent',
+            endOnly: true
+          })
+        ],
+        listeners: {
+          move (event) {
+            const target = event.target;
+            const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+            const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+
+            target.style.transform = `translate(${x}px, ${y}px)`;
+            target.setAttribute('data-x', x);
+            target.setAttribute('data-y', y);
+          }
+        }
+      })
+      .resizable({
+        edges: { left: true, right: true, bottom: true, top: true },
+        inertia: true,
+        modifiers: [
+          interact.modifiers.restrictEdges({
+            outer: 'parent',
+            endOnly: true
+          }),
+          interact.modifiers.restrictSize({
+            min: { width: 100, height: 80 }
+          })
+        ],
+        listeners: {
+          move (event) {
+            const target = event.target;
+            let x = (parseFloat(target.getAttribute('data-x')) || 0);
+            let y = (parseFloat(target.getAttribute('data-y')) || 0);
+
+            target.style.width = event.rect.width + 'px';
+            target.style.height = event.rect.height + 'px';
+
+            x += event.deltaRect.left;
+            y += event.deltaRect.top;
+
+            target.style.transform = `translate(${x}px, ${y}px)`;
+            target.setAttribute('data-x', x);
+            target.setAttribute('data-y', y);
+          }
+        }
+      })
+      .styleCursor(false);
+  </script>
+
 </body>
 </html>
