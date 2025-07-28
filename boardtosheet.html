@@ -395,6 +395,11 @@
     <div class="factory-layout">
       <div class="layout-title"><i class="fas fa-map"></i> แผนผังโรงงานและการกระจายชิ้นงาน</div>
       <div class="factory-floor">
+         <!-- ปุ่ม Fullscreen -->
+  <button id="btnFullscreen" title="ดูเต็มหน้าจอ" style="position:absolute; top:10px; right:10px; background:white; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; z-index:30;">
+    <i class="fas fa-expand"></i>
+  </button>
+        
         <div class="process-area powder-mixing high-volume" data-id="powder-mixing">
           <div class="process-icon"><i class="fas fa-flask"></i></div>
           <div class="process-name">ผสมผง</div>
@@ -480,275 +485,230 @@
   <script src="https://cdn.jsdelivr.net/npm/@interactjs/interactjs/dist/interact.min.js"></script>
 
   <script>
-   
+  // รายการกระบวนการ
+  const processList = [
+    'ผสมผง',
+    'Compact',
+    'Sinter & Steam',
+    'Finishing',
+    'Machining',
+    'Sub Store',
+    'Final Inspection',
+    'Magna flux',
+    'Sort',
+    'Pack',
+    'Rework'
+  ];
 
-    // รายการกระบวนการ
-    const processList = [
-      'ผสมผง',
-      'Compact',
-      'Sinter & Steam',
-      'Finishing',
-      'Machining',
-      'Sub Store',
-      'Final Inspection',
-      'Magna flux',
-      'Sort',
-      'Pack',
-      'Rework'
-    ];
+  // แปลงชื่อกระบวนการ เป็น data-id
+  function getDataIdFromProcessName(procName) {
+    const map = {
+      'ผสมผง': 'powder-mixing',
+      'Compact': 'compact',
+      'Sinter & Steam': 'sinter-steam',
+      'Finishing': 'finishing',
+      'Machining': 'machining',
+      'Sub Store': 'sub-store',
+      'Final Inspection': 'final-inspection',
+      'Magna flux': 'magna-flux',
+      'Sort': 'sort',
+      'Pack': 'pack',
+      'Rework': 'rework'
+    };
+    return map[procName] || '';
+  }
 
-    // แปลงชื่อกระบวนการ เป็น data-id
-    function getDataIdFromProcessName(procName) {
-      const map = {
-        'ผสมผง': 'powder-mixing',
-        'Compact': 'compact',
-        'Sinter & Steam': 'sinter-steam',
-        'Finishing': 'finishing',
-        'Machining': 'machining',
-        'Sub Store': 'sub-store',
-        'Final Inspection': 'final-inspection',
-        'Magna flux': 'magna-flux',
-        'Sort': 'sort',
-        'Pack': 'pack',
-        'Rework': 'rework'
-      };
-      return map[procName] || '';
-    }
+  // โหลดข้อมูลและอัปเดต process counts พร้อม filter วันที่
+  async function loadProcessDataWithDateFilter() {
+    const start = document.getElementById('startDate').value;
+    const end = document.getElementById('endDate').value;
+    const loadingEl = document.getElementById('loadingIndicator');
+    loadingEl.style.display = 'block'; // แสดงวงล้อโหลด
 
-    // โหลดข้อมูลและอัปเดต process counts พร้อม filter วันที่
-    async function loadProcessDataWithDateFilter() {
-  const start = document.getElementById('startDate').value;
-  const end = document.getElementById('endDate').value;
-  const loadingEl = document.getElementById('loadingIndicator');
-  loadingEl.style.display = 'block'; // แสดงวงล้อโหลด
+    try {
+      const url = 'https://script.google.com/macros/s/AKfycbwYy1acBX-V37hiU8lhTY-9YGWgVjVplQOIzhNg1-cNispv6L43_rCVRXVO-HqAfik/exec?page=getInventory';
+      const res = await fetch(url);
+      const data = await res.json();
 
-  try {
-    const url = 'https://script.google.com/macros/s/AKfycbwYy1acBX-V37hiU8lhTY-9YGWgVjVplQOIzhNg1-cNispv6L43_rCVRXVO-HqAfik/exec?page=getInventory';
-    const res = await fetch(url);
-    const data = await res.json();
+      const filtered = data.filter(row => {
+        const rawDate = row.Timestamp;
+        const dateOnly = new Date(rawDate).toISOString().split('T')[0];
+        return (!start || dateOnly >= start) && (!end || dateOnly <= end);
+      });
 
-    const filtered = data.filter(row => {
-      const rawDate = row.Timestamp;
-      const dateOnly = new Date(rawDate).toISOString().split('T')[0];
-      return (!start || dateOnly >= start) && (!end || dateOnly <= end);
-    });
+      const countMap = {};
+      processList.forEach(p => countMap[p] = 0);
 
-    const countMap = {};
-    processList.forEach(p => countMap[p] = 0);
+      filtered.forEach(row => {
+        if (row.mainProcess && countMap.hasOwnProperty(row.mainProcess)) {
+          countMap[row.mainProcess] += Number(row.Quantity || 0);
+        }
+      });
 
-    filtered.forEach(row => {
-      if (row.mainProcess && countMap.hasOwnProperty(row.mainProcess)) {
-        countMap[row.mainProcess] += Number(row.Quantity || 0);
-      }
-    });
-
-    processList.forEach(proc => {
-      const dataId = getDataIdFromProcessName(proc);
-      const el = document.querySelector(`.process-area[data-id="${dataId}"]`);
-      if (el) {
-        const countEl = el.querySelector('.process-count');
-        if (countEl) {
+      processList.forEach(proc => {
+        const dataId = getDataIdFromProcessName(proc);
+        const el = document.querySelector(`.process-area[data-id="${dataId}"]`);
+        if (el) {
+          const countEl = el.querySelector('.process-count');
+          const statusEl = el.querySelector('.process-status');
           const qty = countMap[proc] || 0;
           countEl.textContent = qty.toLocaleString();
 
           el.classList.remove('high-volume', 'medium-volume', 'low-volume');
           if (qty > 1000) {
             el.classList.add('high-volume');
+            statusEl.textContent = 'สูง';
           } else if (qty >= 500) {
             el.classList.add('medium-volume');
+            statusEl.textContent = 'ปานกลาง';
           } else {
             el.classList.add('low-volume');
+            statusEl.textContent = 'น้อย';
           }
         }
+      });
+
+    } catch (error) {
+      console.error('❌ Failed to load process data:', error);
+    } finally {
+      loadingEl.style.display = 'none'; // ซ่อนวงล้อโหลด
+    }
+  }
+
+  // อัปเดตเวลาปัจจุบันใน header
+  function updateDatetime() {
+    const el = document.getElementById('currentDatetime');
+    const now = new Date();
+    el.textContent = now.toLocaleString('th-TH', {
+      year: 'numeric', month: 'short', day: 'numeric',
+      hour: '2-digit', minute: '2-digit', second: '2-digit'
+    });
+  }
+  setInterval(updateDatetime, 1000);
+  updateDatetime();
+
+  // กำหนด flatpickr
+  flatpickr('#startDate', { dateFormat: 'Y-m-d' });
+  flatpickr('#endDate', { dateFormat: 'Y-m-d' });
+
+  // ปุ่มกรอง
+  document.getElementById('btnFilter').addEventListener('click', loadProcessDataWithDateFilter);
+
+  // ปุ่มรีเซ็ตตำแหน่ง
+  document.getElementById('btnResetLayout').addEventListener('click', () => {
+    localStorage.clear();
+    document.querySelectorAll('.process-area').forEach(card => {
+      card.style.transform = `translate(0px, 0px)`;
+      card.setAttribute('data-x', '0');
+      card.setAttribute('data-y', '0');
+      card.style.width = '';
+      card.style.height = '';
+    });
+  });
+
+  // ปุ่ม Fullscreen
+  document.getElementById('btnFullscreen')?.addEventListener('click', () => {
+    const layout = document.querySelector('.factory-layout');
+    if (!document.fullscreenElement) {
+      layout.requestFullscreen().catch(err => console.error('⚠️ Fullscreen error:', err));
+    } else {
+      document.exitFullscreen();
+    }
+  });
+
+  // โหลดครั้งแรก
+  loadProcessDataWithDateFilter();
+
+  // โหลดตำแหน่งการ์ดและขนาด
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.process-area').forEach(card => {
+      const id = card.dataset.id;
+      const savedPos = localStorage.getItem(`card-pos-${id}`);
+      const savedSize = localStorage.getItem(`card-size-${id}`);
+      let x = 0, y = 0;
+
+      if (savedPos) {
+        const pos = JSON.parse(savedPos);
+        x = pos.x;
+        y = pos.y;
+      }
+      card.style.transform = `translate(${x}px, ${y}px)`;
+      card.setAttribute('data-x', x);
+      card.setAttribute('data-y', y);
+
+      if (savedSize) {
+        const { width, height } = JSON.parse(savedSize);
+        card.style.width = width;
+        card.style.height = height;
       }
     });
 
-  } catch (error) {
-    console.error('❌ Failed to load process data:', error);
-  } finally {
-    loadingEl.style.display = 'none'; // ซ่อนวงล้อโหลด
-  }
-}
-
-
-    // อัปเดตเวลาปัจจุบันใน header
-    function updateDatetime() {
-      const el = document.getElementById('currentDatetime');
-      const now = new Date();
-      el.textContent = now.toLocaleString('th-TH', {
-        year: 'numeric', month: 'short', day: 'numeric',
-        hour: '2-digit', minute: '2-digit', second: '2-digit'
-      });
-    }
-    setInterval(updateDatetime, 1000);
-    updateDatetime();
-
-    // กำหนด flatpickr บน input
-    flatpickr('#startDate', { dateFormat: 'Y-m-d' });
-    flatpickr('#endDate', { dateFormat: 'Y-m-d' });
-
-    // ปุ่มตัวกรอง
-    document.getElementById('btnFilter').addEventListener('click', loadProcessDataWithDateFilter);
-
-    // ปุ่มรีเซ็ตตำแหน่ง
-    document.getElementById('btnResetLayout').addEventListener('click', () => {
-      localStorage.clear(); // ลบข้อมูลทั้งหมดที่บันทึกไว้ใน localStorage
-      document.querySelectorAll('.process-area').forEach(card => {
-        // ดึงค่า top, left เริ่มต้นจาก CSS ของแต่ละการ์ด
-        const style = window.getComputedStyle(card);
-        const initialTop = parseFloat(style.top);
-        const initialLeft = parseFloat(style.left);
-
-        // รีเซ็ต transform และ data-x, data-y ให้ตรงกับตำแหน่งเริ่มต้นใน CSS
-        card.style.transform = `translate(0px, 0px)`; // รีเซ็ต translate ให้เป็น 0,0 ก่อน
-        card.setAttribute('data-x', '0'); // รีเซ็ต data-x ให้เป็น 0
-        card.setAttribute('data-y', '0'); // รีเซ็ต data-y ให้เป็น 0
-
-        // เนื่องจาก interact.js จะใช้ transform: translate() เราจึงกำหนด top/left ผ่าน CSS ไว้
-        // และให้ interact.js จัดการ transform ต่อไป
-        // หากต้องการให้กลับไปที่ตำแหน่ง CSS โดยตรงต้องใช้ top/left แทน transform แต่จะขัดแย้งกับ interact.js
-        // วิธีที่ดีที่สุดคือใช้ transform และให้ค่า data-x, data-y เริ่มต้นเป็น 0
-        // และให้ CSS top/left เป็นตัวกำหนดตำแหน่งเริ่มต้นของ element
-
-        // รีเซ็ตขนาดกลับไปเป็นค่าเริ่มต้น (ถ้ามี)
-        card.style.width = '';
-        card.style.height = '';
-      });
-      console.log('Layout reset to default positions.');
-    });
-
-
-    // โหลดข้อมูลครั้งแรก (ไม่มี filter)
-    loadProcessDataWithDateFilter();
-
-    // เริ่มใช้งาน interact.js สำหรับ draggable และ resizable
-    document.addEventListener('DOMContentLoaded', () => {
-      // โหลดตำแหน่งและขนาดที่บันทึกไว้เมื่อ DOM โหลดเสร็จ
-      document.querySelectorAll('.process-area').forEach(card => {
-        const id = card.dataset.id;
-        const savedPos = localStorage.getItem(`card-pos-${id}`);
-        const savedSize = localStorage.getItem(`card-size-${id}`);
-
-        // ดึงค่า top, left เริ่มต้นจาก CSS
-        const style = window.getComputedStyle(card);
-        let x = 0; // interact.js will manage x,y based on translate()
-        let y = 0;
-
-        if (savedPos) {
-          const loadedPos = JSON.parse(savedPos);
-          x = loadedPos.x;
-          y = loadedPos.y;
-        }
-        // ไม่ต้องใช้ else if (defaultPositions[id]) เพราะตำแหน่งเริ่มต้นถูกกำหนดใน CSS แล้ว
-        // และ interact.js จะเริ่มต้น translate จาก 0,0 เสมอ หากไม่มี savedPos
-
-        card.style.transform = `translate(${x}px, ${y}px)`;
-        card.setAttribute('data-x', x);
-        card.setAttribute('data-y', y);
-
-        if (savedSize) {
-          const { width, height } = JSON.parse(savedSize);
-          card.style.width = width;
-          card.style.height = height;
-        }
-      });
-
-      // กำหนดการทำงานของ interact.js
-      interact('.process-area')
-        .draggable({
-          inertia: true,
-          modifiers: [
-            interact.modifiers.restrictRect({
-              restriction: 'parent', // จำกัดให้อยู่ภายใน parent (factory-floor)
-              endOnly: true
-            })
-          ],
-          listeners: {
-            start(event) {
-              // ป้องกันการเลื่อนหน้าเว็บขณะลากบนอุปกรณ์สัมผัส
-              document.body.style.overflow = 'hidden';
-              event.target.classList.add('dragging');
-            },
-            move(event) {
-              const target = event.target;
-              // ดึงค่า x, y ปัจจุบันจากการ์ด
-              const currentX = parseFloat(target.getAttribute('data-x')) || 0;
-              const currentY = parseFloat(target.getAttribute('data-y')) || 0;
-
-              // คำนวณตำแหน่งใหม่
-              const x = currentX + event.dx;
-              const y = currentY + event.dy;
-
-              // อัปเดต transform และ data attributes
-              target.style.transform = `translate(${x}px, ${y}px)`;
-              target.setAttribute('data-x', x);
-              target.setAttribute('data-y', y);
-            },
-            end(event) {
-              document.body.style.overflow = ''; // คืนค่า overflow
-              event.target.classList.remove('dragging');
-
-              // บันทึกตำแหน่งสุดท้ายลง localStorage
-              const target = event.target;
-              const pos = {
-                x: parseFloat(target.getAttribute('data-x')) || 0,
-                y: parseFloat(target.getAttribute('data-y')) || 0
-              };
-              localStorage.setItem(`card-pos-${target.dataset.id}`, JSON.stringify(pos));
-            }
+    interact('.process-area')
+      .draggable({
+        inertia: true,
+        modifiers: [
+          interact.modifiers.restrictRect({
+            restriction: 'parent',
+            endOnly: true
+          })
+        ],
+        listeners: {
+          start: e => { document.body.style.overflow = 'hidden'; e.target.classList.add('dragging'); },
+          move: e => {
+            const t = e.target;
+            const x = (parseFloat(t.getAttribute('data-x')) || 0) + e.dx;
+            const y = (parseFloat(t.getAttribute('data-y')) || 0) + e.dy;
+            t.style.transform = `translate(${x}px, ${y}px)`;
+            t.setAttribute('data-x', x);
+            t.setAttribute('data-y', y);
+          },
+          end: e => {
+            document.body.style.overflow = '';
+            e.target.classList.remove('dragging');
+            const t = e.target;
+            localStorage.setItem(`card-pos-${t.dataset.id}`, JSON.stringify({
+              x: parseFloat(t.getAttribute('data-x')) || 0,
+              y: parseFloat(t.getAttribute('data-y')) || 0
+            }));
           }
-        })
-        .resizable({
-          edges: { left: true, right: true, bottom: true, top: true },
-          inertia: true,
-          modifiers: [
-            interact.modifiers.restrictEdges({
-              outer: 'parent', // จำกัดให้อยู่ภายใน parent
-              endOnly: true
-            }),
-            interact.modifiers.restrictSize({
-              min: { width: 100, height: 80 } // กำหนดขนาดขั้นต่ำ
-            })
-          ],
-          listeners: {
-            move(event) {
-              const target = event.target;
-              let x = (parseFloat(target.getAttribute('data-x')) || 0);
-              let y = (parseFloat(target.getAttribute('data-y')) || 0);
-
-              // อัปเดตขนาด
-              target.style.width = event.rect.width + 'px';
-              target.style.height = event.rect.height + 'px';
-
-              // อัปเดตตำแหน่ง (สำหรับกรณีที่ปรับขนาดจากขอบบนหรือซ้าย)
-              x += event.deltaRect.left;
-              y += event.deltaRect.top;
-
-              // อัปเดต transform และ data attributes
-              target.style.transform = `translate(${x}px, ${y}px)`;
-              target.setAttribute('data-x', x);
-              target.setAttribute('data-y', y);
-            },
-            end(event) {
-              // บันทึกขนาดสุดท้ายลง localStorage
-              const target = event.target;
-              const size = {
-                width: target.style.width,
-                height: target.style.height
-              };
-              localStorage.setItem(`card-size-${target.dataset.id}`, JSON.stringify(size));
-
-              // บันทึกตำแหน่งล่าสุดด้วย (เพราะการปรับขนาดอาจเปลี่ยนตำแหน่ง)
-              const pos = {
-                x: parseFloat(target.getAttribute('data-x')) || 0,
-                y: parseFloat(target.getAttribute('data-y')) || 0
-              };
-              localStorage.setItem(`card-pos-${target.dataset.id}`, JSON.stringify(pos));
-            }
+        }
+      })
+      .resizable({
+        edges: { left: true, right: true, bottom: true, top: true },
+        inertia: true,
+        modifiers: [
+          interact.modifiers.restrictEdges({ outer: 'parent', endOnly: true }),
+          interact.modifiers.restrictSize({ min: { width: 100, height: 80 } })
+        ],
+        listeners: {
+          move: e => {
+            const t = e.target;
+            let x = parseFloat(t.getAttribute('data-x')) || 0;
+            let y = parseFloat(t.getAttribute('data-y')) || 0;
+            t.style.width = e.rect.width + 'px';
+            t.style.height = e.rect.height + 'px';
+            x += e.deltaRect.left;
+            y += e.deltaRect.top;
+            t.style.transform = `translate(${x}px, ${y}px)`;
+            t.setAttribute('data-x', x);
+            t.setAttribute('data-y', y);
+          },
+          end: e => {
+            const t = e.target;
+            localStorage.setItem(`card-size-${t.dataset.id}`, JSON.stringify({
+              width: t.style.width,
+              height: t.style.height
+            }));
+            localStorage.setItem(`card-pos-${t.dataset.id}`, JSON.stringify({
+              x: parseFloat(t.getAttribute('data-x')) || 0,
+              y: parseFloat(t.getAttribute('data-y')) || 0
+            }));
           }
-        })
-        .styleCursor(false); // ให้ interact.js ไม่จัดการ cursor เพื่อให้ CSS cursor: grab ทำงาน
-    });
-  </script>
+        }
+      })
+      .styleCursor(false);
+  });
+</script>
+
 </body>
 </html>
