@@ -772,11 +772,7 @@ tbody tr:hover {
   </div>
 
   <script>
-    const { createClient } = supabase;
-    const supabaseClient = createClient(
-      'https://fvjminqjxfracpvdbjly.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2am1pbnFqeGZyYWNwdmRiamx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMxNTY4NTMsImV4cCI6MjA2ODczMjg1M30.N3X8-qSRQHa7FPIpbDlfL5ewY5_JeCShAuARczfmLgE'
-    );
+    
 
     let allFilteredData = []; // ข้อมูลกรองทั้งหมด
     let currentPage = 1;
@@ -857,42 +853,45 @@ tbody tr:hover {
     }
 
     async function loadData() {
-      const tbody = document.getElementById('tableBody');
-      const summaryDiv = document.getElementById('summary');
-      const paginationControls = document.getElementById('paginationControls');
+  const url = 'https://script.google.com/macros/s/AKfycbwPgXJROc4KohcBPouGPEqMHA33-SiKYcCHf0XMdBboC_oSxA5M98JylddC8Kc3-zc/exec?page=getInventory';
 
-      tbody.innerHTML = `<tr><td colspan="7" class="loading"><i class="fas fa-spinner"></i><div>กำลังโหลดข้อมูล...</div></td></tr>`;
-      summaryDiv.innerHTML = `<div class="loading"><i class="fas fa-spinner"></i><div>กำลังโหลดข้อมูล...</div></div>`;
-      paginationControls.style.display = 'none';
+  const tbody = document.getElementById('tableBody');
+  const summaryDiv = document.getElementById('summary');
+  const paginationControls = document.getElementById('paginationControls');
 
-      try {
-        let { data, error } = await supabaseClient.from('inventory_tags').select('*').order('created_at', { ascending: false });
-        if (error) throw error;
+  tbody.innerHTML = `<tr><td colspan="7" class="loading"><i class="fas fa-spinner"></i><div>กำลังโหลดข้อมูล...</div></td></tr>`;
+  summaryDiv.innerHTML = `<div class="loading"><i class="fas fa-spinner"></i><div>กำลังโหลดข้อมูล...</div></div>`;
+  paginationControls.style.display = 'none';
 
-        const start = document.getElementById('startDate').value;
-        const end = document.getElementById('endDate').value;
-        const selectedProcess = document.getElementById('mainProcess').value;
-        const barcodeKeyword = document.getElementById('barcodeSearch').value.toLowerCase();
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
 
-        allFilteredData = data.filter((item) => {
-          const date = item.created_at.split('T')[0];
-          const matchDate = (!start || date >= start) && (!end || date <= end);
-          const matchProcess = !selectedProcess || item.main_process === selectedProcess;
-          const matchBarcode = !barcodeKeyword || (item.barcode && item.barcode.toLowerCase().includes(barcodeKeyword));
-          return matchDate && matchProcess && matchBarcode;
-        });
+    const start = document.getElementById('startDate').value;
+    const end = document.getElementById('endDate').value;
+    const selectedProcess = document.getElementById('mainProcess').value;
+    const barcodeKeyword = document.getElementById('barcodeSearch').value.toLowerCase();
 
-        updateSummary(allFilteredData);
+    allFilteredData = data.filter((item) => {
+      const rawDate = item.Timestamp;
+      const dateOnly = new Date(rawDate).toISOString().split('T')[0];
 
-        currentPage = 1;
-        displayTablePage(currentPage);
-      } catch (error) {
-        console.error('Error loading data:', error);
-        tbody.innerHTML = `<tr><td colspan="7" class="error"><i class="fas fa-exclamation-triangle"></i><div>เกิดข้อผิดพลาดในการโหลดข้อมูล</div></td></tr>`;
-        summaryDiv.innerHTML = `<div class="error"><i class="fas fa-exclamation-triangle"></i><div>เกิดข้อผิดพลาดในการโหลดข้อมูล</div></div>`;
-        paginationControls.style.display = 'none';
-      }
-    }
+      const matchDate = (!start || dateOnly >= start) && (!end || dateOnly <= end);
+      const matchProcess = !selectedProcess || item.mainProcess === selectedProcess;
+      const matchBarcode = !barcodeKeyword || (item.Barcode && item.Barcode.toLowerCase().includes(barcodeKeyword));
+      return matchDate && matchProcess && matchBarcode;
+    });
+
+    updateSummary(allFilteredData);
+    currentPage = 1;
+    displayTablePage(currentPage);
+  } catch (error) {
+    console.error('Error loading data:', error);
+    tbody.innerHTML = `<tr><td colspan="7" class="error"><i class="fas fa-exclamation-triangle"></i><div>เกิดข้อผิดพลาดในการโหลดข้อมูล</div></td></tr>`;
+    summaryDiv.innerHTML = `<div class="error"><i class="fas fa-exclamation-triangle"></i><div>เกิดข้อผิดพลาดในการโหลดข้อมูล</div></div>`;
+    paginationControls.style.display = 'none';
+  }
+}
 
     function updateSummary(data) {
       const summaryDiv = document.getElementById('summary');
@@ -901,8 +900,8 @@ tbody tr:hover {
         return;
       }
 
-      const totalQty = data.reduce((sum, row) => sum + Number(row.quantity || 0), 0);
-      const uniqueScanner = [...new Set(data.map((row) => row.scanner))].length;
+      const totalQty = data.reduce((sum, row) => sum + Number(row.Quantity || 0), 0);
+      const uniqueScanner = [...new Set(data.map((row) => row.Scanner))].length;
 
       const allProcesses = [
   'ผสมผง',
@@ -925,9 +924,9 @@ tbody tr:hover {
       });
 
       data.forEach((row) => {
-        const proc = row.main_process || 'อื่นๆ';
+        const proc = row.mainProcess || 'อื่นๆ';
         if (allProcesses.includes(proc)) {
-          processCount[proc] += Number(row.quantity || 0);
+          processCount[proc] += Number(row.Quantity || 0);
         }
       });
 
@@ -993,29 +992,28 @@ updateDatetime();
       }
 
       tbody.innerHTML = dataToDisplay
-        .map((row) => {
-          const adjustedDate = adjustTimeByHours(row.created_at, -7);
-          const displayBarcode = extractBarcodeBeforeSlash(row.barcode);
+  .map((row) => {
+    const adjustedDate = adjustTimeByHours(row.Timestamp, 0);
+    const displayBarcode = extractBarcodeBeforeSlash(row.Barcode);
 
-          return `
-          <tr>
-            <td>${adjustedDate.toLocaleDateString('th-TH', {
-              year: 'numeric',
-              month: 'short',
-              day: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit',
-            })}</td>
-            <td><code>${displayBarcode}</code></td>
-            <td>${row.main_process || '-'}</td>
-            <td>${row.sub_process || '-'}</td>
-            <td><span class="status">${row.status || '-'}</span></td>
-            <td><strong>${(row.quantity || 0).toLocaleString()}</strong></td>
-            <td>${row.scanner || '-'}</td>
-          </tr>
-        `;
-        })
-        .join('');
+    return `
+      <tr>
+        <td>${adjustedDate.toLocaleDateString('th-TH', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        })}</td>
+        <td><code>${displayBarcode}</code></td>
+        <td>${row.mainProcess || '-'}</td>
+        <td>${row.subProcess || '-'}</td>
+        <td><span class="status">${row.status || '-'}</span></td>
+        <td><strong>${(row.Quantity || 0).toLocaleString()}</strong></td>
+        <td>${row.Scanner || '-'}</td>
+      </tr>
+    `;
+  }).join('');
 
       setupPagination();
 
@@ -1101,8 +1099,8 @@ updateDatetime();
       try {
         const wb = XLSX.utils.book_new();
         const rows = allFilteredData.map((row) => {
-          const adjustedDate = adjustTimeByHours(row.created_at, -7);
-          const displayBarcode = extractBarcodeBeforeSlash(row.barcode);
+          const adjustedDate = adjustTimeByHours(row.Timestamp, 0); // หรือลบ 0 ชม. ถ้าใช้เวลาไทยอยู่แล้ว
+          const displayBarcode = extractBarcodeBeforeSlash(row.Barcode);
           return [
             adjustedDate.toLocaleDateString('th-TH', {
               year: 'numeric',
@@ -1112,11 +1110,11 @@ updateDatetime();
               minute: '2-digit',
             }),
             displayBarcode,
-            row.main_process || '-',
-            row.sub_process || '-',
+            row.mainProcess || '-',
+            row.subProcess || '-',
             row.status || '-',
-            (row.quantity || 0).toLocaleString(),
-            row.scanner || '-',
+            (row.Quantity || 0).toLocaleString(),
+            row.Scanner || '-',
           ];
         });
 
