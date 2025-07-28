@@ -664,7 +664,7 @@ tbody tr:hover {
     <div id="pageSearch" style="display: block;">
       <div class="main-flex">
         <!-- Controls Section (ซ้าย 20%) -->
-        <aside class="controls-section">
+        <aside id="filterSidebar" class="controls-section">
           <div class="controls-title">
             <i class="fas fa-filter"></i>
             ตัวกรองข้อมูล
@@ -767,6 +767,20 @@ tbody tr:hover {
             <div id="paginationControls" class="pagination-controls" style="display: none;"></div>
           </div>
         </section>
+
+        <aside id="tableSidebar" class="controls-section" style="display: none;">
+  <div class="controls-title">
+    <i class="fas fa-sliders-h"></i>
+    ตัวกรองตาราง
+  </div>
+  <div class="controls">
+    <div class="input-group">
+      <i class="fas fa-search"></i>
+      <input type="text" placeholder="ค้นหาในตาราง..." oninput="filterTableRows(this.value)">
+    </div>
+  </div>
+</aside>
+        
       </div>
     </div>
   </div>
@@ -803,20 +817,27 @@ tbody tr:hover {
 
     // สลับแท็บในหน้าค้นหา
     function switchTab(tabName, event) {
-      document.querySelectorAll('.tab-button').forEach((btn) => btn.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach((content) => content.classList.remove('active'));
+  document.querySelectorAll('.tab-button').forEach((btn) => btn.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach((content) => content.classList.remove('active'));
 
-      event.currentTarget.classList.add('active');
+  event.currentTarget.classList.add('active');
 
-      if (tabName === 'summary') {
-        document.getElementById('summaryTab').classList.add('active');
-        document.getElementById('paginationControls').style.display = 'none';
-      } else if (tabName === 'details') {
-        document.getElementById('detailsTab').classList.add('active');
-        document.getElementById('paginationControls').style.display = 'flex';
-        displayTablePage(currentPage);
-      }
-    }
+  const controlSection = document.getElementById('filterSidebar'); // ใส่ id ให้ sidebar แรก
+  const tableSidebar = document.getElementById('tableSidebar');
+
+  if (tabName === 'summary') {
+    document.getElementById('summaryTab').classList.add('active');
+    document.getElementById('paginationControls').style.display = 'none';
+    controlSection.style.display = 'flex';
+    tableSidebar.style.display = 'none';
+  } else if (tabName === 'details') {
+    document.getElementById('detailsTab').classList.add('active');
+    document.getElementById('paginationControls').style.display = 'flex';
+    controlSection.style.display = 'none';
+    tableSidebar.style.display = 'flex';
+    displayTablePage(currentPage);
+  }
+}
 
     flatpickr('#startDate', {
       dateFormat: 'Y-m-d',
@@ -827,6 +848,17 @@ tbody tr:hover {
       theme: 'light',
     });
 
+function filterTableRows(keyword) {
+  const rows = document.querySelectorAll('#tableBody tr');
+  const lowerKeyword = keyword.toLowerCase();
+
+  rows.forEach((row) => {
+    const text = row.textContent.toLowerCase();
+    row.style.display = text.includes(lowerKeyword) ? '' : 'none';
+  });
+}
+
+    
     function clearFilters() {
       document.getElementById('startDate').value = '';
       document.getElementById('endDate').value = '';
