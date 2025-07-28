@@ -465,14 +465,9 @@
 
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script src="https://cdn.jsdelivr.net/npm/@interactjs/interactjs/dist/interact.min.js"></script>
-  <script src="https://unpkg.com/@supabase/supabase-js"></script>
 
   <script>
-    // สร้าง client Supabase
-    const supabaseClient = supabase.createClient(
-      'https://fvjminqjxfracpvdbjly.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2am1pbnFqeGZyYWNwdmRiamx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMxNTY4NTMsImV4cCI6MjA2ODczMjg1M30.N3X8-qSRQHa7FPIpbDlfL5ewY5_JeCShAuARczfmLgE'
-    );
+   
 
     // รายการกระบวนการ
     const processList = [
@@ -509,56 +504,56 @@
 
     // โหลดข้อมูลและอัปเดต process counts พร้อม filter วันที่
     async function loadProcessDataWithDateFilter() {
-      const start = document.getElementById('startDate').value;
-      const end = document.getElementById('endDate').value;
+  const start = document.getElementById('startDate').value;
+  const end = document.getElementById('endDate').value;
 
-      try {
-        let query = supabaseClient.from('inventory_tags').select('main_process, quantity');
+  try {
+    const url = 'https://script.google.com/macros/s/AKfycbwYy1acBX-V37hiU8lhTY-9YGWgVjVplQOIzhNg1-cNispv6L43_rCVRXVO-HqAfik/exec?page=getInventory';
 
-        if (start) query = query.gte('created_at', start);
-        if (end) query = query.lte('created_at', end);
+    const res = await fetch(url);
+    const data = await res.json();
 
-        const { data, error } = await query;
+    const filtered = data.filter(row => {
+      const rawDate = row.Timestamp;
+      const dateOnly = new Date(rawDate).toISOString().split('T')[0];
+      return (!start || dateOnly >= start) && (!end || dateOnly <= end);
+    });
 
-        if (error) {
-          console.error('Error loading filtered data:', error);
-          return;
-        }
+    const countMap = {};
+    processList.forEach(p => countMap[p] = 0);
 
-        const countMap = {};
-        processList.forEach(p => countMap[p] = 0);
-
-        data.forEach(row => {
-          if (row.main_process && countMap.hasOwnProperty(row.main_process)) {
-            countMap[row.main_process] += Number(row.quantity) || 0;
-          }
-        });
-
-        processList.forEach(proc => {
-          const dataId = getDataIdFromProcessName(proc);
-          const el = document.querySelector(`.process-area[data-id="${dataId}"]`);
-          if (el) {
-            const countEl = el.querySelector('.process-count');
-            if (countEl) {
-              const qty = countMap[proc] || 0;
-              countEl.textContent = qty.toLocaleString();
-
-              // กำหนดสถานะสี
-              el.classList.remove('high-volume', 'medium-volume', 'low-volume');
-              if (qty > 1000) {
-                el.classList.add('high-volume');
-              } else if (qty >= 500) {
-                el.classList.add('medium-volume');
-              } else {
-                el.classList.add('low-volume');
-              }
-            }
-          }
-        });
-      } catch (err) {
-        console.error('Error querying supabase:', err);
+    filtered.forEach(row => {
+      if (row.mainProcess && countMap.hasOwnProperty(row.mainProcess)) {
+        countMap[row.mainProcess] += Number(row.Quantity || 0);
       }
-    }
+    });
+
+    processList.forEach(proc => {
+      const dataId = getDataIdFromProcessName(proc);
+      const el = document.querySelector(`.process-area[data-id="${dataId}"]`);
+      if (el) {
+        const countEl = el.querySelector('.process-count');
+        if (countEl) {
+          const qty = countMap[proc] || 0;
+          countEl.textContent = qty.toLocaleString();
+
+          el.classList.remove('high-volume', 'medium-volume', 'low-volume');
+          if (qty > 1000) {
+            el.classList.add('high-volume');
+          } else if (qty >= 500) {
+            el.classList.add('medium-volume');
+          } else {
+            el.classList.add('low-volume');
+          }
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Failed to load process data:', error);
+  }
+}
+
 
     // อัปเดตเวลาปัจจุบันใน header
     function updateDatetime() {
