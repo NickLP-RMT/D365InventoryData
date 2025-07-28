@@ -11,10 +11,7 @@
   <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
-    /* Global Reset */
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    /* CSS Variables for consistent styling */
     :root {
       --primary-blue: #1e40af;
       --secondary-blue: #3b82f6;
@@ -33,7 +30,6 @@
       --danger-red: #ef4444;
     }
 
-    /* Body Styling */
     body {
       font-family: 'Kanit', sans-serif;
       background: linear-gradient(135deg, var(--light-gray) 0%, #e0f2fe 100%);
@@ -48,7 +44,7 @@
       padding: 2rem;
     }
 
-    /* Header Styling */
+    /* Header */
     .header {
       background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
       padding: 1rem 2rem 1.2rem 2rem;
@@ -353,34 +349,6 @@
         justify-content: center;
       }
     }
-
-    /* Loading Overlay Styles (similar to reporttosheet.html) */
-    .loading-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(255, 255, 255, 0.8);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-      flex-direction: column;
-      gap: 1rem;
-      color: var(--primary-blue);
-      font-size: 1.2rem;
-      font-weight: 500;
-    }
-
-    .loading-overlay i {
-      font-size: 3rem;
-      animation: spin 1.5s linear infinite;
-    }
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
   </style>
 </head>
 <body>
@@ -391,7 +359,7 @@
         <div id="currentDatetime" style="font-size:1rem; font-weight: 500; opacity: 0.9;"></div>
       </div>
       <div class="header-row">
-        <p>แสดงผังโรงงานและการกระจายชิ้นงาน</p>
+        <p>แสดงผังโรงงานและกระบวนการทำงาน CHP</p>
         <nav class="header-menu">
           <a href="boardtosheet.html" class="header-menu-btn active" id="btnDashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
           <a href="reporttosheet.html" class="header-menu-btn" id="btnSearch"><i class="fas fa-search"></i> ค้นหา</a>
@@ -412,13 +380,18 @@
       <button id="btnResetLayout">รีเซ็ตตำแหน่ง</button>
     </div>
 
+<!-- วงล้อโหลด -->
+<div id="loadingIndicator" style="display:none; text-align:center; margin:1rem 0; color:#64748b;">
+  <i class="fas fa-spinner fa-spin" style="font-size:1.5rem;"></i> กำลังโหลดข้อมูล...
+</div>
+
     <div class="factory-layout">
       <div class="layout-title"><i class="fas fa-map"></i> แผนผังโรงงานและการกระจายชิ้นงาน</div>
       <div class="factory-floor">
-          <!-- ปุ่ม Fullscreen -->
-          <button id="btnFullscreen" title="ดูเต็มหน้าจอ" style="position:absolute; top:10px; right:10px; background:white; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; z-index:30;">
-            <i class="fas fa-expand"></i>
-          </button>
+         <!-- ปุ่ม Fullscreen -->
+  <button id="btnFullscreen" title="ดูเต็มหน้าจอ" style="position:absolute; top:10px; right:10px; background:white; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; z-index:30;">
+    <i class="fas fa-expand"></i>
+  </button>
         
         <div class="process-area powder-mixing high-volume" data-id="powder-mixing">
           <div class="process-icon"><i class="fas fa-flask"></i></div>
@@ -499,263 +472,240 @@
         </div>
 
         <div class="process-area" style="top: 20px; right: 20px; position: absolute; width: 180px;" data-id="legend">
-          <div class="process-name">🔵 เงื่อนไขปริมาณ</div>
-          <div class="process-status" style="font-size: 0.85rem;">
-            <div>🟢 ปริมาณมาก &gt; 1000</div>
-            <div>🟠 ปานกลาง 500–1000</div>
-            <div>🔴 ปริมาณน้อย &lt; 500</div>
-          </div>
-        </div>
+    <div class="process-name">🔵 เงื่อนไขปริมาณ</div>
+    <div class="process-status" style="font-size: 0.85rem;">
+      <div>🟢 ปริมาณมาก &gt; 1000</div>
+      <div>🟠 ปานกลาง 500–1000</div>
+      <div>🔴 ปริมาณน้อย &lt; 500</div>
+    </div>
+  </div>
+</div>
       </div>
     </div>
   </div>
 
-  <!-- Loading Overlay (similar to reporttosheet.html) -->
-  <div id="loadingOverlay" class="loading-overlay" style="display: none;">
-    <i class="fas fa-sync-alt"></i>
-    <span>กำลังโหลดข้อมูล... กรุณารอสักครู่</span>
-  </div>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@interactjs/interactjs/dist/interact.min.js"></script>
 
   <script>
-    const processList = [
-      'ผสมผง', 'Compact', 'Sinter & Steam', 'Finishing',
-      'Machining', 'Sub Store', 'Final Inspection',
-      'Magna flux', 'Sort', 'Pack', 'Rework'
-    ];
+const processList = [
+  'ผสมผง', 'Compact', 'Sinter & Steam', 'Finishing',
+  'Machining', 'Sub Store', 'Final Inspection',
+  'Magna flux', 'Sort', 'Pack', 'Rework'
+];
 
-    /**
-     * Shows the global loading overlay.
-     */
-    function showLoadingOverlay() {
-      document.getElementById('loadingOverlay').style.display = 'flex';
-    }
+function getDataIdFromProcessName(procName) {
+  const map = {
+    'ผสมผง': 'powder-mixing',
+    'Compact': 'compact',
+    'Sinter & Steam': 'sinter-steam',
+    'Finishing': 'finishing',
+    'Machining': 'machining',
+    'Sub Store': 'sub-store',
+    'Final Inspection': 'final-inspection',
+    'Magna flux': 'magna-flux',
+    'Sort': 'sort',
+    'Pack': 'pack',
+    'Rework': 'rework'
+  };
+  return map[procName] || '';
+}
 
-    /**
-     * Hides the global loading overlay.
-     */
-    function hideLoadingOverlay() {
-      document.getElementById('loadingOverlay').style.display = 'none';
-    }
+async function loadProcessDataWithDateFilter() {
+  const start = document.getElementById('startDate').value;
+  const end = document.getElementById('endDate').value;
 
-    function getDataIdFromProcessName(procName) {
-      const map = {
-        'ผสมผง': 'powder-mixing',
-        'Compact': 'compact',
-        'Sinter & Steam': 'sinter-steam',
-        'Finishing': 'finishing',
-        'Machining': 'machining',
-        'Sub Store': 'sub-store',
-        'Final Inspection': 'final-inspection',
-        'Magna flux': 'magna-flux',
-        'Sort': 'sort',
-        'Pack': 'pack',
-        'Rework': 'rework'
-      };
-      return map[procName] || '';
-    }
+  Swal.fire({
+    title: 'กำลังโหลดข้อมูล...',
+    allowOutsideClick: false,
+    didOpen: () => Swal.showLoading()
+  });
 
-    async function loadProcessDataWithDateFilter() {
-      const start = document.getElementById('startDate').value;
-      const end = document.getElementById('endDate').value;
+  try {
+    const url = 'https://script.google.com/macros/s/AKfycbwYy1acBX-V37hiU8lhTY-9YGWgVjVplQOIzhNg1-cNispv6L43_rCVRXVO-HqAfik/exec?page=getInventory';
+    const res = await fetch(url);
+    const data = await res.json();
 
-      showLoadingOverlay(); // Show global loading overlay
-
-      try {
-        const url = 'https://script.google.com/macros/s/AKfycbwYy1acBX-V37hiU8lhTY-9YGWgVjVplQOIzhNg1-cNispv6L43_rCVRXVO-HqAfik/exec?page=getInventory';
-        const res = await fetch(url);
-        if (!res.ok) {
-            throw new Error(`HTTP error! status: ${res.status}`);
-        }
-        const data = await res.json();
-
-        const filtered = data.filter(row => {
-          const rawDate = row.Timestamp;
-          const dateOnly = new Date(rawDate).toISOString().split('T')[0];
-          return (!start || dateOnly >= start) && (!end || dateOnly <= end);
-        });
-
-        const countMap = {};
-        processList.forEach(p => countMap[p] = 0);
-
-        filtered.forEach(row => {
-          if (row.mainProcess && countMap.hasOwnProperty(row.mainProcess)) {
-            countMap[row.mainProcess] += Number(row.Quantity || 0);
-          }
-        });
-
-        processList.forEach(proc => {
-          const dataId = getDataIdFromProcessName(proc);
-          const el = document.querySelector(`.process-area[data-id="${dataId}"]`);
-          if (el) {
-            const qty = countMap[proc] || 0;
-            el.querySelector('.process-count').textContent = qty.toLocaleString();
-
-            const statusEl = el.querySelector('.process-status');
-            el.classList.remove('high-volume', 'medium-volume', 'low-volume');
-
-            if (qty > 1000) {
-              el.classList.add('high-volume');
-              statusEl.textContent = 'ปริมาณมาก';
-            } else if (qty >= 500) {
-              el.classList.add('medium-volume');
-              statusEl.textContent = 'ปริมาณปานกลาง';
-            } else {
-              el.classList.add('low-volume');
-              statusEl.textContent = 'ปริมาณน้อย';
-            }
-          }
-        });
-
-      } catch (error) {
-        console.error('❌ Failed to load process data:', error);
-        Swal.fire('เกิดข้อผิดพลาด', `ไม่สามารถโหลดข้อมูลได้: ${error.message || String(error)}`, 'error');
-      } finally {
-        hideLoadingOverlay(); // Hide global loading overlay
-      }
-    }
-
-    function updateDatetime() {
-      const el = document.getElementById('currentDatetime');
-      const now = new Date();
-      el.textContent = now.toLocaleString('th-TH', {
-        year: 'numeric', month: 'short', day: 'numeric',
-        hour: '2-digit', minute: '2-digit', second: '2-digit'
-      });
-    }
-    setInterval(updateDatetime, 1000);
-    updateDatetime();
-
-    flatpickr('#startDate', { dateFormat: 'Y-m-d' });
-    flatpickr('#endDate', { dateFormat: 'Y-m-d' });
-    document.getElementById('btnFilter').addEventListener('click', loadProcessDataWithDateFilter);
-
-    document.getElementById('btnResetLayout').addEventListener('click', () => {
-      localStorage.clear();
-      document.querySelectorAll('.process-area').forEach(card => {
-        card.style.transform = `translate(0px, 0px)`;
-        card.setAttribute('data-x', '0');
-        card.setAttribute('data-y', '0');
-        card.style.width = '';
-        card.style.height = '';
-      });
+    const filtered = data.filter(row => {
+      const rawDate = row.Timestamp;
+      const dateOnly = new Date(rawDate).toISOString().split('T')[0];
+      return (!start || dateOnly >= start) && (!end || dateOnly <= end);
     });
 
-    document.addEventListener('DOMContentLoaded', () => {
-      document.querySelectorAll('.process-area').forEach(card => {
-        const id = card.dataset.id;
-        const savedPos = localStorage.getItem(`card-pos-${id}`);
-        const savedSize = localStorage.getItem(`card-size-${id}`);
-        let x = 0, y = 0;
+    const countMap = {};
+    processList.forEach(p => countMap[p] = 0);
 
-        if (savedPos) {
-          try { // Add try-catch for parsing localStorage data
-            const loadedPos = JSON.parse(savedPos);
-            x = loadedPos.x;
-            y = loadedPos.y;
-          } catch (e) {
-            console.error(`Error parsing saved position for ${id}:`, e);
-            localStorage.removeItem(`card-pos-${id}`); // Clear corrupted data
-          }
-        }
-
-        card.style.transform = `translate(${x}px, ${y}px)`;
-        card.setAttribute('data-x', x);
-        card.setAttribute('data-y', y);
-
-        if (savedSize) {
-          try { // Add try-catch for parsing localStorage data
-            const { width, height } = JSON.parse(savedSize);
-            card.style.width = width;
-            card.style.height = height;
-          } catch (e) {
-            console.error(`Error parsing saved size for ${id}:`, e);
-            localStorage.removeItem(`card-size-${id}`); // Clear corrupted data
-          }
-        }
-      });
-
-      interact('.process-area')
-        .draggable({
-          inertia: true,
-          modifiers: [interact.modifiers.restrictRect({ restriction: 'parent', endOnly: true })],
-          listeners: {
-            start(e) {
-              document.body.style.overflow = 'hidden';
-              e.target.classList.add('dragging');
-            },
-            move(e) {
-              const target = e.target;
-              let x = parseFloat(target.getAttribute('data-x')) || 0;
-              let y = parseFloat(target.getAttribute('data-y')) || 0;
-              x += e.dx;
-              y += e.dy;
-              target.style.transform = `translate(${x}px, ${y}px)`;
-              target.setAttribute('data-x', x);
-              target.setAttribute('data-y', y);
-            },
-            end(e) {
-              document.body.style.overflow = '';
-              e.target.classList.remove('dragging');
-              const target = e.target;
-              const pos = {
-                x: parseFloat(target.getAttribute('data-x')) || 0,
-                y: parseFloat(target.getAttribute('data-y')) || 0
-              };
-              localStorage.setItem(`card-pos-${target.dataset.id}`, JSON.stringify(pos));
-            }
-          }
-        })
-        .resizable({
-          edges: { top: true, left: true, right: true, bottom: true },
-          modifiers: [
-            interact.modifiers.restrictEdges({ outer: 'parent', endOnly: true }),
-            interact.modifiers.restrictSize({ min: { width: 100, height: 80 } })
-          ],
-          listeners: {
-            move(e) {
-              const target = e.target;
-              let x = (parseFloat(target.getAttribute('data-x')) || 0) + e.deltaRect.left;
-              let y = (parseFloat(target.getAttribute('data-y')) || 0) + e.deltaRect.top;
-              target.style.width = e.rect.width + 'px';
-              target.style.height = e.rect.height + 'px';
-              target.style.transform = `translate(${x}px, ${y}px)`;
-              target.setAttribute('data-x', x);
-              target.setAttribute('data-y', y);
-            },
-            end(e) {
-              const target = e.target;
-              const size = {
-                width: target.style.width,
-                height: target.style.height
-              };
-              localStorage.setItem(`card-size-${target.dataset.id}`, JSON.stringify(size));
-              const pos = {
-                x: parseFloat(target.getAttribute('data-x')) || 0,
-                y: parseFloat(target.getAttribute('data-y')) || 0
-              };
-              localStorage.setItem(`card-pos-${target.dataset.id}`, JSON.stringify(pos));
-            }
-          }
-        })
-        .styleCursor(false);
-    });
-
-    // Fullscreen toggle
-    document.addEventListener('DOMContentLoaded', () => {
-      const btn = document.getElementById('btnFullscreen');
-      if (btn) {
-        btn.addEventListener('click', () => {
-          const el = document.querySelector('.factory-layout');
-          if (!document.fullscreenElement) {
-            el.requestFullscreen?.();
-          } else {
-            document.exitFullscreen?.();
-          }
-        });
+    filtered.forEach(row => {
+      if (row.mainProcess && countMap.hasOwnProperty(row.mainProcess)) {
+        countMap[row.mainProcess] += Number(row.Quantity || 0);
       }
     });
 
-    loadProcessDataWithDateFilter();
-  </script>
+    processList.forEach(proc => {
+      const dataId = getDataIdFromProcessName(proc);
+      const el = document.querySelector(`.process-area[data-id="${dataId}"]`);
+      if (el) {
+        const qty = countMap[proc] || 0;
+        el.querySelector('.process-count').textContent = qty.toLocaleString();
+
+        const statusEl = el.querySelector('.process-status');
+        el.classList.remove('high-volume', 'medium-volume', 'low-volume');
+
+        if (qty > 1000) {
+          el.classList.add('high-volume');
+          statusEl.textContent = 'ปริมาณมาก';
+        } else if (qty >= 500) {
+          el.classList.add('medium-volume');
+          statusEl.textContent = 'ปริมาณปานกลาง';
+        } else {
+          el.classList.add('low-volume');
+          statusEl.textContent = 'ปริมาณน้อย';
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Failed to load process data:', error);
+    Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูลได้', 'error');
+  } finally {
+    Swal.close();
+  }
+}
+
+function updateDatetime() {
+  const el = document.getElementById('currentDatetime');
+  const now = new Date();
+  el.textContent = now.toLocaleString('th-TH', {
+    year: 'numeric', month: 'short', day: 'numeric',
+    hour: '2-digit', minute: '2-digit', second: '2-digit'
+  });
+}
+setInterval(updateDatetime, 1000);
+updateDatetime();
+
+flatpickr('#startDate', { dateFormat: 'Y-m-d' });
+flatpickr('#endDate', { dateFormat: 'Y-m-d' });
+document.getElementById('btnFilter').addEventListener('click', loadProcessDataWithDateFilter);
+
+document.getElementById('btnResetLayout').addEventListener('click', () => {
+  localStorage.clear();
+  document.querySelectorAll('.process-area').forEach(card => {
+    card.style.transform = `translate(0px, 0px)`;
+    card.setAttribute('data-x', '0');
+    card.setAttribute('data-y', '0');
+    card.style.width = '';
+    card.style.height = '';
+  });
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.process-area').forEach(card => {
+    const id = card.dataset.id;
+    const savedPos = localStorage.getItem(`card-pos-${id}`);
+    const savedSize = localStorage.getItem(`card-size-${id}`);
+    let x = 0, y = 0;
+
+    if (savedPos) {
+      const loadedPos = JSON.parse(savedPos);
+      x = loadedPos.x;
+      y = loadedPos.y;
+    }
+
+    card.style.transform = `translate(${x}px, ${y}px)`;
+    card.setAttribute('data-x', x);
+    card.setAttribute('data-y', y);
+
+    if (savedSize) {
+      const { width, height } = JSON.parse(savedSize);
+      card.style.width = width;
+      card.style.height = height;
+    }
+  });
+
+  interact('.process-area')
+    .draggable({
+      inertia: true,
+      modifiers: [interact.modifiers.restrictRect({ restriction: 'parent', endOnly: true })],
+      listeners: {
+        start(e) {
+          document.body.style.overflow = 'hidden';
+          e.target.classList.add('dragging');
+        },
+        move(e) {
+          const target = e.target;
+          let x = parseFloat(target.getAttribute('data-x')) || 0;
+          let y = parseFloat(target.getAttribute('data-y')) || 0;
+          x += e.dx;
+          y += e.dy;
+          target.style.transform = `translate(${x}px, ${y}px)`;
+          target.setAttribute('data-x', x);
+          target.setAttribute('data-y', y);
+        },
+        end(e) {
+          document.body.style.overflow = '';
+          e.target.classList.remove('dragging');
+          const target = e.target;
+          const pos = {
+            x: parseFloat(target.getAttribute('data-x')) || 0,
+            y: parseFloat(target.getAttribute('data-y')) || 0
+          };
+          localStorage.setItem(`card-pos-${target.dataset.id}`, JSON.stringify(pos));
+        }
+      }
+    })
+    .resizable({
+      edges: { top: true, left: true, right: true, bottom: true },
+      modifiers: [
+        interact.modifiers.restrictEdges({ outer: 'parent', endOnly: true }),
+        interact.modifiers.restrictSize({ min: { width: 100, height: 80 } })
+      ],
+      listeners: {
+        move(e) {
+          const target = e.target;
+          let x = (parseFloat(target.getAttribute('data-x')) || 0) + e.deltaRect.left;
+          let y = (parseFloat(target.getAttribute('data-y')) || 0) + e.deltaRect.top;
+          target.style.width = e.rect.width + 'px';
+          target.style.height = e.rect.height + 'px';
+          target.style.transform = `translate(${x}px, ${y}px)`;
+          target.setAttribute('data-x', x);
+          target.setAttribute('data-y', y);
+        },
+        end(e) {
+          const target = e.target;
+          const size = {
+            width: target.style.width,
+            height: target.style.height
+          };
+          localStorage.setItem(`card-size-${target.dataset.id}`, JSON.stringify(size));
+          const pos = {
+            x: parseFloat(target.getAttribute('data-x')) || 0,
+            y: parseFloat(target.getAttribute('data-y')) || 0
+          };
+          localStorage.setItem(`card-pos-${target.dataset.id}`, JSON.stringify(pos));
+        }
+      }
+    })
+    .styleCursor(false);
+});
+
+// Fullscreen toggle
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('btnFullscreen');
+  if (btn) {
+    btn.addEventListener('click', () => {
+      const el = document.querySelector('.factory-layout');
+      if (!document.fullscreenElement) {
+        el.requestFullscreen?.();
+      } else {
+        document.exitFullscreen?.();
+      }
+    });
+  }
+});
+
+loadProcessDataWithDateFilter();
+</script>
+
+
 </body>
 </html>
