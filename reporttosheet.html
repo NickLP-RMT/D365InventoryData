@@ -7,653 +7,665 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <!-- Supabase JS is imported but not used in the provided JS code. It can be removed if not needed. -->
   <script src="https://unpkg.com/@supabase/supabase-js"></script>
   <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
   <style>
-     * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-:root {
-  --primary-blue: #1e40af;
-  --secondary-blue: #3b82f6;
-  --light-blue: #dbeafe;
-  --dark-blue: #1e3a8a;
-  --accent-blue: #60a5fa;
-  --white: #ffffff;
-  --light-gray: #f8fafc;
-  --border-gray: #e2e8f0;
-  --text-dark: #1e293b;
-  --text-light: #64748b;
-  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-}
-
-body {
-  font-family: 'Kanit', sans-serif;
-  background: linear-gradient(135deg, var(--light-gray) 0%, #e0f2fe 100%);
-  min-height: 100vh;
-  color: var(--text-dark);
-}
-
-.container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 2rem;
-}
-
-/* Header */
-.header {
-  background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
-  padding: 1rem 2rem 1.2rem 2rem;
-  border-radius: 16px;
-  margin-bottom: 1.2rem;
-  box-shadow: var(--shadow-lg);
-  color: var(--white);
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.header h1 {
-  font-size: 1.4rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 0.5rem;
-}
-
-.header p {
-  font-size: 1rem;
-  opacity: 0.9;
-  font-weight: 300;
-  margin-bottom: 0;
-}
-
-/* Header Menu */
-.header-menu {
-  display: flex;
-  gap: 1rem;
-  margin-top: auto;
-}
-
-.header-menu-btn {
-  background: rgba(255 255 255 / 0.2);
-  border: none;
-  border-radius: 12px;
-  padding: 0.75rem 2rem;
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--white);
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.header-menu-btn:hover:not(.active) {
-  background: rgba(255 255 255 / 0.4);
-  transform: translateY(-2px);
-}
-
-.header-menu-btn.active {
-  background: var(--white);
-  color: var(--primary-blue);
-  font-weight: 700;
-  cursor: default;
-  box-shadow: var(--shadow-lg);
-}
-
-/* Main Flex Layout (2 columns) */
-.main-flex {
-  display: flex;
-  gap: 1.5rem;
-  align-items: flex-start;
-  /* ความสูงเต็ม viewport - header (ปรับได้ตาม header จริง) */
-  height: calc(100vh - 110px);
-  min-height: 420px;
-}
-
-/* Controls Section สูงเต็มจอ */
-.controls-section {
-  flex: 0 0 20%;
-  max-width: 22%;
-  min-width: 200px;
-  height: 100%;
-  margin-bottom: 0;
-  background: var(--white);
-  padding: 1rem 1rem 0.75rem 1rem;
-  border-radius: 12px;
-  box-shadow: var(--shadow);
-  border: 1px solid var(--border-gray);
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-  overflow-y: auto;
-}
-
-/* Tab Container สูงเต็มจอและ scroll เฉพาะด้านขวา */
-.tab-container {
-  flex: 1 1 0;
-  min-width: 0;
-  max-width: 78%;
-  height: 100%;
-  background: var(--white);
-  border-radius: 16px;
-  box-shadow: var(--shadow);
-  border: 1px solid var(--border-gray);
-  overflow: hidden;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-.tab-content {
-  flex: 1 1 auto;
-  overflow-y: auto;
-  padding: 2rem;
-  min-height: 0;
-}
-
-.table-container {
-  max-height: unset;
-  overflow-y: unset;
-}
-
-/* Responsive */
-@media (max-width: 900px) {
-  .main-flex {
-    flex-direction: column;
-    height: auto;
-    min-height: unset;
-  }
-  .controls-section, .tab-container {
-    max-width: 100%;
-    width: 100%;
-    height: auto;
-  }
-  .tab-content {
-    max-height: unset;
-    overflow-y: unset;
-  }
-}
-
-/* Controls Section (ฟิลเตอร์) — ขนาดเล็กลง */
-.controls-title {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--text-dark);
-  margin-bottom: 1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-}
-
-.controls {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 0.6rem;
-  margin-bottom: 1rem;
-}
-
-.input-group {
-  position: relative;
-}
-
-.input-group input,
-.input-group select {
-  width: 100%;
-  padding: 0.5rem 0.75rem 0.5rem 2rem;
-  border: 2px solid var(--border-gray);
-  border-radius: 8px;
-  font-size: 0.87rem;
-  transition: all 0.3s ease;
-  background: var(--white);
-  color: var(--text-dark);
-  font-family: inherit;
-}
-
-.input-group input:focus,
-.input-group select:focus {
-  outline: none;
-  border-color: var(--secondary-blue);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.input-group select {
-  cursor: pointer;
-}
-
-.input-group i {
-  position: absolute;
-  left: 0.6rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-light);
-  font-size: 0.8rem;
-}
-
-/* ปุ่มแนวตั้ง Gradient */
-.button-group.vertical-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  margin-top: 0.6rem;
-}
-
-.button-group.vertical-buttons .btn {
-  width: 100% !important;      /* ปรับให้ปุ่มกว้างเท่ากัน */
-  min-width: 0;
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 0.7rem 1rem;
-  font-size: 1rem;
-  font-weight: 600;
-  border-radius: 8px;
-  border: none;
-  transition: background 0.2s, box-shadow 0.2s;
-  cursor: pointer;
-  gap: 0.5rem;
-  /* เพื่อให้ไอคอนกับข้อความตรงกลางจริงๆ */
-  white-space: nowrap;
-}
-
-.button-group.vertical-buttons .btn.btn-primary {
-  background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
-  color: #fff;
-}
-
-.button-group.vertical-buttons .btn.btn-primary:hover {
-  background: linear-gradient(135deg, var(--secondary-blue) 0%, var(--primary-blue) 100%);
-  box-shadow: var(--shadow-lg);
-}
-
-.button-group.vertical-buttons .btn.btn-secondary {
-  background: var(--white);
-  color: var(--primary-blue);
-  border: 2px solid var(--primary-blue);
-}
-
-.button-group.vertical-buttons .btn.btn-secondary:hover {
-  background: var(--primary-blue);
-  color: #fff;
-}
-
-.button-group.vertical-buttons .btn i {
-  font-size: 1.1rem;
-  margin-right: 0.35rem;
-  vertical-align: middle;
-  display: inline-block;
-}
-
-.button-group.vertical-buttons .btn:focus {
-  outline: 2px solid var(--secondary-blue);
-}
-
-/* (กรณีปุ่มอื่นๆ ในแนวนอน) */
-.button-group .btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-}
-
-/* Tab Styles */
-.tab-header {
-  display: flex;
-  background: var(--light-gray);
-  border-bottom: 1px solid var(--border-gray);
-}
-
-.tab-button {
-  flex: 1;
-  padding: 1rem 2rem;
-  border: none;
-  background: transparent;
-  color: var(--text-light);
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  font-family: inherit;
-  border-bottom: 3px solid transparent;
-}
-
-.tab-button.active {
-  background: var(--white);
-  color: var(--primary-blue);
-  border-bottom-color: var(--primary-blue);
-}
-
-.tab-button:hover:not(.active) {
-  background: rgba(59, 130, 246, 0.05);
-  color: var(--primary-blue);
-}
-
-.tab-content {
-  display: none;
-  padding: 2rem;
-}
-
-.tab-content.active {
-  display: block;
-}
-
-.summary-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
-}
-
-.summary-card {
-  background: linear-gradient(135deg, var(--white) 0%, #f8fafc 100%);
-  border: 1px solid var(--border-gray);
-  border-radius: 10px;         /* เดิม 16px */
-  padding: 0.9rem 1rem;        /* เดิม 1.5rem */
-  box-shadow: var(--shadow);
-  transition: all 0.2s ease;
-  position: relative;
-  overflow: hidden;
-  min-width: 0;
-}
-
-.summary-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
-}
-
-.summary-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;                /* เดิม 4px */
-  background: linear-gradient(90deg, var(--primary-blue) 0%, var(--accent-blue) 100%);
-}
-
-.summary-card .icon {
-  width: 38px;                /* เดิม 48px */
-  height: 38px;
-  border-radius: 8px;         /* เดิม 12px */
-  margin-bottom: 0.65rem;     /* เดิม 1rem */
-  color: var(--primary-blue);
-  font-size: 1.05rem;         /* เดิม 1.25rem */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, var(--light-blue) 0%, #bfdbfe 100%);
-}
-
-.summary-card .title {
-  font-size: 0.78rem;         /* เดิม 0.875rem */
-  font-weight: 500;
-  color: var(--text-light);
-  margin-bottom: 0.25rem;     /* เดิม 0.5rem */
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.summary-card .value {
-  font-size: 1.32rem;         /* เดิม 2rem */
-  font-weight: 700;
-  color: var(--text-dark);
-  line-height: 1;
-}
-
-.table-container {
-  overflow-x: auto;
-  max-height: 600px;
-  overflow-y: auto;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: var(--white);
-}
-
-th,
-td {
-  padding: 1rem;
-  text-align: left;
-  border-bottom: 1px solid var(--border-gray);
-}
-
-th {
-  background: linear-gradient(135deg, var(--primary-blue) 0%, var(--dark-blue) 100%);
-  color: var(--white);
-  font-weight: 600;
-  font-size: 0.875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-
-td {
-  font-size: 0.9rem;
-  color: var(--text-dark);
-}
-
-tbody tr {
-  transition: all 0.2s ease;
-}
-
-tbody tr:hover {
-  background: var(--light-gray);
-}
-
-.loading {
-  text-align: center;
-  padding: 3rem;
-  color: var(--text-light);
-  font-size: 1.1rem;
-}
-
-.loading i {
-  font-size: 2rem;
-  margin-bottom: 1rem;
-  color: var(--secondary-blue);
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.error {
-  text-align: center;
-  padding: 3rem;
-  color: #dc2626;
-  font-size: 1.1rem;
-}
-
-.no-data {
-  text-align: center;
-  padding: 3rem;
-  color: var(--text-light);
-  font-size: 1.1rem;
-}
-
-@media (max-width: 900px) {
-  .main-flex {
-    flex-direction: column;
-    height: auto;
-    min-height: unset;
-  }
-  .controls-section, .tab-container {
-    max-width: 100%;
-    width: 100%;
-    height: auto;
-  }
-  .tab-content {
-    max-height: unset;
-    overflow-y: unset;
-  }
-}
-
-@media (max-width: 768px) {
-  .container {
-    padding: 1rem;
-  }
-
-  .header h1 {
-    font-size: 2rem;
-  }
-
-  .controls {
-    grid-template-columns: 1fr;
-  }
-
-  .summary-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .button-group {
-    justify-content: center;
-  }
-
-  .tab-button {
-    padding: 0.75rem 1rem;
-    font-size: 0.9rem;
-  }
-
-  table {
-    font-size: 0.8rem;
-  }
-
-  th,
-  td {
-    padding: 0.5rem;
-  }
-}
-
-/* Flatpickr customization */
-.flatpickr-calendar {
-  border-radius: 12px !important;
-  box-shadow: var(--shadow-lg) !important;
-  border: 1px solid var(--border-gray) !important;
-}
-
-.flatpickr-day.selected {
-  background: var(--primary-blue) !important;
-  border-color: var(--primary-blue) !important;
-}
-
-/* Pagination */
-.pagination-controls {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 1.5rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--border-gray);
-}
-
-.pagination-btn {
-  padding: 0.5rem 1rem;
-  border: 1px solid var(--border-gray);
-  border-radius: 8px;
-  background-color: var(--white);
-  color: var(--primary-blue);
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: all 0.2s ease;
-  font-family: inherit;
-}
-
-.pagination-btn:hover:not(.active):not(:disabled) {
-  background-color: var(--light-blue);
-  border-color: var(--secondary-blue);
-  color: var(--dark-blue);
-}
-
-.pagination-btn.active {
-  background-color: var(--primary-blue);
-  color: var(--white);
-  border-color: var(--primary-blue);
-  font-weight: 600;
-  cursor: default;
-}
-
-.pagination-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.pagination-info {
-  font-size: 0.9rem;
-  color: var(--text-light);
-  margin: 0 1rem;
-}
-
-/* Dashboard Content */
-#pageDashboard {
-  min-height: 300px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--white);
-  border-radius: 16px;
-  box-shadow: var(--shadow);
-  padding: 2rem;
-  font-size: 1.2rem;
-  color: var(--text-light);
-}
-
+    /* Global Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* CSS Variables for consistent styling */
+    :root {
+      --primary-blue: #1e40af;
+      --secondary-blue: #3b82f6;
+      --light-blue: #dbeafe;
+      --dark-blue: #1e3a8a;
+      --accent-blue: #60a5fa;
+      --white: #ffffff;
+      --light-gray: #f8fafc;
+      --border-gray: #e2e8f0;
+      --text-dark: #1e293b;
+      --text-light: #64748b;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Body Styling */
+    body {
+      font-family: 'Kanit', sans-serif;
+      background: linear-gradient(135deg, var(--light-gray) 0%, #e0f2fe 100%);
+      min-height: 100vh;
+      color: var(--text-dark);
+    }
+
+    /* Main Container */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    /* Header Styling */
+    .header {
+      background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+      padding: 1rem 2rem 1.2rem 2rem;
+      border-radius: 16px;
+      margin-bottom: 1.2rem;
+      box-shadow: var(--shadow-lg);
+      color: var(--white);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    /* Header Row (for layout of title/datetime and description/menu) */
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Header Title (RMT Inventory TAG Report) */
+    .header-title {
+      font-size: 1.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin: 0;
+      line-height: 1;
+      font-weight: 700; /* Inherited from .header h1, but explicitly set for clarity */
+    }
+
+    .header-title i {
+      font-size: 2.5rem;
+      margin-top: 2px;
+    }
+
+    /* Current Date/Time Display */
+    .header-datetime {
+      font-size: 1rem;
+      font-weight: 500;
+      opacity: 0.9;
+    }
+
+    /* Header Description (System description) */
+    .header-description {
+      font-size: 1rem;
+      margin: 0;
+      opacity: 0.9; /* Inherited from .header p, but explicitly set for clarity */
+      font-weight: 300; /* Inherited from .header p, but explicitly set for clarity */
+    }
+
+    /* Header Navigation Menu */
+    .header-menu {
+      display: flex;
+      gap: 1rem;
+      margin-top: auto;
+    }
+
+    .header-menu-btn {
+      background: rgba(255 255 255 / 0.2);
+      border: none;
+      border-radius: 12px;
+      padding: 0.75rem 2rem;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--white);
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none; /* Ensure links don't have underlines */
+    }
+
+    .header-menu-btn:hover:not(.active) {
+      background: rgba(255 255 255 / 0.4);
+      transform: translateY(-2px);
+    }
+
+    .header-menu-btn.active {
+      background: var(--white);
+      color: var(--primary-blue);
+      font-weight: 700;
+      cursor: default;
+      box-shadow: var(--shadow-lg);
+    }
+
+    /* Main Flex Layout (2 columns) - Adjusted to allow single body scrollbar */
+    .main-flex {
+      display: flex;
+      gap: 1.5rem;
+      align-items: flex-start;
+      /* Removed fixed height to allow content to dictate height and enable single body scrollbar */
+      /* height: calc(100vh - 110px); */
+      min-height: 420px; /* Keep min-height for initial layout stability */
+    }
+
+    /* Controls Section (Left Panel) - Adjusted to allow single body scrollbar */
+    .controls-section {
+      flex: 0 0 20%;
+      max-width: 22%;
+      min-width: 200px;
+      /* Removed fixed height */
+      /* height: 100%; */
+      margin-bottom: 0;
+      background: var(--white);
+      padding: 1rem 1rem 0.75rem 1rem;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border-gray);
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+      /* Removed overflow-y to allow the main body scrollbar to handle scrolling */
+      /* overflow-y: auto; */
+    }
+
+    /* Tab Container (Right Panel) - Adjusted to allow single body scrollbar */
+    .tab-container {
+      flex: 1 1 0;
+      min-width: 0;
+      max-width: 78%;
+      /* Removed fixed height */
+      /* height: 100%; */
+      background: var(--white);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border-gray);
+      /* Removed overflow: hidden to allow content to flow naturally */
+      /* overflow: hidden; */
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Tab Content Area - Adjusted to allow single body scrollbar */
+    .tab-content {
+      flex: 1 1 auto;
+      /* Removed overflow-y to allow the main body scrollbar to handle scrolling */
+      /* overflow-y: auto; */
+      padding: 2rem;
+      min-height: 0;
+    }
+
+    /* Table Container - Keeps horizontal scroll for wide tables, no vertical scrollbar here */
+    .table-container {
+      overflow-x: auto; /* Retained for horizontal scrolling of wide tables */
+      max-height: unset; /* Ensure no max height */
+      overflow-y: unset; /* Ensure no vertical scrollbar for table-container itself */
+    }
+
+    /* Responsive Adjustments for main layout */
+    @media (max-width: 900px) {
+      .main-flex {
+        flex-direction: column;
+        height: auto;
+        min-height: unset;
+      }
+      .controls-section, .tab-container {
+        max-width: 100%;
+        width: 100%;
+        height: auto;
+        /* Ensure no overflow-y on mobile for these sections when stacked */
+        overflow-y: unset;
+      }
+      .tab-content {
+        max-height: unset;
+        overflow-y: unset;
+      }
+    }
+
+    /* Controls Section (Filters) */
+    .controls-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-dark);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 0.6rem;
+      margin-bottom: 1rem;
+    }
+
+    .input-group {
+      position: relative;
+    }
+
+    .input-group input,
+    .input-group select {
+      width: 100%;
+      padding: 0.5rem 0.75rem 0.5rem 2rem;
+      border: 2px solid var(--border-gray);
+      border-radius: 8px;
+      font-size: 0.87rem;
+      transition: all 0.3s ease;
+      background: var(--white);
+      color: var(--text-dark);
+      font-family: inherit;
+    }
+
+    .input-group input:focus,
+    .input-group select:focus {
+      outline: none;
+      border-color: var(--secondary-blue);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .input-group select {
+      cursor: pointer;
+    }
+
+    .input-group i {
+      position: absolute;
+      left: 0.6rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-light);
+      font-size: 0.8rem;
+    }
+
+    /* Vertical Button Group (Filter/Export Buttons) */
+    .button-group.vertical-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      margin-top: 0.6rem;
+    }
+
+    .button-group.vertical-buttons .btn {
+      width: 100% !important; /* Ensure buttons take full width */
+      min-width: 0;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 0.7rem 1rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 8px;
+      border: none;
+      transition: background 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+      gap: 0.5rem;
+      white-space: nowrap; /* Prevent text wrapping */
+    }
+
+    .button-group.vertical-buttons .btn.btn-primary {
+      background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+      color: #fff;
+    }
+
+    .button-group.vertical-buttons .btn.btn-primary:hover {
+      background: linear-gradient(135deg, var(--secondary-blue) 0%, var(--primary-blue) 100%);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .button-group.vertical-buttons .btn.btn-secondary {
+      background: var(--white);
+      color: var(--primary-blue);
+      border: 2px solid var(--primary-blue);
+    }
+
+    .button-group.vertical-buttons .btn.btn-secondary:hover {
+      background: var(--primary-blue);
+      color: #fff;
+    }
+
+    .button-group.vertical-buttons .btn i {
+      font-size: 1.1rem;
+      margin-right: 0.35rem;
+      vertical-align: middle;
+      display: inline-block;
+    }
+
+    .button-group.vertical-buttons .btn:focus {
+      outline: 2px solid var(--secondary-blue);
+    }
+
+    /* General button group (if any horizontal buttons were present) */
+    .button-group .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    /* Tab Header Styling */
+    .tab-header {
+      display: flex;
+      background: var(--light-gray);
+      border-bottom: 1px solid var(--border-gray);
+    }
+
+    .tab-button {
+      flex: 1;
+      padding: 1rem 2rem;
+      border: none;
+      background: transparent;
+      color: var(--text-light);
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      font-family: inherit;
+      border-bottom: 3px solid transparent;
+    }
+
+    .tab-button.active {
+      background: var(--white);
+      color: var(--primary-blue);
+      border-bottom-color: var(--primary-blue);
+    }
+
+    .tab-button:hover:not(.active) {
+      background: rgba(59, 130, 246, 0.05);
+      color: var(--primary-blue);
+    }
+
+    /* Summary Grid Layout */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    /* Summary Card Styling */
+    .summary-card {
+      background: linear-gradient(135deg, var(--white) 0%, #f8fafc 100%);
+      border: 1px solid var(--border-gray);
+      border-radius: 10px;
+      padding: 0.9rem 1rem;
+      box-shadow: var(--shadow);
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    .summary-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .summary-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary-blue) 0%, var(--accent-blue) 100%);
+    }
+
+    .summary-card .icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      margin-bottom: 0.65rem;
+      color: var(--primary-blue);
+      font-size: 1.05rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, var(--light-blue) 0%, #bfdbfe 100%);
+    }
+
+    .summary-card .title {
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--text-light);
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .summary-card .value {
+      font-size: 1.32rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      line-height: 1;
+    }
+
+    /* Table Styling */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--white);
+    }
+
+    th,
+    td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border-gray);
+    }
+
+    th {
+      background: linear-gradient(135deg, var(--primary-blue) 0%, var(--dark-blue) 100%);
+      color: var(--white);
+      font-weight: 600;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    td {
+      font-size: 0.9rem;
+      color: var(--text-dark);
+    }
+
+    tbody tr {
+      transition: all 0.2s ease;
+    }
+
+    tbody tr:hover {
+      background: var(--light-gray);
+    }
+
+    /* Loading State */
+    .loading {
+      text-align: center;
+      padding: 3rem;
+      color: var(--text-light);
+      font-size: 1.1rem;
+    }
+
+    .loading i {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: var(--secondary-blue);
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Error State */
+    .error {
+      text-align: center;
+      padding: 3rem;
+      color: #dc2626;
+      font-size: 1.1rem;
+    }
+
+    /* No Data State */
+    .no-data {
+      text-align: center;
+      padding: 3rem;
+      color: var(--text-light);
+      font-size: 1.1rem;
+    }
+
+    /* Responsive Adjustments for smaller screens */
+    @media (max-width: 768px) {
+      .container {
+        padding: 1rem;
+      }
+
+      /* Adjust header title size for smaller screens */
+      .header-title {
+        font-size: 2rem;
+      }
+
+      .controls {
+        grid-template-columns: 1fr;
+      }
+
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .button-group {
+        justify-content: center;
+      }
+
+      .tab-button {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+      }
+
+      table {
+        font-size: 0.8rem;
+      }
+
+      th,
+      td {
+        padding: 0.5rem;
+      }
+    }
+
+    /* Flatpickr customization */
+    .flatpickr-calendar {
+      border-radius: 12px !important;
+      box-shadow: var(--shadow-lg) !important;
+      border: 1px solid var(--border-gray) !important;
+    }
+
+    .flatpickr-day.selected {
+      background: var(--primary-blue) !important;
+      border-color: var(--primary-blue) !important;
+    }
+
+    /* Pagination Controls */
+    .pagination-controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-gray);
+    }
+
+    .pagination-btn {
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--border-gray);
+      border-radius: 8px;
+      background-color: var(--white);
+      color: var(--primary-blue);
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .pagination-btn:hover:not(.active):not(:disabled) {
+      background-color: var(--light-blue);
+      border-color: var(--secondary-blue);
+      color: var(--dark-blue);
+    }
+
+    .pagination-btn.active {
+      background-color: var(--primary-blue);
+      color: var(--white);
+      border-color: var(--primary-blue);
+      font-weight: 600;
+      cursor: default;
+    }
+
+    .pagination-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .pagination-info {
+      font-size: 0.9rem;
+      color: var(--text-light);
+      margin: 0 1rem;
+    }
+
+    /* Dashboard Content (Under Development) */
+    #pageDashboard {
+      min-height: 300px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--white);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 2rem;
+      font-size: 1.2rem;
+      color: var(--text-light);
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <!-- Header (ลดขนาด) -->
+    <!-- Header -->
     <div class="header">
-  <!-- บรรทัดบน -->
-  <div class="header-row" style="display: flex; justify-content: space-between; align-items: center;">
-    <h1 style="font-size:1.4rem;display:flex;align-items:center;gap:0.75rem;margin:0;line-height:1;">
-      <i class="fas fa-chart-bar" style="font-size: 2.5rem; margin-top: 2px;"></i>
-      RMT Inventory TAG Report
-    </h1>
-    <div id="currentDatetime" style="font-size:1rem;font-weight:500;opacity:0.9"></div>
-  </div>
-  <!-- บรรทัดล่าง -->
-  <div class="header-row" style="display: flex; justify-content: space-between; align-items: center;">
-    <p style="font-size:1rem; margin:0;">
-      ระบบจัดการและรายงานข้อมูล Inventory ส่วนโรงงาน CHP
-    </p>
-    <nav class="header-menu" style="display: flex; gap: 1rem;">
-  <a href="boardtosheet.html" class="header-menu-btn" id="btnDashboard" style="text-decoration:none;">
-    <i class="fas fa-tachometer-alt"></i> Dashboard
-  </a>
-  <a href="reporttosheet.html" class="header-menu-btn active" id="btnSearch" style="text-decoration:none;">
-    <i class="fas fa-search"></i> ค้นหา
-  </a>
-</nav>
-  </div>
-</div>
+      <!-- Top Row: Title and Current Datetime -->
+      <div class="header-row">
+        <h1 class="header-title">
+          <i class="fas fa-chart-bar"></i>
+          RMT Inventory TAG Report
+        </h1>
+        <div id="currentDatetime" class="header-datetime"></div>
+      </div>
+      <!-- Bottom Row: Description and Navigation Menu -->
+      <div class="header-row">
+        <p class="header-description">
+          ระบบจัดการและรายงานข้อมูล Inventory ส่วนโรงงาน CHP
+        </p>
+        <nav class="header-menu">
+          <a href="boardtosheet.html" class="header-menu-btn" id="btnDashboard">
+            <i class="fas fa-tachometer-alt"></i> Dashboard
+          </a>
+          <a href="reporttosheet.html" class="header-menu-btn active" id="btnSearch">
+            <i class="fas fa-search"></i> ค้นหา
+          </a>
+        </nav>
+      </div>
+    </div>
 
-
-    <!-- เนื้อหาหลักแยกเป็น 2 หน้า -->
+    <!-- Main Content Pages -->
+    <!-- Dashboard Page (Currently under development) -->
     <div id="pageDashboard" style="display: none;">
       <div>
         <i class="fas fa-tools" style="font-size: 3rem; margin-bottom: 1rem; color: var(--secondary-blue);"></i>
@@ -661,9 +673,10 @@ tbody tr:hover {
       </div>
     </div>
 
+    <!-- Search Page (Main functionality) -->
     <div id="pageSearch" style="display: block;">
       <div class="main-flex">
-        <!-- Controls Section (ซ้าย 20%) -->
+        <!-- Controls Section (Left Panel for Filters) -->
         <aside class="controls-section">
           <div class="controls-title">
             <i class="fas fa-filter"></i>
@@ -701,24 +714,24 @@ tbody tr:hover {
             </div>
           </div>
           <div class="button-group vertical-buttons">
-  <button class="btn btn-primary" onclick="loadData()">
-    <i class="fas fa-search"></i>
-    ค้นหา
-  </button>
-  <button class="btn btn-secondary" onclick="clearFilters()">
-    <i class="fas fa-eraser"></i>
-    Clear
-  </button>
-  <button class="btn btn-secondary" onclick="exportExcel()">
-    <i class="fas fa-file-excel"></i>
-    ดาวน์โหลด Excel
-  </button>
-</div>
+            <button class="btn btn-primary" onclick="loadData()">
+              <i class="fas fa-search"></i>
+              ค้นหา
+            </button>
+            <button class="btn btn-secondary" onclick="clearFilters()">
+              <i class="fas fa-eraser"></i>
+              Clear
+            </button>
+            <button class="btn btn-secondary" onclick="exportExcel()">
+              <i class="fas fa-file-excel"></i>
+              ดาวน์โหลด Excel
+            </button>
+          </div>
         </aside>
 
-        <!-- Tab Container (ขวา 80%) -->
+        <!-- Tab Container (Right Panel for Summary/Details) -->
         <section class="tab-container">
-          <!-- Tab Header -->
+          <!-- Tab Header Buttons -->
           <div class="tab-header">
             <button class="tab-button active" onclick="switchTab('summary', event)">
               <i class="fas fa-chart-pie"></i>
@@ -772,52 +785,54 @@ tbody tr:hover {
   </div>
 
   <script>
-    
-
-    let allFilteredData = []; // ข้อมูลกรองทั้งหมด
+    let allFilteredData = []; // Stores all filtered data
     let currentPage = 1;
-    const rowsPerPage = 20;
+    const rowsPerPage = 20; // Number of rows to display per page
 
-    // สลับหน้าเมนูหลัก
+    // Function to switch between main application pages (Dashboard/Search)
     function switchMainPage(pageId) {
       const pages = ['pageDashboard', 'pageSearch'];
       pages.forEach((id) => {
-        document.getElementById(id).style.display = 'none';
+        document.getElementById(id).style.display = 'none'; // Hide all pages
       });
-      document.getElementById(pageId).style.display = 'block';
+      document.getElementById(pageId).style.display = 'block'; // Show the selected page
 
-      // อัปเดตปุ่ม active
+      // Update active state for main menu buttons
       document.querySelectorAll('.header-menu-btn').forEach((btn) => {
         btn.classList.remove('active');
       });
       document.getElementById('btn' + pageId.replace('page', '')).classList.add('active');
 
+      // If switching to search page, load data
       if (pageId === 'pageSearch') {
         loadData();
       }
     }
 
-    // ปุ่มเมนูหลัก
+    // Event listeners for main menu buttons
     document.getElementById('btnDashboard').addEventListener('click', () => switchMainPage('pageDashboard'));
     document.getElementById('btnSearch').addEventListener('click', () => switchMainPage('pageSearch'));
 
-    // สลับแท็บในหน้าค้นหา
+    // Function to switch between tabs within the search page (Summary/Details)
     function switchTab(tabName, event) {
+      // Remove 'active' class from all tab buttons and content
       document.querySelectorAll('.tab-button').forEach((btn) => btn.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach((content) => content.classList.remove('active'));
 
+      // Add 'active' class to the clicked tab button and its corresponding content
       event.currentTarget.classList.add('active');
 
       if (tabName === 'summary') {
         document.getElementById('summaryTab').classList.add('active');
-        document.getElementById('paginationControls').style.display = 'none';
+        document.getElementById('paginationControls').style.display = 'none'; // Hide pagination for summary
       } else if (tabName === 'details') {
         document.getElementById('detailsTab').classList.add('active');
-        document.getElementById('paginationControls').style.display = 'flex';
-        displayTablePage(currentPage);
+        document.getElementById('paginationControls').style.display = 'flex'; // Show pagination for details
+        displayTablePage(currentPage); // Display current page of table data
       }
     }
 
+    // Initialize Flatpickr for date input fields
     flatpickr('#startDate', {
       dateFormat: 'Y-m-d',
       theme: 'light',
@@ -827,72 +842,83 @@ tbody tr:hover {
       theme: 'light',
     });
 
+    // Function to clear all filter inputs
     function clearFilters() {
       document.getElementById('startDate').value = '';
       document.getElementById('endDate').value = '';
       document.getElementById('mainProcess').value = '';
       document.getElementById('barcodeSearch').value = '';
 
+      // Clear Flatpickr instances
       document.getElementById('startDate')._flatpickr?.clear();
       document.getElementById('endDate')._flatpickr?.clear();
 
-      currentPage = 1;
-      loadData();
+      currentPage = 1; // Reset to first page
+      loadData(); // Reload data with cleared filters
     }
 
+    // Function to adjust timestamp by hours (e.g., for timezone conversion)
     function adjustTimeByHours(dateString, hours) {
       const date = new Date(dateString);
       date.setHours(date.getHours() + hours);
       return date;
     }
 
+    // Function to extract barcode part before a slash
     function extractBarcodeBeforeSlash(barcode) {
       if (!barcode) return '-';
       const slashIndex = barcode.indexOf('/');
       return slashIndex !== -1 ? barcode.substring(0, slashIndex) : barcode;
     }
 
+    // Function to load and filter data from Google Apps Script
     async function loadData() {
-  const url = 'https://script.google.com/macros/s/AKfycbwYy1acBX-V37hiU8lhTY-9YGWgVjVplQOIzhNg1-cNispv6L43_rCVRXVO-HqAfik/exec?page=getInventory';
+      const url = 'https://script.google.com/macros/s/AKfycbwYy1acBX-V37hiU8lhTY-9YGWgVjVplQOIzhNg1-cNispv6L43_rCVRXVO-HqAfik/exec?page=getInventory';
 
-  const tbody = document.getElementById('tableBody');
-  const summaryDiv = document.getElementById('summary');
-  const paginationControls = document.getElementById('paginationControls');
+      const tbody = document.getElementById('tableBody');
+      const summaryDiv = document.getElementById('summary');
+      const paginationControls = document.getElementById('paginationControls');
 
-  tbody.innerHTML = `<tr><td colspan="7" class="loading"><i class="fas fa-spinner"></i><div>กำลังโหลดข้อมูล...</div></td></tr>`;
-  summaryDiv.innerHTML = `<div class="loading"><i class="fas fa-spinner"></i><div>กำลังโหลดข้อมูล...</div></div>`;
-  paginationControls.style.display = 'none';
+      // Show loading indicators
+      tbody.innerHTML = `<tr><td colspan="7" class="loading"><i class="fas fa-spinner"></i><div>กำลังโหลดข้อมูล...</div></td></tr>`;
+      summaryDiv.innerHTML = `<div class="loading"><i class="fas fa-spinner"></i><div>กำลังโหลดข้อมูล...</div></div>`;
+      paginationControls.style.display = 'none'; // Hide pagination during loading
 
-  try {
-    const response = await fetch(url);
-    const data = await response.json();
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
 
-    const start = document.getElementById('startDate').value;
-    const end = document.getElementById('endDate').value;
-    const selectedProcess = document.getElementById('mainProcess').value;
-    const barcodeKeyword = document.getElementById('barcodeSearch').value.toLowerCase();
+        // Get filter values
+        const start = document.getElementById('startDate').value;
+        const end = document.getElementById('endDate').value;
+        const selectedProcess = document.getElementById('mainProcess').value;
+        const barcodeKeyword = document.getElementById('barcodeSearch').value.toLowerCase();
 
-    allFilteredData = data.filter((item) => {
-      const rawDate = item.Timestamp;
-      const dateOnly = new Date(rawDate).toISOString().split('T')[0];
+        // Filter data based on user inputs
+        allFilteredData = data.filter((item) => {
+          const rawDate = item.Timestamp;
+          // Extract date part only for comparison
+          const dateOnly = new Date(rawDate).toISOString().split('T')[0];
 
-      const matchDate = (!start || dateOnly >= start) && (!end || dateOnly <= end);
-      const matchProcess = !selectedProcess || item.mainProcess === selectedProcess;
-      const matchBarcode = !barcodeKeyword || (item.Barcode && item.Barcode.toLowerCase().includes(barcodeKeyword));
-      return matchDate && matchProcess && matchBarcode;
-    });
+          const matchDate = (!start || dateOnly >= start) && (!end || dateOnly <= end);
+          const matchProcess = !selectedProcess || item.mainProcess === selectedProcess;
+          const matchBarcode = !barcodeKeyword || (item.Barcode && item.Barcode.toLowerCase().includes(barcodeKeyword));
+          return matchDate && matchProcess && matchBarcode;
+        });
 
-    updateSummary(allFilteredData);
-    currentPage = 1;
-    displayTablePage(currentPage);
-  } catch (error) {
-    console.error('Error loading data:', error);
-    tbody.innerHTML = `<tr><td colspan="7" class="error"><i class="fas fa-exclamation-triangle"></i><div>เกิดข้อผิดพลาดในการโหลดข้อมูล</div></td></tr>`;
-    summaryDiv.innerHTML = `<div class="error"><i class="fas fa-exclamation-triangle"></i><div>เกิดข้อผิดพลาดในการโหลดข้อมูล</div></div>`;
-    paginationControls.style.display = 'none';
-  }
-}
+        updateSummary(allFilteredData); // Update summary cards
+        currentPage = 1; // Reset to first page after new data load
+        displayTablePage(currentPage); // Display table data for the first page
+      } catch (error) {
+        console.error('Error loading data:', error);
+        // Display error messages in both summary and table sections
+        tbody.innerHTML = `<tr><td colspan="7" class="error"><i class="fas fa-exclamation-triangle"></i><div>เกิดข้อผิดพลาดในการโหลดข้อมูล</div></td></tr>`;
+        summaryDiv.innerHTML = `<div class="error"><i class="fas fa-exclamation-triangle"></i><div>เกิดข้อผิดพลาดในการโหลดข้อมูล</div></div>`;
+        paginationControls.style.display = 'none'; // Ensure pagination is hidden on error
+      }
+    }
 
+    // Function to update summary cards based on filtered data
     function updateSummary(data) {
       const summaryDiv = document.getElementById('summary');
       if (data.length === 0) {
@@ -903,26 +929,28 @@ tbody tr:hover {
       const totalQty = data.reduce((sum, row) => sum + Number(row.Quantity || 0), 0);
       const uniqueScanner = [...new Set(data.map((row) => row.Scanner))].length;
 
+      // Define all possible processes for summary cards
       const allProcesses = [
-  'ผสมผง',
-  'Compact',
-  'Sinter & Steam',
-  'Finishing',
-  'Machining',
-  'Sub Store',
-  'Final Inspection', // ข้อ 7 แทรกเพิ่มตรงนี้
-  'Magna flux',
-  'Sort',
-  'Pack',
-  'Rework',
-];
+        'ผสมผง',
+        'Compact',
+        'Sinter & Steam',
+        'Finishing',
+        'Machining',
+        'Sub Store',
+        'Final Inspection',
+        'Magna flux',
+        'Sort',
+        'Pack',
+        'Rework',
+      ];
 
-
+      // Initialize process counts
       const processCount = {};
       allProcesses.forEach((process) => {
         processCount[process] = 0;
       });
 
+      // Aggregate quantity by main process
       data.forEach((row) => {
         const proc = row.mainProcess || 'อื่นๆ';
         if (allProcesses.includes(proc)) {
@@ -930,52 +958,59 @@ tbody tr:hover {
         }
       });
 
+      // Generate HTML for process summary cards
       const processCards = allProcesses
         .map(
           (process) => `
-        <div class="summary-card">
-          <div class="icon"><i class="fas fa-cog"></i></div>
-          <div class="title">${process}</div>
-          <div class="value">${processCount[process].toLocaleString()}</div>
-        </div>
-      `
+          <div class="summary-card">
+            <div class="icon"><i class="fas fa-cog"></i></div>
+            <div class="title">${process}</div>
+            <div class="value">${processCount[process].toLocaleString()}</div>
+          </div>
+        `
         )
         .join('');
 
+      // Render all summary cards
       summaryDiv.innerHTML = `
-      <div class="summary-card">
-        <div class="icon"><i class="fas fa-list"></i></div>
-        <div class="title">รายการทั้งหมด</div>
-        <div class="value">${data.length.toLocaleString()}</div>
-      </div>
-      <div class="summary-card">
-        <div class="icon"><i class="fas fa-boxes"></i></div>
-        <div class="title">รวมจำนวน</div>
-        <div class="value">${totalQty.toLocaleString()}</div>
-      </div>
-      <div class="summary-card">
-        <div class="icon"><i class="fas fa-users"></i></div>
-        <div class="title">ผู้สแกน</div>
-        <div class="value">${uniqueScanner}</div>
-      </div>
-      ${processCards}
-    `;
+        <div class="summary-card">
+          <div class="icon"><i class="fas fa-list"></i></div>
+          <div class="title">รายการทั้งหมด</div>
+          <div class="value">${data.length.toLocaleString()}</div>
+        </div>
+        <div class="summary-card">
+          <div class="icon"><i class="fas fa-boxes"></i></div>
+          <div class="title">รวมจำนวน</div>
+          <div class="value">${totalQty.toLocaleString()}</div>
+        </div>
+        <div class="summary-card">
+          <div class="icon"><i class="fas fa-users"></i></div>
+          <div class="title">ผู้สแกน</div>
+          <div class="value">${uniqueScanner}</div>
+        </div>
+        ${processCards}
+      `;
     }
-function updateDatetime() {
-  const el = document.getElementById('currentDatetime');
-  const now = new Date();
-  el.textContent = now.toLocaleString('th-TH', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit'
-  });
-}
-setInterval(updateDatetime, 1000);
-updateDatetime();
 
+    // Function to update current date and time display
+    function updateDatetime() {
+      const el = document.getElementById('currentDatetime');
+      const now = new Date();
+      el.textContent = now.toLocaleString('th-TH', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+    }
+    // Update datetime every second
+    setInterval(updateDatetime, 1000);
+    // Initial call to display datetime immediately
+    updateDatetime();
+
+    // Function to display a specific page of table data
     function displayTablePage(page) {
       currentPage = page;
       const tbody = document.getElementById('tableBody');
@@ -991,48 +1026,53 @@ updateDatetime();
         return;
       }
 
+      // Generate HTML for table rows
       tbody.innerHTML = dataToDisplay
-  .map((row) => {
-    const adjustedDate = adjustTimeByHours(row.Timestamp, 0);
-    const displayBarcode = extractBarcodeBeforeSlash(row.Barcode);
+        .map((row) => {
+          // Adjust time by 0 hours (assuming timestamp is already local or handles timezone correctly)
+          const adjustedDate = adjustTimeByHours(row.Timestamp, 0);
+          const displayBarcode = extractBarcodeBeforeSlash(row.Barcode);
 
-    return `
-      <tr>
-        <td>${adjustedDate.toLocaleDateString('th-TH', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-        })}</td>
-        <td><code>${displayBarcode}</code></td>
-        <td>${row.mainProcess || '-'}</td>
-        <td>${row.subProcess || '-'}</td>
-        <td><span class="status">${row.status || '-'}</span></td>
-        <td><strong>${(row.Quantity || 0).toLocaleString()}</strong></td>
-        <td>${row.Scanner || '-'}</td>
-      </tr>
-    `;
-  }).join('');
+          return `
+            <tr>
+              <td>${adjustedDate.toLocaleDateString('th-TH', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+              })}</td>
+              <td><code>${displayBarcode}</code></td>
+              <td>${row.mainProcess || '-'}</td>
+              <td>${row.subProcess || '-'}</td>
+              <td><span class="status">${row.status || '-'}</span></td>
+              <td><strong>${(row.Quantity || 0).toLocaleString()}</strong></td>
+              <td>${row.Scanner || '-'}</td>
+            </tr>
+          `;
+        }).join('');
 
-      setupPagination();
+      setupPagination(); // Re-setup pagination controls
 
+      // Show pagination controls only if the details tab is active
       if (document.getElementById('detailsTab').classList.contains('active')) {
         paginationControls.style.display = 'flex';
       }
     }
 
+    // Function to set up pagination buttons
     function setupPagination() {
       const paginationControls = document.getElementById('paginationControls');
-      paginationControls.innerHTML = '';
+      paginationControls.innerHTML = ''; // Clear existing buttons
 
       const totalPages = Math.ceil(allFilteredData.length / rowsPerPage);
 
       if (totalPages <= 1) {
-        paginationControls.style.display = 'none';
+        paginationControls.style.display = 'none'; // Hide pagination if only one page or no data
         return;
       }
 
+      // Previous button
       const prevBtn = document.createElement('button');
       prevBtn.classList.add('pagination-btn');
       prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i> Previous';
@@ -1040,14 +1080,17 @@ updateDatetime();
       prevBtn.onclick = () => displayTablePage(currentPage - 1);
       paginationControls.appendChild(prevBtn);
 
+      // Logic for displaying page numbers (current page +/- 2, with ellipsis)
       let startPage = Math.max(1, currentPage - 2);
       let endPage = Math.min(totalPages, currentPage + 2);
 
+      // Adjust start/end to show 5 pages if possible
       if (endPage - startPage < 4) {
         if (startPage === 1) endPage = Math.min(totalPages, 5);
         if (endPage === totalPages) startPage = Math.max(1, totalPages - 4);
       }
 
+      // First page button and ellipsis if needed
       if (startPage > 1) {
         const firstPageBtn = document.createElement('button');
         firstPageBtn.classList.add('pagination-btn');
@@ -1062,17 +1105,19 @@ updateDatetime();
         }
       }
 
+      // Page number buttons
       for (let i = startPage; i <= endPage; i++) {
         const pageBtn = document.createElement('button');
         pageBtn.classList.add('pagination-btn');
         pageBtn.textContent = i;
         if (i === currentPage) {
-          pageBtn.classList.add('active');
+          pageBtn.classList.add('active'); // Highlight active page
         }
         pageBtn.onclick = () => displayTablePage(i);
         paginationControls.appendChild(pageBtn);
       }
 
+      // Last page button and ellipsis if needed
       if (endPage < totalPages) {
         if (endPage < totalPages - 1) {
           const ellipsis = document.createElement('span');
@@ -1087,6 +1132,7 @@ updateDatetime();
         paginationControls.appendChild(lastPageBtn);
       }
 
+      // Next button
       const nextBtn = document.createElement('button');
       nextBtn.classList.add('pagination-btn');
       nextBtn.innerHTML = 'Next <i class="fas fa-chevron-right"></i>';
@@ -1095,11 +1141,13 @@ updateDatetime();
       paginationControls.appendChild(nextBtn);
     }
 
+    // Function to export filtered data to an Excel file
     function exportExcel() {
       try {
         const wb = XLSX.utils.book_new();
         const rows = allFilteredData.map((row) => {
-          const adjustedDate = adjustTimeByHours(row.Timestamp, 0); // หรือลบ 0 ชม. ถ้าใช้เวลาไทยอยู่แล้ว
+          // Adjust time by 0 hours for export (or remove if not needed)
+          const adjustedDate = adjustTimeByHours(row.Timestamp, 0);
           const displayBarcode = extractBarcodeBeforeSlash(row.Barcode);
           return [
             adjustedDate.toLocaleDateString('th-TH', {
@@ -1154,7 +1202,7 @@ updateDatetime();
       }
     }
 
-    // เริ่มโค้ดโดยเปิดที่หน้าค้นหาและโหลดข้อมูล
+    // Initial load: Start by displaying the search page and loading data
     switchMainPage('pageSearch');
   </script>
 </body>
