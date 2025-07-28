@@ -202,15 +202,28 @@
       gap: 0.5rem;
       align-items: center;
     }
-    .factory-floor {
+
+    /* New wrapper for aspect ratio control */
+    .factory-floor-wrapper {
       position: relative;
       width: 100%;
-      height: 750px;
-      background: url('https://nicklp-rmt.github.io/D365InventoryData/pic/layout.jpg') no-repeat center center;
-      background-size: contain; /* Changed from cover to contain */
+      padding-bottom: 56.25%; /* 16:9 Aspect Ratio (9/16 * 100%) */
+      height: 0; /* Required for padding-bottom trick */
+      overflow: hidden;
       border: 3px solid var(--border-gray);
       border-radius: 12px;
-      overflow: hidden; /* Changed from visible to hidden for correct drag behavior */
+      background-color: #f0f0f0; /* Optional: background if image doesn't fill perfectly */
+    }
+
+    .factory-floor {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('https://nicklp-rmt.github.io/D365InventoryData/pic/layout.jpg') no-repeat center center;
+      background-size: contain; /* Ensures image is fully visible */
+      /* No border or border-radius here, moved to wrapper */
     }
 
     /* Process Area styles */
@@ -334,15 +347,8 @@
 
     /* Responsive */
     @media (max-width: 768px) {
-      .factory-floor {
-        /*
-        transform: scale(0.8);
-        transform-origin: top left;
-        Removing scale might provide more predictable drag/resize behavior
-        on small screens if combined with specific element positioning adjustments.
-        Otherwise, restrictRect in interact.js might need adjustment.
-        */
-        height: 500px;
+      .factory-floor-wrapper { /* Adjust wrapper for responsiveness */
+        padding-bottom: 75%; /* Example for 4:3 aspect ratio on smaller screens if needed */
       }
       .header {
         flex-direction: column;
@@ -417,96 +423,100 @@
 
     <div class="factory-layout">
       <div class="layout-title"><i class="fas fa-map"></i> แผนผังโรงงานและการกระจายชิ้นงาน</div>
-      <div class="factory-floor">
-          <!-- ปุ่ม Fullscreen -->
-          <button id="btnFullscreen" title="ดูเต็มหน้าจอ" style="position:absolute; top:10px; right:10px; background:white; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; z-index:30;">
-            <i class="fas fa-expand"></i>
-          </button>
-        
-        <div class="process-area powder-mixing high-volume" data-id="powder-mixing">
-          <div class="process-icon"><i class="fas fa-flask"></i></div>
-          <div class="process-name">ผสมผง</div>
-          <div class="process-count">0</div>
-          <div class="process-status">สถานะ</div>
-          <div class="resize-handle"></div>
-        </div>
-        <div class="process-area compact medium-volume" data-id="compact">
-          <div class="process-icon"><i class="fas fa-compress-arrows-alt"></i></div>
-          <div class="process-name">Compact</div>
-          <div class="process-count">0</div>
-          <div class="process-status">สถานะ</div>
-          <div class="resize-handle"></div>
-        </div>
-        <div class="process-area sinter-steam high-volume" data-id="sinter-steam">
-          <div class="process-icon"><i class="fas fa-fire"></i></div>
-          <div class="process-name">Sinter & Steam</div>
-          <div class="process-count">0</div>
-          <div class="process-status">สถานะ</div>
-          <div class="resize-handle"></div>
-        </div>
-        <div class="process-area finishing medium-volume" data-id="finishing">
-          <div class="process-icon"><i class="fas fa-gem"></i></div>
-          <div class="process-name">Finishing</div>
-          <div class="process-count">0</div>
-          <div class="process-status">สถานะ</div>
-          <div class="resize-handle"></div>
-        </div>
-        <div class="process-area machining high-volume" data-id="machining">
-          <div class="process-icon"><i class="fas fa-cog"></i></div>
-          <div class="process-name">Machining</div>
-          <div class="process-count">0</div>
-          <div class="process-status">สถานะ</div>
-          <div class="resize-handle"></div>
-        </div>
-        <div class="process-area sub-store medium-volume" data-id="sub-store">
-          <div class="process-icon"><i class="fas fa-warehouse"></i></div>
-          <div class="process-name">Sub Store</div>
-          <div class="process-count">0</div>
-          <div class="process-status">สถานะ</div>
-          <div class="resize-handle"></div>
-        </div>
-        <div class="process-area final-inspection medium-volume" data-id="final-inspection">
-          <div class="process-icon"><i class="fas fa-clipboard-check"></i></div>
-          <div class="process-name">Final Inspection</div>
-          <div class="process-count">0</div>
-          <div class="process-status">สถานะ</div>
-          <div class="resize-handle"></div>
-        </div>
-        <div class="process-area magna-flux low-volume" data-id="magna-flux">
-          <div class="process-icon"><i class="fas fa-magnet"></i></div>
-          <div class="process-name">Magna flux</div>
-          <div class="process-count">0</div>
-          <div class="process-status">สถานะ</div>
-          <div class="resize-handle"></div>
-        </div>
-        <div class="process-area sort medium-volume" data-id="sort">
-          <div class="process-icon"><i class="fas fa-sort-amount-down"></i></div>
-          <div class="process-name">Sort</div>
-          <div class="process-count">0</div>
-          <div class="process-status">สถานะ</div>
-          <div class="resize-handle"></div>
-        </div>
-        <div class="process-area pack medium-volume" data-id="pack">
-          <div class="process-icon"><i class="fas fa-box"></i></div>
-          <div class="process-name">Pack</div>
-          <div class="process-count">0</div>
-          <div class="process-status">สถานะ</div>
-          <div class="resize-handle"></div>
-        </div>
-        <div class="process-area rework low-volume" data-id="rework">
-          <div class="process-icon"><i class="fas fa-tools"></i></div>
-          <div class="process-name">Rework</div>
-          <div class="process-count">0</div>
-          <div class="process-status">สถานะ</div>
-          <div class="resize-handle"></div>
-        </div>
+      
+      <!-- New wrapper for aspect ratio control -->
+      <div class="factory-floor-wrapper">
+        <div class="factory-floor">
+            <!-- ปุ่ม Fullscreen -->
+            <button id="btnFullscreen" title="ดูเต็มหน้าจอ" style="position:absolute; top:10px; right:10px; background:white; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; z-index:30;">
+              <i class="fas fa-expand"></i>
+            </button>
+          
+          <div class="process-area powder-mixing high-volume" data-id="powder-mixing">
+            <div class="process-icon"><i class="fas fa-flask"></i></div>
+            <div class="process-name">ผสมผง</div>
+            <div class="process-count">0</div>
+            <div class="process-status">สถานะ</div>
+            <div class="resize-handle"></div>
+          </div>
+          <div class="process-area compact medium-volume" data-id="compact">
+            <div class="process-icon"><i class="fas fa-compress-arrows-alt"></i></div>
+            <div class="process-name">Compact</div>
+            <div class="process-count">0</div>
+            <div class="process-status">สถานะ</div>
+            <div class="resize-handle"></div>
+          </div>
+          <div class="process-area sinter-steam high-volume" data-id="sinter-steam">
+            <div class="process-icon"><i class="fas fa-fire"></i></div>
+            <div class="process-name">Sinter & Steam</div>
+            <div class="process-count">0</div>
+            <div class="process-status">สถานะ</div>
+            <div class="resize-handle"></div>
+          </div>
+          <div class="process-area finishing medium-volume" data-id="finishing">
+            <div class="process-icon"><i class="fas fa-gem"></i></div>
+            <div class="process-name">Finishing</div>
+            <div class="process-count">0</div>
+            <div class="process-status">สถานะ</div>
+            <div class="resize-handle"></div>
+          </div>
+          <div class="process-area machining high-volume" data-id="machining">
+            <div class="process-icon"><i class="fas fa-cog"></i></div>
+            <div class="process-name">Machining</div>
+            <div class="process-count">0</div>
+            <div class="process-status">สถานะ</div>
+            <div class="resize-handle"></div>
+          </div>
+          <div class="process-area sub-store medium-volume" data-id="sub-store">
+            <div class="process-icon"><i class="fas fa-warehouse"></i></div>
+            <div class="process-name">Sub Store</div>
+            <div class="process-count">0</div>
+            <div class="process-status">สถานะ</div>
+            <div class="resize-handle"></div>
+          </div>
+          <div class="process-area final-inspection medium-volume" data-id="final-inspection">
+            <div class="process-icon"><i class="fas fa-clipboard-check"></i></div>
+            <div class="process-name">Final Inspection</div>
+            <div class="process-count">0</div>
+            <div class="process-status">สถานะ</div>
+            <div class="resize-handle"></div>
+          </div>
+          <div class="process-area magna-flux low-volume" data-id="magna-flux">
+            <div class="process-icon"><i class="fas fa-magnet"></i></div>
+            <div class="process-name">Magna flux</div>
+            <div class="process-count">0</div>
+            <div class="process-status">สถานะ</div>
+            <div class="resize-handle"></div>
+          </div>
+          <div class="process-area sort medium-volume" data-id="sort">
+            <div class="process-icon"><i class="fas fa-sort-amount-down"></i></div>
+            <div class="process-name">Sort</div>
+            <div class="process-count">0</div>
+            <div class="process-status">สถานะ</div>
+            <div class="resize-handle"></div>
+          </div>
+          <div class="process-area pack medium-volume" data-id="pack">
+            <div class="process-icon"><i class="fas fa-box"></i></div>
+            <div class="process-name">Pack</div>
+            <div class="process-count">0</div>
+            <div class="process-status">สถานะ</div>
+            <div class="resize-handle"></div>
+          </div>
+          <div class="process-area rework low-volume" data-id="rework">
+            <div class="process-icon"><i class="fas fa-tools"></i></div>
+            <div class="process-name">Rework</div>
+            <div class="process-count">0</div>
+            <div class="process-status">สถานะ</div>
+            <div class="resize-handle"></div>
+          </div>
 
-        <div class="process-area" style="top: 20px; right: 20px; position: absolute; width: 180px;" data-id="legend">
-          <div class="process-name">🔵 เงื่อนไขปริมาณ</div>
-          <div class="process-status" style="font-size: 0.85rem;">
-            <div>🟢 ปริมาณมาก &gt; 1000</div>
-            <div>🟠 ปานกลาง 500–1000</div>
-            <div>🔴 ปริมาณน้อย &lt; 500</div>
+          <div class="process-area" style="top: 20px; right: 20px; position: absolute; width: 180px;" data-id="legend">
+            <div class="process-name">🔵 เงื่อนไขปริมาณ</div>
+            <div class="process-status" style="font-size: 0.85rem;">
+              <div>🟢 ปริมาณมาก &gt; 1000</div>
+              <div>🟠 ปานกลาง 500–1000</div>
+              <div>🔴 ปริมาณน้อย &lt; 500</div>
+            </div>
           </div>
         </div>
       </div>
@@ -753,11 +763,22 @@
       const btn = document.getElementById('btnFullscreen');
       if (btn) {
         btn.addEventListener('click', () => {
-          const el = document.querySelector('.factory-layout');
-          if (!document.fullscreenElement) {
-            el.requestFullscreen?.();
+          // Check if fullscreen is enabled in the current environment
+          if (document.fullscreenEnabled) {
+            const el = document.querySelector('.factory-layout');
+            if (!document.fullscreenElement) {
+              el.requestFullscreen?.();
+            } else {
+              document.exitFullscreen?.();
+            }
           } else {
-            document.exitFullscreen?.();
+            // Inform the user if fullscreen is not supported
+            Swal.fire({
+              icon: 'info',
+              title: 'โหมดเต็มหน้าจอไม่รองรับ',
+              text: 'เบราว์เซอร์หรือสภาพแวดล้อมปัจจุบันของคุณอาจไม่รองรับโหมดเต็มหน้าจอ',
+              confirmButtonColor: '#3b82f6',
+            });
           }
         });
       }
