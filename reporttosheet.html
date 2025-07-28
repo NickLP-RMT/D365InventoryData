@@ -555,9 +555,9 @@
       }
 
       th,
-      td {
-        padding: 0.5rem;
-      }
+    td {
+      padding: 0.5rem;
+    }
     }
 
     /* Flatpickr customization */
@@ -929,13 +929,15 @@
 
       /**
        * Extracts the barcode part before a slash, if present.
-       * @param {string} barcode - The full barcode string.
+       * Ensures the input barcode is treated as a string.
+       * @param {*} barcode - The raw barcode value (can be string, number, null, undefined).
        * @returns {string} The extracted barcode part or '-' if empty.
        */
       function extractBarcodeBeforeSlash(barcode) {
-        if (!barcode) return '-';
-        const slashIndex = barcode.indexOf('/');
-        return slashIndex !== -1 ? barcode.substring(0, slashIndex) : barcode;
+        const barcodeStr = String(barcode || '').trim(); // Convert to string and trim
+        if (!barcodeStr) return '-';
+        const slashIndex = barcodeStr.indexOf('/');
+        return slashIndex !== -1 ? barcodeStr.substring(0, slashIndex) : barcodeStr;
       }
 
       /**
@@ -977,7 +979,9 @@
 
             const matchDate = (!start || dateOnly >= start) && (!end || dateOnly <= end);
             const matchProcess = !selectedProcess || item.mainProcess === selectedProcess;
-            const matchBarcode = !barcodeKeyword || (item.Barcode && item.Barcode.toLowerCase().includes(barcodeKeyword));
+            // Ensure item.Barcode is a string before calling .includes()
+            const itemBarcodeStr = String(item.Barcode || '');
+            const matchBarcode = !barcodeKeyword || (itemBarcodeStr.toLowerCase().includes(barcodeKeyword));
             return matchDate && matchProcess && matchBarcode;
           });
 
