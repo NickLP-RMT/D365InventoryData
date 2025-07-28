@@ -1,1128 +1,711 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>🏭 Factory Layout Dashboard</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>🏭 Factory Layout Dashboard</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --primary-blue: #1e40af;
+      --secondary-blue: #3b82f6;
+      --light-blue: #dbeafe;
+      --dark-blue: #1e3a8a;
+      --accent-blue: #60a5fa;
+      --white: #ffffff;
+      --light-gray: #f8fafc;
+      --border-gray: #e2e8f0;
+      --text-dark: #1e293b;
+      --text-light: #64748b;
+      --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+      --success-green: #10b981;
+      --warning-orange: #f59e0b;
+      --danger-red: #ef4444;
+    }
 
-    <style>
-        /* Base Styles & Global Resets */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root {
-            /* Color Palette */
-            --primary-blue: #1e40af; /* Darker blue for primary elements */
-            --secondary-blue: #3b82f6; /* Lighter blue for accents */
-            --light-blue: #dbeafe; /* Very light blue */
-            --dark-blue: #1e3a8a; /* Even darker blue */
-            --accent-blue: #60a5fa; /* Medium blue */
-            --white: #ffffff;
-            --light-gray: #f8fafc; /* Lightest background gray */
-            --border-gray: #e2e8f0; /* Border color */
-            --text-dark: #1e293b; /* Dark text */
-            --text-light: #64748b; /* Lighter text for secondary info */
-            
-            /* Shadows */
-            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.06);
-            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.05);
-            
-            /* Status Colors */
-            --success-green: #10b981; /* Green for high volume/good status */
-            --warning-orange: #f59e0b; /* Orange for medium volume/warning */
-            --danger-red: #ef4444; /* Red for low volume/critical */
+    body {
+      font-family: 'Kanit', sans-serif;
+      background: linear-gradient(135deg, var(--light-gray) 0%, #e0f2fe 100%);
+      min-height: 100vh;
+      color: var(--text-dark);
+      padding: 0;
+      user-select: none;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
 
-            /* Background colors for volume levels with slight transparency */
-            --bg-high-volume: rgba(236, 253, 245, 0.95);
-            --bg-medium-volume: rgba(255, 251, 235, 0.95);
-            --bg-low-volume: rgba(254, 242, 242, 0.95);
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+      padding: 1rem 2rem 1.2rem 2rem;
+      border-radius: 16px;
+      margin-bottom: 1.2rem;
+      box-shadow: var(--shadow-lg);
+      color: var(--white);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin: 0;
+      line-height: 1;
+    }
+    .header h1 i {
+      font-size: 2.5rem;
+      margin-top: 2px;
+    }
+    .header p {
+      font-size: 1rem;
+      opacity: 0.9;
+      font-weight: 300;
+      margin: 0;
+    }
+    .header-menu {
+      display: flex;
+      gap: 1rem;
+    }
+    .header-menu-btn {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      border-radius: 12px;
+      padding: 0.75rem 2rem;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--white);
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      user-select: none;
+    }
+    .header-menu-btn:hover:not(.active) {
+      background: rgba(255,255,255,0.4);
+      transform: translateY(-2px);
+    }
+    .header-menu-btn.active {
+      background: var(--white);
+      color: var(--primary-blue);
+      font-weight: 700;
+      cursor: default;
+      box-shadow: var(--shadow-lg);
+    }
 
-            /* Pulse animation colors (more subtle) */
-            --success-pulse: rgba(16,185,129,0.2); /* Lighter pulse */
-            --warning-pulse: rgba(245,158,11,0.2);
-            --danger-pulse: rgba(239,68,68,0.2);
-        }
+    /* Controls Section (date filters) */
+    .controls {
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .input-group {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .input-group i {
+      position: absolute;
+      left: 10px;
+      color: var(--text-light);
+      font-size: 1rem;
+      pointer-events: none;
+    }
+    .input-group input {
+      padding: 0.5rem 0.75rem 0.5rem 2.5rem;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 2px solid var(--border-gray);
+      outline: none;
+      font-family: 'Kanit', sans-serif;
+      transition: border-color 0.3s ease;
+      width: 150px;
+    }
+    .input-group input:focus {
+      border-color: var(--secondary-blue);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    #btnFilter {
+      background: var(--primary-blue);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background-color 0.3s ease;
+    }
+    #btnFilter:hover {
+      background: var(--secondary-blue);
+    }
+    #btnResetLayout {
+      background: var(--warning-orange);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background-color 0.3s ease;
+      margin-left: auto;
+    }
+    #btnResetLayout:hover {
+      background: #e67e22;
+    }
 
-        body {
-            font-family: 'Kanit', sans-serif;
-            background: linear-gradient(135deg, var(--light-gray) 0%, #e0f2fe 100%);
-            min-height: 100vh;
-            color: var(--text-dark);
-            padding: 0;
-            /* user-select: none; */ /* Allow text selection for better UX */
-        }
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
+    /* Factory Layout Section */
+    .factory-layout {
+      background: var(--white);
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      min-height: 80vh;
+      overflow: hidden; /* Changed from visible to hidden to ensure children respect bounds */
+    }
+    .layout-title {
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 2rem;
+      color: var(--text-dark);
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    .factory-floor {
+      position: relative;
+      width: 100%;
+      height: 750px;
+      background: url('https://nicklp-rmt.github.io/D365InventoryData/pic/layout.jpg') no-repeat center center;
+      background-size: cover;
+      border: 3px solid var(--border-gray);
+      border-radius: 12px;
+      overflow: hidden; /* Changed from visible to hidden for correct drag behavior */
+    }
 
-        /* --- Header Section Styles --- */
-        .header {
-            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
-            padding: 1.5rem 2.5rem; /* Increased padding */
-            border-radius: 16px;
-            margin-bottom: 1.5rem; /* Increased margin */
-            box-shadow: var(--shadow-lg);
-            color: var(--white);
-            display: flex;
-            flex-direction: column;
-            gap: 1.25rem; /* Increased gap */
-        }
-        .header-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap; /* Allow wrapping on smaller screens */
-            gap: 1rem; /* Gap between items in a row */
-        }
-        .header h1 {
-            font-size: 1.8rem; /* Larger font size */
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 0.8rem; /* Increased gap */
-            margin: 0;
-            line-height: 1;
-            flex-grow: 1; /* Allow title to grow */
-        }
-        .header h1 i {
-            font-size: 2.8rem; /* Larger icon */
-            margin-top: 2px;
-            color: rgba(255,255,255,0.8); /* Slightly less opaque icon */
-        }
-        .header p {
-            font-size: 1.05rem; /* Slightly larger font */
-            opacity: 0.9;
-            font-weight: 300;
-            margin: 0;
-        }
-        #currentDatetime {
-            font-size: 1.05rem;
-            font-weight: 500;
-            opacity: 0.9;
-        }
-        .header-menu {
-            display: flex;
-            gap: 1.2rem; /* Increased gap */
-            flex-wrap: wrap;
-            justify-content: center; /* Center buttons if wrapped */
-        }
-        .header-menu-btn {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            border-radius: 12px;
-            padding: 0.85rem 2.2rem; /* Increased padding */
-            font-size: 1.05rem; /* Slightly larger font */
-            font-weight: 600;
-            color: var(--white);
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 0.6rem; /* Increased gap */
-            text-decoration: none;
-            user-select: none;
-        }
-        .header-menu-btn:hover:not(.active) {
-            background: rgba(255,255,255,0.35); /* More distinct hover */
-            transform: translateY(-3px); /* More pronounced lift */
-            box-shadow: var(--shadow);
-        }
-        .header-menu-btn.active {
-            background: var(--white);
-            color: var(--primary-blue);
-            font-weight: 700;
-            cursor: default;
-            box-shadow: var(--shadow-lg);
-            transform: translateY(-1px); /* Keep slightly lifted */
-        }
+    /* Process Area styles */
+    .process-area {
+      position: absolute;
+      border: 2px solid var(--border-gray);
+      border-radius: 12px;
+      background-color: rgba(255, 255, 255, 0.85);
+      box-shadow: var(--shadow);
+      transition: box-shadow 0.3s ease; /* Removed transform from transition */
+      cursor: grab;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 1rem;
+      min-width: 150px;
+      min-height: 120px;
+      user-select: none;
+      touch-action: none;
+      /* transform property will be set by JavaScript */
+    }
+    .process-area.dragging {
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      z-index: 100;
+      cursor: grabbing;
+    }
+    .process-area:hover {
+      box-shadow: var(--shadow-lg);
+      z-index: 20;
+    }
+    .process-icon {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      pointer-events: none;
+    }
+    .process-name {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+      pointer-events: none;
+    }
+    .process-count {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      pointer-events: none;
+      min-height: 30px;
+    }
+    .process-status {
+      font-size: 0.8rem;
+      margin-top: 0.25rem;
+      opacity: 0.8;
+      pointer-events: none;
+    }
 
-        /* --- Controls Section Styles --- */
-        .controls {
-            margin-bottom: 1.5rem; /* Increased margin */
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            flex-wrap: wrap;
-            justify-content: flex-start; /* Align to start */
-        }
-        .input-group {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-        .input-group i {
-            position: absolute;
-            left: 12px; /* Adjusted position */
-            color: var(--text-light);
-            font-size: 1.05rem; /* Slightly larger icon */
-            pointer-events: none;
-        }
-        .input-group input {
-            padding: 0.6rem 0.85rem 0.6rem 2.8rem; /* Adjusted padding for icon */
-            font-size: 1rem;
-            border-radius: 8px;
-            border: 2px solid var(--border-gray);
-            outline: none;
-            font-family: 'Kanit', sans-serif;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
-            width: 160px; /* Slightly wider input */
-            color: var(--text-dark);
-        }
-        .input-group input:focus {
-            border-color: var(--secondary-blue);
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15); /* More pronounced focus */
-        }
-        .controls button {
-            background: var(--primary-blue);
-            color: white;
-            border: none;
-            padding: 0.6rem 1.2rem; /* Adjusted padding */
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 1rem;
-            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
-            box-shadow: var(--shadow);
-        }
-        .controls button:hover {
-            background: var(--secondary-blue);
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-lg);
-        }
-        #btnResetLayout {
-            background: var(--warning-orange);
-            margin-left: auto; /* Push to the right */
-        }
-        #btnResetLayout:hover {
-            background: #e67e22; /* Darker orange on hover */
-        }
+    /* กำหนดตำแหน่งเริ่มต้นให้แต่ละการ์ดเพื่อไม่ให้ซ้อนทับกัน */
+    .powder-mixing { top: 50px; left: 50px; }
+    .compact { top: 50px; left: 250px; }
+    .sinter-steam { top: 50px; left: 450px; }
+    .finishing { top: 50px; left: 650px; }
+    .machining { top: 250px; left: 50px; }
+    .sub-store { top: 250px; left: 250px; }
+    .final-inspection { top: 250px; left: 450px; }
+    .magna-flux { top: 250px; left: 650px; }
+    .sort { top: 450px; left: 50px; }
+    .pack { top: 450px; left: 250px; }
+    .rework { top: 450px; left: 450px; }
 
-        /* --- Factory Layout Section Styles (NEW/MODIFIED) --- */
-        .factory-layout {
-            background: var(--white);
-            border-radius: 20px;
-            padding: 2.5rem; /* Increased padding */
-            box-shadow: var(--shadow-lg);
-            position: relative;
-            min-height: 80vh;
-            display: flex; /* Use flexbox for main content area */
-            flex-direction: column; /* Stack header and content wrapper vertically */
-        }
-        .layout-header {
-            text-align: center;
-            font-size: 1.7rem; /* Larger title */
-            font-weight: 600;
-            margin-bottom: 2.5rem; /* Increased margin */
-            color: var(--primary-blue); /* Title color */
-            display: flex;
-            justify-content: center;
-            gap: 0.6rem;
-            align-items: center;
-            letter-spacing: 0.5px;
-        }
-        .factory-content-wrapper {
-            display: flex;
-            gap: 2rem; /* Space between floor and legend */
-            flex-grow: 1; /* Allows content to take available space */
-            position: relative; /* Context for absolute positioning of full-screen button */
-            min-height: 600px; /* Minimum height to prevent collapse */
-        }
-        .factory-floor {
-            position: relative;
-            flex-grow: 1; /* Allows floor to fill available space */
-            width: 100%; /* Default width, will be overridden by flex-grow */
-            height: 750px; /* Base height for desktop */
-            background: url('https://nicklp-rmt.github.io/D365InventoryData/pic/layout.jpg') no-repeat center center;
-            background-size: cover;
-            border: 3px solid var(--border-gray);
-            border-radius: 12px;
-            overflow: hidden; /* Crucial for containing draggable elements */
-            transition: all 0.4s ease-in-out; /* Smooth transition for fullscreen */
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.05); /* Subtle inner shadow */
-        }
-        /* Fullscreen specific styles */
-        .factory-floor.fullscreen-active {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: 9999; /* Ensure it's on top of everything */
-            border-radius: 0;
-            margin: 0;
-            border: none; /* No border in fullscreen */
-        }
+    /* สีและ animation ตามปริมาณงาน */
+    .high-volume {
+      border-color: var(--success-green);
+      background: linear-gradient(135deg, rgba(236, 253, 245, 0.85) 0%, rgba(255, 255, 255, 0.85) 100%);
+      animation: pulse-green 2s infinite;
+    }
+    .medium-volume {
+      border-color: var(--warning-orange);
+      background: linear-gradient(135deg, rgba(255, 251, 235, 0.85) 0%, rgba(255, 255, 255, 0.85) 100%);
+      animation: pulse-orange 2s infinite;
+    }
+    .low-volume {
+      border-color: var(--danger-red);
+      background: linear-gradient(135deg, rgba(254, 242, 242, 0.85) 0%, rgba(255, 255, 255, 0.85) 100%);
+      animation: pulse-red 2s infinite;
+    }
+    @keyframes pulse-green {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.4); }
+      50% { box-shadow: 0 0 0 10px rgba(16,185,129,0); }
+    }
+    @keyframes pulse-orange {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.4); }
+      50% { box-shadow: 0 0 0 10px rgba(245,158,11,0); }
+    }
+    @keyframes pulse-red {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
+      50% { box-shadow: 0 0 0 10px rgba(239,68,68,0); }
+    }
 
-        /* Process Area Card styles */
-        .process-area {
-            position: absolute;
-            border: 2px solid var(--border-gray);
-            border-radius: 12px;
-            background-color: var(--white); /* Default white background */
-            box-shadow: var(--shadow);
-            transition: box-shadow 0.3s ease, border-color 0.3s ease, background-color 0.3s ease, transform 0.1s linear; /* Added transform for smoother drag */
-            cursor: grab;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 1.2rem; /* Increased padding */
-            min-width: 160px; /* Slightly larger min-width */
-            min-height: 130px; /* Slightly larger min-height */
-            user-select: none;
-            touch-action: none; /* For better touch interactions */
-        }
-        .process-area.dragging {
-            box-shadow: 0 12px 30px rgba(0,0,0,0.3); /* More prominent shadow when dragging */
-            z-index: 100;
-            cursor: grabbing;
-            transform: scale(1.03); /* Slight scale up when dragging */
-        }
-        .process-area:hover:not(.dragging) {
-            box-shadow: var(--shadow-lg);
-            z-index: 20; /* Keep it above other non-hovered cards */
-            transform: translateY(-2px); /* Subtle lift on hover */
-        }
-        .process-icon {
-            font-size: 2.2rem; /* Larger icon */
-            margin-bottom: 0.6rem; /* Adjusted margin */
-            color: var(--primary-blue); /* Default icon color */
-            pointer-events: none; /* Ignore pointer events */
-        }
-        .process-name {
-            font-size: 1.05rem; /* Slightly larger font */
-            font-weight: 600;
-            margin-bottom: 0.3rem;
-            pointer-events: none;
-        }
-        .process-count {
-            font-size: 1.6rem; /* Larger count font */
-            font-weight: 700;
-            color: var(--text-dark);
-            pointer-events: none;
-            min-height: 35px; /* Ensure consistent height */
-        }
-        .process-status {
-            font-size: 0.85rem; /* Slightly larger status text */
-            margin-top: 0.3rem;
-            opacity: 0.8;
-            pointer-events: none;
-            font-weight: 500;
-        }
+    /* Resize handles */
+    .resize-handle {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background: var(--primary-blue);
+      opacity: 0;
+      border-radius: 2px;
+      z-index: 25;
+      user-select: none;
+      transition: opacity 0.3s ease;
+      cursor: nwse-resize;
+      right: -3px;
+      bottom: -3px;
+    }
+    .process-area:hover .resize-handle {
+      opacity: 0.7;
+    }
+    .resize-handle:hover {
+      opacity: 1 !important;
+    }
 
-        /* Initial positions for cards - these are applied by default */
-        /* They will be overridden by localStorage data via JS if available */
-        .powder-mixing { top: 50px; left: 50px; }
-        .compact { top: 50px; left: 250px; }
-        .sinter-steam { top: 50px; left: 450px; }
-        .finishing { top: 50px; left: 650px; }
-        .machining { top: 250px; left: 50px; }
-        .sub-store { top: 250px; left: 250px; }
-        .final-inspection { top: 250px; left: 450px; }
-        .magna-flux { top: 250px; left: 650px; }
-        .sort { top: 450px; left: 50px; }
-        .pack { top: 450px; left: 250px; }
-        .rework { top: 450px; left: 450px; }
-
-        /* Volume-based styles with single pulse animation */
-        .high-volume {
-            border-color: var(--success-green);
-            background: linear-gradient(135deg, var(--bg-high-volume) 0%, var(--white) 100%);
-            animation: pulse-border-success 1.5s ease-out; /* Single pulse effect */
-        }
-        .high-volume .process-icon { color: var(--success-green); }
-
-        .medium-volume {
-            border-color: var(--warning-orange);
-            background: linear-gradient(135deg, var(--bg-medium-volume) 0%, var(--white) 100%);
-            animation: pulse-border-warning 1.5s ease-out;
-        }
-        .medium-volume .process-icon { color: var(--warning-orange); }
-
-        .low-volume {
-            border-color: var(--danger-red);
-            background: linear-gradient(135deg, var(--bg-low-volume) 0%, var(--white) 100%);
-            animation: pulse-border-danger 1.5s ease-out;
-        }
-        .low-volume .process-icon { color: var(--danger-red); }
-
-        /* Keyframes for a single pulse effect that fades out the shadow */
-        @keyframes pulse-border-success {
-            0% { box-shadow: 0 0 0 0 var(--success-pulse); }
-            50% { box-shadow: 0 0 0 15px rgba(16,185,129,0); } /* Larger pulse radius */
-            100% { box-shadow: var(--shadow); } /* Return to normal shadow */
-        }
-        @keyframes pulse-border-warning {
-            0% { box-shadow: 0 0 0 0 var(--warning-pulse); }
-            50% { box-shadow: 0 0 0 15px rgba(245,158,11,0); }
-            100% { box-shadow: var(--shadow); }
-        }
-        @keyframes pulse-border-danger {
-            0% { box-shadow: 0 0 0 0 var(--danger-pulse); }
-            50% { box-shadow: 0 0 0 15px rgba(239,68,68,0); }
-            100% { box-shadow: var(--shadow); }
-        }
-
-        /* Resize handles */
-        .resize-handle {
-            position: absolute;
-            width: 15px; /* Larger handle */
-            height: 15px;
-            background: var(--primary-blue);
-            opacity: 0;
-            border-radius: 3px;
-            z-index: 25;
-            user-select: none;
-            transition: opacity 0.3s ease;
-            cursor: nwse-resize; /* Diagonal resize cursor */
-            right: -5px; /* Slightly outside for easier grabbing */
-            bottom: -5px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        .process-area:hover .resize-handle {
-            opacity: 0.8; /* Visible on hover */
-        }
-        .resize-handle:hover {
-            opacity: 1 !important; /* Fully opaque when hovering handle directly */
-        }
-
-        /* Legend styles (NEW) */
-        .legend-container {
-            flex-shrink: 0; /* Prevents legend from shrinking */
-            width: 280px; /* Wider fixed width for legend */
-            background: var(--white);
-            border-radius: 12px;
-            padding: 1.5rem; /* More padding */
-            box-shadow: var(--shadow);
-            border: 2px solid var(--border-gray);
-            align-self: flex-start; /* Align to the top of the flex container */
-            margin-top: 50px; /* Visually align with the first row of cards */
-            height: fit-content; /* Only take up necessary height */
-            position: sticky; /* Keep legend visible when scrolling if content is long */
-            top: 2rem; /* Stick to top with some offset */
-        }
-        .legend-title {
-            font-size: 1.25rem; /* Larger title */
-            font-weight: 600;
-            margin-bottom: 1.5rem; /* More space below title */
-            color: var(--primary-blue);
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            border-bottom: 1px solid var(--border-gray); /* Separator */
-            padding-bottom: 0.75rem;
-        }
-        .legend-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 1rem; /* More space between items */
-            font-size: 1rem; /* Readable font size */
-            color: var(--text-dark);
-        }
-        .legend-item:last-child {
-            margin-bottom: 0; /* No margin after last item */
-        }
-        .legend-color-box {
-            width: 24px; /* Larger color box */
-            height: 24px;
-            border-radius: 4px;
-            margin-right: 1rem; /* More space */
-            border: 1px solid var(--border-gray);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            flex-shrink: 0; /* Prevent shrinking */
-        }
-        .legend-color-box.high { background: var(--bg-high-volume); border-color: var(--success-green); }
-        .legend-color-box.medium { background: var(--bg-medium-volume); border-color: var(--warning-orange); }
-        .legend-color-box.low { background: var(--bg-low-volume); border-color: var(--danger-red); }
-
-        .legend-info {
-            margin-top: 2rem;
-            padding-top: 1.5rem;
-            border-top: 1px dashed var(--border-gray); /* Dashed separator */
-        }
-        .legend-info .legend-item {
-            font-size: 0.9rem; /* Smaller for info text */
-            color: var(--text-light);
-        }
-        .legend-info .legend-item i {
-            font-size: 0.9rem;
-            color: var(--secondary-blue); /* Info icons in blue */
-        }
-
-        /* Fullscreen Button - Positioned relative to factory-floor */
-        #btnFullscreen {
-            position: absolute;
-            top: 15px; /* Adjusted position */
-            right: 15px; /* Adjusted position */
-            background: var(--white);
-            border: 1px solid var(--border-gray);
-            padding: 10px 15px; /* More padding */
-            border-radius: 8px;
-            cursor: pointer;
-            z-index: 30;
-            box-shadow: var(--shadow);
-            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
-            color: var(--text-dark);
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-            font-weight: 500;
-            font-size: 0.95rem;
-        }
-        #btnFullscreen:hover {
-            background: var(--light-gray);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-        }
-        #btnFullscreen i {
-            font-size: 1.1rem; /* Larger icon */
-        }
-
-        /* --- Responsive Adjustments --- */
-        @media (max-width: 1200px) {
-            .container {
-                padding: 1.5rem;
-            }
-            .header {
-                padding: 1.2rem 2rem;
-            }
-            .header h1 {
-                font-size: 1.6rem;
-            }
-            .header h1 i {
-                font-size: 2.4rem;
-            }
-            .header-menu-btn {
-                padding: 0.75rem 1.8rem;
-                font-size: 1rem;
-            }
-            .factory-layout {
-                padding: 2rem;
-            }
-            .legend-container {
-                width: 250px;
-                padding: 1.2rem;
-            }
-            .legend-title {
-                font-size: 1.15rem;
-            }
-            .legend-item {
-                font-size: 0.95rem;
-            }
-        }
-
-        @media (max-width: 1024px) {
-            .factory-content-wrapper {
-                flex-direction: column; /* Stack floor and legend vertically */
-                align-items: center; /* Center items */
-                gap: 2.5rem; /* More space when stacked */
-            }
-            .legend-container {
-                width: 80%; /* Take more width on smaller screens */
-                margin-top: 0; /* Remove top margin when stacked */
-                position: relative; /* No sticky in column layout */
-                top: auto;
-            }
-            .factory-floor {
-                height: 600px; /* Adjust height for smaller screens */
-                width: 95%; /* Adjust width when stacked */
-                max-width: 800px; /* Max width for floor */
-            }
-            #btnFullscreen {
-                top: 10px; /* Adjusted for stacked layout */
-                right: 10px;
-                padding: 8px 12px;
-                font-size: 0.85rem;
-            }
-            #btnFullscreen i {
-                font-size: 1rem;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
-            .header {
-                flex-direction: column;
-                text-align: center;
-                gap: 1rem;
-                padding: 1rem 1.5rem;
-            }
-            .header-row {
-                flex-direction: column;
-                gap: 0.8rem;
-            }
-            .header h1 {
-                font-size: 1.4rem;
-            }
-            .header h1 i {
-                font-size: 2.2rem;
-            }
-            .header p, #currentDatetime {
-                font-size: 0.9rem;
-            }
-            .header-menu {
-                flex-direction: column;
-                width: 100%;
-                gap: 0.8rem;
-            }
-            .header-menu-btn {
-                width: 100%;
-                font-size: 0.9rem;
-                padding: 0.6rem 1rem;
-                justify-content: center;
-            }
-            .controls {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 0.8rem;
-                margin-bottom: 1rem;
-            }
-            .input-group {
-                width: 100%;
-            }
-            .input-group input {
-                width: 100%;
-                padding: 0.5rem 0.75rem 0.5rem 2.5rem;
-            }
-            .controls button {
-                width: 100%;
-                padding: 0.5rem 1rem;
-            }
-            #btnResetLayout {
-                margin-left: 0; /* Reset margin */
-            }
-            .factory-layout {
-                padding: 1.5rem;
-            }
-            .layout-header {
-                font-size: 1.4rem;
-                margin-bottom: 1.5rem;
-            }
-            .factory-floor {
-                height: 450px; /* Smaller height for mobile */
-                width: 100%;
-            }
-            .process-area {
-                min-width: 110px; /* Even smaller min-width for mobile */
-                min-height: 90px; /* Even smaller min-height for mobile */
-                padding: 0.8rem;
-                font-size: 0.9rem;
-            }
-            .process-icon {
-                font-size: 1.8rem;
-            }
-            .process-name {
-                font-size: 0.9rem;
-            }
-            .process-count {
-                font-size: 1.3rem;
-                min-height: 25px;
-            }
-            .process-status {
-                font-size: 0.75rem;
-            }
-            .resize-handle {
-                width: 12px;
-                height: 12px;
-                right: -3px;
-                bottom: -3px;
-            }
-            .legend-container {
-                width: 100%;
-                padding: 1rem;
-            }
-            .legend-title {
-                font-size: 1.1rem;
-                margin-bottom: 1rem;
-                padding-bottom: 0.5rem;
-            }
-            .legend-item {
-                font-size: 0.9rem;
-                margin-bottom: 0.8rem;
-            }
-            .legend-color-box {
-                width: 20px;
-                height: 20px;
-                margin-right: 0.8rem;
-            }
-            .legend-info {
-                margin-top: 1.5rem;
-                padding-top: 1rem;
-            }
-        }
-    </style>
+    /* Responsive */
+    @media (max-width: 768px) {
+      .factory-floor {
+        /*
+        transform: scale(0.8);
+        transform-origin: top left;
+        Removing scale might provide more predictable drag/resize behavior
+        on small screens if combined with specific element positioning adjustments.
+        Otherwise, restrictRect in interact.js might need adjustment.
+        */
+        height: 500px;
+      }
+      .header {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+      }
+      .header h1 {
+        font-size: 1.5rem;
+      }
+      .controls {
+        justify-content: center;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div class="header-row">
-                <h1><i class="fas fa-industry"></i> Factory Layout Dashboard</h1>
-                <div id="currentDatetime"></div>
-            </div>
-            <div class="header-row">
-                <p>แสดงผังโรงงานและกระบวนการทำงาน CHP</p>
-                <nav class="header-menu">
-                    <a href="boardtosheet.html" class="header-menu-btn active" id="btnDashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-                    <a href="reporttosheet.html" class="header-menu-btn" id="btnSearch"><i class="fas fa-search"></i> ค้นหา</a>
-                </nav>
-            </div>
-        </div>
-
-        <div class="controls">
-            <div class="input-group">
-                <i class="fas fa-calendar-alt"></i>
-                <input type="text" id="startDate" placeholder="วันที่เริ่มต้น" autocomplete="off" />
-            </div>
-            <div class="input-group">
-                <i class="fas fa-calendar-alt"></i>
-                <input type="text" id="endDate" placeholder="วันที่สิ้นสุด" autocomplete="off" />
-            </div>
-            <button id="btnFilter">ใช้ตัวกรอง</button>
-            <button id="btnResetLayout">รีเซ็ตตำแหน่ง</button>
-        </div>
-
-        <div class="factory-layout">
-            <div class="layout-header"><i class="fas fa-map"></i> แผนผังโรงงานและการกระจายชิ้นงาน</div>
-            <div class="factory-content-wrapper">
-                <div class="factory-floor" id="factoryFloor">
-                    <button id="btnFullscreen" title="ดูเต็มหน้าจอ">
-                        <i class="fas fa-expand-arrows-alt"></i> <span id="fullscreenText">ดูเต็มหน้าจอ</span>
-                    </button>
-
-                    <div class="process-area powder-mixing high-volume" data-id="powder-mixing">
-                        <div class="process-icon"><i class="fas fa-flask"></i></div>
-                        <div class="process-name">ผสมผง</div>
-                        <div class="process-count">0</div>
-                        <div class="process-status">สถานะ</div>
-                        <div class="resize-handle"></div>
-                    </div>
-                    <div class="process-area compact medium-volume" data-id="compact">
-                        <div class="process-icon"><i class="fas fa-compress-arrows-alt"></i></div>
-                        <div class="process-name">Compact</div>
-                        <div class="process-count">0</div>
-                        <div class="process-status">สถานะ</div>
-                        <div class="resize-handle"></div>
-                    </div>
-                    <div class="process-area sinter-steam high-volume" data-id="sinter-steam">
-                        <div class="process-icon"><i class="fas fa-fire"></i></div>
-                        <div class="process-name">Sinter & Steam</div>
-                        <div class="process-count">0</div>
-                        <div class="process-status">สถานะ</div>
-                        <div class="resize-handle"></div>
-                    </div>
-                    <div class="process-area finishing medium-volume" data-id="finishing">
-                        <div class="process-icon"><i class="fas fa-gem"></i></div>
-                        <div class="process-name">Finishing</div>
-                        <div class="process-count">0</div>
-                        <div class="process-status">สถานะ</div>
-                        <div class="resize-handle"></div>
-                    </div>
-                    <div class="process-area machining high-volume" data-id="machining">
-                        <div class="process-icon"><i class="fas fa-cog"></i></div>
-                        <div class="process-name">Machining</div>
-                        <div class="process-count">0</div>
-                        <div class="process-status">สถานะ</div>
-                        <div class="resize-handle"></div>
-                    </div>
-                    <div class="process-area sub-store medium-volume" data-id="sub-store">
-                        <div class="process-icon"><i class="fas fa-warehouse"></i></div>
-                        <div class="process-name">Sub Store</div>
-                        <div class="process-count">0</div>
-                        <div class="process-status">สถานะ</div>
-                        <div class="resize-handle"></div>
-                    </div>
-                    <div class="process-area final-inspection medium-volume" data-id="final-inspection">
-                        <div class="process-icon"><i class="fas fa-clipboard-check"></i></div>
-                        <div class="process-name">Final Inspection</div>
-                        <div class="process-count">0</div>
-                        <div class="process-status">สถานะ</div>
-                        <div class="resize-handle"></div>
-                    </div>
-                    <div class="process-area magna-flux low-volume" data-id="magna-flux">
-                        <div class="process-icon"><i class="fas fa-magnet"></i></div>
-                        <div class="process-name">Magna flux</div>
-                        <div class="process-count">0</div>
-                        <div class="process-status">สถานะ</div>
-                        <div class="resize-handle"></div>
-                    </div>
-                    <div class="process-area sort medium-volume" data-id="sort">
-                        <div class="process-icon"><i class="fas fa-sort-amount-down"></i></div>
-                        <div class="process-name">Sort</div>
-                        <div class="process-count">0</div>
-                        <div class="process-status">สถานะ</div>
-                        <div class="resize-handle"></div>
-                    </div>
-                    <div class="process-area pack medium-volume" data-id="pack">
-                        <div class="process-icon"><i class="fas fa-box"></i></div>
-                        <div class="process-name">Pack</div>
-                        <div class="process-count">0</div>
-                        <div class="process-status">สถานะ</div>
-                        <div class="resize-handle"></div>
-                    </div>
-                    <div class="process-area rework low-volume" data-id="rework">
-                        <div class="process-icon"><i class="fas fa-tools"></i></div>
-                        <div class="process-name">Rework</div>
-                        <div class="process-count">0</div>
-                        <div class="process-status">สถานะ</div>
-                        <div class="resize-handle"></div>
-                    </div>
-                </div>
-
-                <div class="legend-container">
-                    <div class="legend-title"><i class="fas fa-info-circle"></i> เงื่อนไขปริมาณชิ้นงาน</div>
-                    <div class="legend-item">
-                        <div class="legend-color-box high"></div>
-                        <div>**ปริมาณมาก** (> 1000 ชิ้น)</div>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color-box medium"></div>
-                        <div>**ปริมาณปานกลาง** (500 – 1000 ชิ้น)</div>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color-box low"></div>
-                        <div>**ปริมาณน้อย** (< 500 ชิ้น)</div>
-                    </div>
-                    
-                    <div class="legend-info">
-                        <div class="legend-item">
-                            <i class="fas fa-hand-rock"></i>
-                            <div><small>คลิก & ลาก เพื่อย้ายการ์ด</small></div>
-                        </div>
-                        <div class="legend-item">
-                            <i class="fas fa-expand-alt"></i>
-                            <div><small>ลากมุมล่างขวาเพื่อปรับขนาด</small></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+  <div class="container">
+    <div class="header">
+      <div class="header-row">
+        <h1><i class="fas fa-industry"></i> Factory Layout Dashboard</h1>
+        <div id="currentDatetime" style="font-size:1rem; font-weight: 500; opacity: 0.9;"></div>
+      </div>
+      <div class="header-row">
+        <p>แสดงผังโรงงานและกระบวนการทำงาน CHP</p>
+        <nav class="header-menu">
+          <a href="boardtosheet.html" class="header-menu-btn active" id="btnDashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+          <a href="reporttosheet.html" class="header-menu-btn" id="btnSearch"><i class="fas fa-search"></i> ค้นหา</a>
+        </nav>
+      </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@interactjs/interactjs/dist/interact.min.js"></script>
+    <div class="controls">
+      <div class="input-group">
+        <i class="fas fa-calendar-alt"></i>
+        <input type="text" id="startDate" placeholder="วันที่เริ่มต้น" autocomplete="off" />
+      </div>
+      <div class="input-group">
+        <i class="fas fa-calendar-alt"></i>
+        <input type="text" id="endDate" placeholder="วันที่สิ้นสุด" autocomplete="off" />
+      </div>
+      <button id="btnFilter">ใช้ตัวกรอง</button>
+      <button id="btnResetLayout">รีเซ็ตตำแหน่ง</button>
+    </div>
 
-    <script>
-        // List of processes (can be extended)
-        const processList = [
-            'ผสมผง', 'Compact', 'Sinter & Steam', 'Finishing',
-            'Machining', 'Sub Store', 'Final Inspection',
-            'Magna flux', 'Sort', 'Pack', 'Rework'
-        ];
+<!-- วงล้อโหลด -->
+<div id="loadingIndicator" style="display:none; text-align:center; margin:1rem 0; color:#64748b;">
+  <i class="fas fa-spinner fa-spin" style="font-size:1.5rem;"></i> กำลังโหลดข้อมูล...
+</div>
 
-        // Mapping from process name to data-id (for CSS classes)
-        function getDataIdFromProcessName(procName) {
-            const map = {
-                'ผสมผง': 'powder-mixing',
-                'Compact': 'compact',
-                'Sinter & Steam': 'sinter-steam',
-                'Finishing': 'finishing',
-                'Machining': 'machining',
-                'Sub Store': 'sub-store',
-                'Final Inspection': 'final-inspection',
-                'Magna flux': 'magna-flux',
-                'Sort': 'sort',
-                'Pack': 'pack',
-                'Rework': 'rework'
-            };
-            return map[procName] || '';
+    <div class="factory-layout">
+      <div class="layout-title"><i class="fas fa-map"></i> แผนผังโรงงานและการกระจายชิ้นงาน</div>
+      <div class="factory-floor">
+         <!-- ปุ่ม Fullscreen -->
+  <button id="btnFullscreen" title="ดูเต็มหน้าจอ" style="position:absolute; top:10px; right:10px; background:white; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; z-index:30;">
+    <i class="fas fa-expand"></i>
+  </button>
+        
+        <div class="process-area powder-mixing high-volume" data-id="powder-mixing">
+          <div class="process-icon"><i class="fas fa-flask"></i></div>
+          <div class="process-name">ผสมผง</div>
+          <div class="process-count">0</div>
+          <div class="process-status">สถานะ</div>
+          <div class="resize-handle"></div>
+        </div>
+        <div class="process-area compact medium-volume" data-id="compact">
+          <div class="process-icon"><i class="fas fa-compress-arrows-alt"></i></div>
+          <div class="process-name">Compact</div>
+          <div class="process-count">0</div>
+          <div class="process-status">สถานะ</div>
+          <div class="resize-handle"></div>
+        </div>
+        <div class="process-area sinter-steam high-volume" data-id="sinter-steam">
+          <div class="process-icon"><i class="fas fa-fire"></i></div>
+          <div class="process-name">Sinter & Steam</div>
+          <div class="process-count">0</div>
+          <div class="process-status">สถานะ</div>
+          <div class="resize-handle"></div>
+        </div>
+        <div class="process-area finishing medium-volume" data-id="finishing">
+          <div class="process-icon"><i class="fas fa-gem"></i></div>
+          <div class="process-name">Finishing</div>
+          <div class="process-count">0</div>
+          <div class="process-status">สถานะ</div>
+          <div class="resize-handle"></div>
+        </div>
+        <div class="process-area machining high-volume" data-id="machining">
+          <div class="process-icon"><i class="fas fa-cog"></i></div>
+          <div class="process-name">Machining</div>
+          <div class="process-count">0</div>
+          <div class="process-status">สถานะ</div>
+          <div class="resize-handle"></div>
+        </div>
+        <div class="process-area sub-store medium-volume" data-id="sub-store">
+          <div class="process-icon"><i class="fas fa-warehouse"></i></div>
+          <div class="process-name">Sub Store</div>
+          <div class="process-count">0</div>
+          <div class="process-status">สถานะ</div>
+          <div class="resize-handle"></div>
+        </div>
+        <div class="process-area final-inspection medium-volume" data-id="final-inspection">
+          <div class="process-icon"><i class="fas fa-clipboard-check"></i></div>
+          <div class="process-name">Final Inspection</div>
+          <div class="process-count">0</div>
+          <div class="process-status">สถานะ</div>
+          <div class="resize-handle"></div>
+        </div>
+        <div class="process-area magna-flux low-volume" data-id="magna-flux">
+          <div class="process-icon"><i class="fas fa-magnet"></i></div>
+          <div class="process-name">Magna flux</div>
+          <div class="process-count">0</div>
+          <div class="process-status">สถานะ</div>
+          <div class="resize-handle"></div>
+        </div>
+        <div class="process-area sort medium-volume" data-id="sort">
+          <div class="process-icon"><i class="fas fa-sort-amount-down"></i></div>
+          <div class="process-name">Sort</div>
+          <div class="process-count">0</div>
+          <div class="process-status">สถานะ</div>
+          <div class="resize-handle"></div>
+        </div>
+        <div class="process-area pack medium-volume" data-id="pack">
+          <div class="process-icon"><i class="fas fa-box"></i></div>
+          <div class="process-name">Pack</div>
+          <div class="process-count">0</div>
+          <div class="process-status">สถานะ</div>
+          <div class="resize-handle"></div>
+        </div>
+        <div class="process-area rework low-volume" data-id="rework">
+          <div class="process-icon"><i class="fas fa-tools"></i></div>
+          <div class="process-name">Rework</div>
+          <div class="process-count">0</div>
+          <div class="process-status">สถานะ</div>
+          <div class="resize-handle"></div>
+        </div>
+
+        <div class="process-area" style="top: 20px; right: 20px; position: absolute; width: 180px;" data-id="legend">
+    <div class="process-name">🔵 เงื่อนไขปริมาณ</div>
+    <div class="process-status" style="font-size: 0.85rem;">
+      <div>🟢 ปริมาณมาก &gt; 1000</div>
+      <div>🟠 ปานกลาง 500–1000</div>
+      <div>🔴 ปริมาณน้อย &lt; 500</div>
+    </div>
+  </div>
+</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@interactjs/interactjs/dist/interact.min.js"></script>
+
+  <script>
+const processList = [
+  'ผสมผง', 'Compact', 'Sinter & Steam', 'Finishing',
+  'Machining', 'Sub Store', 'Final Inspection',
+  'Magna flux', 'Sort', 'Pack', 'Rework'
+];
+
+function getDataIdFromProcessName(procName) {
+  const map = {
+    'ผสมผง': 'powder-mixing',
+    'Compact': 'compact',
+    'Sinter & Steam': 'sinter-steam',
+    'Finishing': 'finishing',
+    'Machining': 'machining',
+    'Sub Store': 'sub-store',
+    'Final Inspection': 'final-inspection',
+    'Magna flux': 'magna-flux',
+    'Sort': 'sort',
+    'Pack': 'pack',
+    'Rework': 'rework'
+  };
+  return map[procName] || '';
+}
+
+async function loadProcessDataWithDateFilter() {
+  const start = document.getElementById('startDate').value;
+  const end = document.getElementById('endDate').value;
+
+  Swal.fire({
+    title: 'กำลังโหลดข้อมูล...',
+    allowOutsideClick: false,
+    didOpen: () => Swal.showLoading()
+  });
+
+  try {
+    const url = 'https://script.google.com/macros/s/AKfycbwYy1acBX-V37hiU8lhTY-9YGWgVjVplQOIzhNg1-cNispv6L43_rCVRXVO-HqAfik/exec?page=getInventory';
+    const res = await fetch(url);
+    const data = await res.json();
+
+    const filtered = data.filter(row => {
+      const rawDate = row.Timestamp;
+      const dateOnly = new Date(rawDate).toISOString().split('T')[0];
+      return (!start || dateOnly >= start) && (!end || dateOnly <= end);
+    });
+
+    const countMap = {};
+    processList.forEach(p => countMap[p] = 0);
+
+    filtered.forEach(row => {
+      if (row.mainProcess && countMap.hasOwnProperty(row.mainProcess)) {
+        countMap[row.mainProcess] += Number(row.Quantity || 0);
+      }
+    });
+
+    processList.forEach(proc => {
+      const dataId = getDataIdFromProcessName(proc);
+      const el = document.querySelector(`.process-area[data-id="${dataId}"]`);
+      if (el) {
+        const qty = countMap[proc] || 0;
+        el.querySelector('.process-count').textContent = qty.toLocaleString();
+
+        const statusEl = el.querySelector('.process-status');
+        el.classList.remove('high-volume', 'medium-volume', 'low-volume');
+
+        if (qty > 1000) {
+          el.classList.add('high-volume');
+          statusEl.textContent = 'ปริมาณมาก';
+        } else if (qty >= 500) {
+          el.classList.add('medium-volume');
+          statusEl.textContent = 'ปริมาณปานกลาง';
+        } else {
+          el.classList.add('low-volume');
+          statusEl.textContent = 'ปริมาณน้อย';
         }
+      }
+    });
 
-        // Function to load and display process data
-        async function loadProcessDataWithDateFilter() {
-            const start = document.getElementById('startDate').value;
-            const end = document.getElementById('endDate').value;
+  } catch (error) {
+    console.error('❌ Failed to load process data:', error);
+    Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูลได้', 'error');
+  } finally {
+    Swal.close();
+  }
+}
 
-            // Show loading alert
-            Swal.fire({
-                title: 'กำลังโหลดข้อมูล...',
-                allowOutsideClick: false,
-                didOpen: () => Swal.showLoading()
-            });
+function updateDatetime() {
+  const el = document.getElementById('currentDatetime');
+  const now = new Date();
+  el.textContent = now.toLocaleString('th-TH', {
+    year: 'numeric', month: 'short', day: 'numeric',
+    hour: '2-digit', minute: '2-digit', second: '2-digit'
+  });
+}
+setInterval(updateDatetime, 1000);
+updateDatetime();
 
-            try {
-                // Fetch data from Google Apps Script endpoint
-                const url = 'https://script.google.com/macros/s/AKfycbwYy1acBX-V37hiU8lhTY-9YGWgVjVplQOIzhNg1-cNispv6L43_rCVRXVO-HqAfik/exec?page=getInventory';
-                const res = await fetch(url);
-                const data = await res.json();
+flatpickr('#startDate', { dateFormat: 'Y-m-d' });
+flatpickr('#endDate', { dateFormat: 'Y-m-d' });
+document.getElementById('btnFilter').addEventListener('click', loadProcessDataWithDateFilter);
 
-                // Filter data based on selected date range
-                const filtered = data.filter(row => {
-                    const rawDate = row.Timestamp;
-                    // Ensure rawDate is valid before processing
-                    if (!rawDate) return false; 
-                    const dateOnly = new Date(rawDate).toISOString().split('T')[0];
-                    return (!start || dateOnly >= start) && (!end || dateOnly <= end);
-                });
+document.getElementById('btnResetLayout').addEventListener('click', () => {
+  localStorage.clear();
+  document.querySelectorAll('.process-area').forEach(card => {
+    card.style.transform = `translate(0px, 0px)`;
+    card.setAttribute('data-x', '0');
+    card.setAttribute('data-y', '0');
+    card.style.width = '';
+    card.style.height = '';
+  });
+});
 
-                // Initialize count map for all processes
-                const countMap = {};
-                processList.forEach(p => countMap[p] = 0);
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.process-area').forEach(card => {
+    const id = card.dataset.id;
+    const savedPos = localStorage.getItem(`card-pos-${id}`);
+    const savedSize = localStorage.getItem(`card-size-${id}`);
+    let x = 0, y = 0;
 
-                // Aggregate quantities by mainProcess
-                filtered.forEach(row => {
-                    if (row.mainProcess && countMap.hasOwnProperty(row.mainProcess)) {
-                        countMap[row.mainProcess] += Number(row.Quantity || 0);
-                    }
-                });
+    if (savedPos) {
+      const loadedPos = JSON.parse(savedPos);
+      x = loadedPos.x;
+      y = loadedPos.y;
+    }
 
-                // Update UI for each process area
-                processList.forEach(proc => {
-                    const dataId = getDataIdFromProcessName(proc);
-                    const el = document.querySelector(`.process-area[data-id="${dataId}"]`);
-                    if (el) {
-                        const qty = countMap[proc] || 0;
-                        el.querySelector('.process-count').textContent = qty.toLocaleString(); // Format with commas
+    card.style.transform = `translate(${x}px, ${y}px)`;
+    card.setAttribute('data-x', x);
+    card.setAttribute('data-y', y);
 
-                        const statusEl = el.querySelector('.process-status');
-                        
-                        // Remove previous volume classes to reset state
-                        el.classList.remove('high-volume', 'medium-volume', 'low-volume');
+    if (savedSize) {
+      const { width, height } = JSON.parse(savedSize);
+      card.style.width = width;
+      card.style.height = height;
+    }
+  });
 
-                        // Re-trigger CSS animation by removing and re-adding animation property
-                        el.style.animation = 'none';
-                        // Force a reflow (browser recalculates styles)
-                        el.offsetHeight; 
-                        el.style.animation = null; // Re-enable animation for the next class addition
-
-                        // Apply new volume class and status text based on quantity
-                        if (qty > 1000) {
-                            el.classList.add('high-volume');
-                            statusEl.textContent = 'ปริมาณมาก';
-                        } else if (qty >= 500) {
-                            el.classList.add('medium-volume');
-                            statusEl.textContent = 'ปริมาณปานกลาง';
-                        } else {
-                            el.classList.add('low-volume');
-                            statusEl.textContent = 'ปริมาณน้อย';
-                        }
-                    }
-                });
-
-            } catch (error) {
-                console.error('❌ Failed to load process data:', error);
-                Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูลได้ในขณะนี้', 'error');
-            } finally {
-                Swal.close(); // Close loading alert
-            }
+  interact('.process-area')
+    .draggable({
+      inertia: true,
+      modifiers: [interact.modifiers.restrictRect({ restriction: 'parent', endOnly: true })],
+      listeners: {
+        start(e) {
+          document.body.style.overflow = 'hidden';
+          e.target.classList.add('dragging');
+        },
+        move(e) {
+          const target = e.target;
+          let x = parseFloat(target.getAttribute('data-x')) || 0;
+          let y = parseFloat(target.getAttribute('data-y')) || 0;
+          x += e.dx;
+          y += e.dy;
+          target.style.transform = `translate(${x}px, ${y}px)`;
+          target.setAttribute('data-x', x);
+          target.setAttribute('data-y', y);
+        },
+        end(e) {
+          document.body.style.overflow = '';
+          e.target.classList.remove('dragging');
+          const target = e.target;
+          const pos = {
+            x: parseFloat(target.getAttribute('data-x')) || 0,
+            y: parseFloat(target.getAttribute('data-y')) || 0
+          };
+          localStorage.setItem(`card-pos-${target.dataset.id}`, JSON.stringify(pos));
         }
-
-        // Update current date and time in header
-        function updateDatetime() {
-            const el = document.getElementById('currentDatetime');
-            const now = new Date();
-            el.textContent = now.toLocaleString('th-TH', {
-                year: 'numeric', month: 'short', day: 'numeric',
-                hour: '2-digit', minute: '2-digit', second: '2-digit'
-            });
+      }
+    })
+    .resizable({
+      edges: { top: true, left: true, right: true, bottom: true },
+      modifiers: [
+        interact.modifiers.restrictEdges({ outer: 'parent', endOnly: true }),
+        interact.modifiers.restrictSize({ min: { width: 100, height: 80 } })
+      ],
+      listeners: {
+        move(e) {
+          const target = e.target;
+          let x = (parseFloat(target.getAttribute('data-x')) || 0) + e.deltaRect.left;
+          let y = (parseFloat(target.getAttribute('data-y')) || 0) + e.deltaRect.top;
+          target.style.width = e.rect.width + 'px';
+          target.style.height = e.rect.height + 'px';
+          target.style.transform = `translate(${x}px, ${y}px)`;
+          target.setAttribute('data-x', x);
+          target.setAttribute('data-y', y);
+        },
+        end(e) {
+          const target = e.target;
+          const size = {
+            width: target.style.width,
+            height: target.style.height
+          };
+          localStorage.setItem(`card-size-${target.dataset.id}`, JSON.stringify(size));
+          const pos = {
+            x: parseFloat(target.getAttribute('data-x')) || 0,
+            y: parseFloat(target.getAttribute('data-y')) || 0
+          };
+          localStorage.setItem(`card-pos-${target.dataset.id}`, JSON.stringify(pos));
         }
-        setInterval(updateDatetime, 1000); // Update every second
-        updateDatetime(); // Initial call
+      }
+    })
+    .styleCursor(false);
+});
 
-        // Initialize Flatpickr for date inputs
-        flatpickr('#startDate', { dateFormat: 'Y-m-d' });
-        flatpickr('#endDate', { dateFormat: 'Y-m-d' });
+// Fullscreen toggle
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('btnFullscreen');
+  if (btn) {
+    btn.addEventListener('click', () => {
+      const el = document.querySelector('.factory-layout');
+      if (!document.fullscreenElement) {
+        el.requestFullscreen?.();
+      } else {
+        document.exitFullscreen?.();
+      }
+    });
+  }
+});
 
-        // Add event listener for filter button
-        document.getElementById('btnFilter').addEventListener('click', loadProcessDataWithDateFilter);
+loadProcessDataWithDateFilter();
+</script>
 
-        // Reset Layout Button functionality
-        document.getElementById('btnResetLayout').addEventListener('click', () => {
-            Swal.fire({
-                title: 'คุณแน่ใจหรือไม่?',
-                text: "ตำแหน่งและขนาดของการ์ดจะถูกรีเซ็ตกลับเป็นค่าเริ่มต้น!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'ใช่, รีเซ็ตเลย!',
-                cancelButtonText: 'ยกเลิก'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    localStorage.clear(); // Clear all saved positions/sizes
-                    document.querySelectorAll('.process-area').forEach(card => {
-                        // Reset transform for Interact.js
-                        card.style.transform = `translate(0px, 0px)`;
-                        card.setAttribute('data-x', '0');
-                        card.setAttribute('data-y', '0');
-                        
-                        // Reset width/height
-                        card.style.width = ''; // Revert to CSS default or initial value
-                        card.style.height = ''; // Revert to CSS default or initial value
-                        
-                        // Manually re-apply initial top/left from CSS for correct default positioning
-                        // This mirrors how the DOMContentLoaded block initializes them if no saved state
-                        const id = card.dataset.id;
-                        switch (id) {
-                            case 'powder-mixing': card.style.top = '50px'; card.style.left = '50px'; break;
-                            case 'compact': card.style.top = '50px'; card.style.left = '250px'; break;
-                            case 'sinter-steam': card.style.top = '50px'; card.style.left = '450px'; break;
-                            case 'finishing': card.style.top = '50px'; card.style.left = '650px'; break;
-                            case 'machining': card.style.top = '250px'; card.style.left = '50px'; break;
-                            case 'sub-store': card.style.top = '250px'; card.style.left = '250px'; break;
-                            case 'final-inspection': card.style.top = '250px'; card.style.left = '450px'; break;
-                            case 'magna-flux': card.style.top = '250px'; card.style.left = '650px'; break;
-                            case 'sort': card.style.top = '450px'; card.style.left = '50px'; break;
-                            case 'pack': card.style.top = '450px'; card.style.left = '250px'; break;
-                            case 'rework': card.style.top = '450px'; card.style.left = '450px'; break;
-                        }
-                    });
-                    Swal.fire('รีเซ็ตสำเร็จ!', 'ตำแหน่งและขนาดถูกรีเซ็ตแล้ว', 'success');
-                }
-            });
-        });
 
-        // Initialize Interact.js for draggable and resizable cards
-        document.addEventListener('DOMContentLoaded', () => {
-            // Load saved positions and sizes from localStorage
-            document.querySelectorAll('.process-area').forEach(card => {
-                const id = card.dataset.id;
-                const savedPos = localStorage.getItem(`card-pos-${id}`);
-                const savedSize = localStorage.getItem(`card-size-${id}`);
-                let x = 0, y = 0;
-
-                // Apply initial CSS positions first
-                const initialTop = parseFloat(getComputedStyle(card).top);
-                const initialLeft = parseFloat(getComputedStyle(card).left);
-                card.style.top = initialTop + 'px';
-                card.style.left = initialLeft + 'px';
-
-                if (savedPos) {
-                    const loadedPos = JSON.parse(savedPos);
-                    x = loadedPos.x;
-                    y = loadedPos.y;
-                    // Apply translation relative to the initial CSS top/left
-                    card.style.transform = `translate(${x}px, ${y}px)`;
-                } else {
-                    // If no saved position, ensure data-x/y are zero for Interact.js
-                    card.style.transform = `translate(0px, 0px)`;
-                }
-
-                card.setAttribute('data-x', x);
-                card.setAttribute('data-y', y);
-
-                if (savedSize) {
-                    const { width: savedWidth, height: savedHeight } = JSON.parse(savedSize);
-                    card.style.width = savedWidth;
-                    card.style.height = savedHeight;
-                }
-            });
-
-            // Make process areas draggable
-            interact('.process-area')
-                .draggable({
-                    inertia: true, // Smooth movement after release
-                    modifiers: [
-                        interact.modifiers.restrictRect({
-                            restriction: '.factory-floor', // Restrict dragging within the factory floor
-                            endOnly: true // Apply restriction only at the end of the drag
-                        })
-                    ],
-                    listeners: {
-                        start(e) {
-                            document.body.style.overflow = 'hidden'; // Prevent body scroll during drag
-                            e.target.classList.add('dragging');
-                        },
-                        move(e) {
-                            const target = e.target;
-                            let x = parseFloat(target.getAttribute('data-x')) || 0;
-                            let y = parseFloat(target.getAttribute('data-y')) || 0;
-                            x += e.dx;
-                            y += e.dy;
-                            target.style.transform = `translate(${x}px, ${y}px)`;
-                            target.setAttribute('data-x', x);
-                            target.setAttribute('data-y', y);
-                        },
-                        end(e) {
-                            document.body.style.overflow = ''; // Re-enable body scroll
-                            e.target.classList.remove('dragging');
-                            const target = e.target;
-                            const pos = {
-                                x: parseFloat(target.getAttribute('data-x')) || 0,
-                                y: parseFloat(target.getAttribute('data-y')) || 0
-                            };
-                            localStorage.setItem(`card-pos-${target.dataset.id}`, JSON.stringify(pos)); // Save position
-                        }
-                    }
-                })
-                .resizable({
-                    edges: { top: true, left: true, right: true, bottom: true }, // Enable resizing from all edges
-                    modifiers: [
-                        interact.modifiers.restrictEdges({ outer: '.factory-floor', endOnly: true }), // Restrict resizing within parent
-                        interact.modifiers.restrictSize({ min: { width: 100, height: 80 } }) // Minimum size
-                    ],
-                    listeners: {
-                        move(e) {
-                            const target = e.target;
-                            let x = (parseFloat(target.getAttribute('data-x')) || 0);
-                            let y = (parseFloat(target.getAttribute('data-y')) || 0);
-
-                            // Update x and y by the change in the top and left edge
-                            x += e.deltaRect.left;
-                            y += e.deltaRect.top;
-
-                            target.style.width = e.rect.width + 'px';
-                            target.style.height = e.rect.height + 'px';
-                            target.style.transform = `translate(${x}px, ${y}px)`;
-
-                            target.setAttribute('data-x', x);
-                            target.setAttribute('data-y', y);
-                        },
-                        end(e) {
-                            const target = e.target;
-                            const size = {
-                                width: target.style.width,
-                                height: target.style.height
-                            };
-                            localStorage.setItem(`card-size-${target.dataset.id}`, JSON.stringify(size)); // Save size
-
-                            const pos = {
-                                x: parseFloat(target.getAttribute('data-x')) || 0,
-                                y: parseFloat(target.getAttribute('data-y')) || 0
-                            };
-                            localStorage.setItem(`card-pos-${target.dataset.id}`, JSON.stringify(pos)); // Save updated position after resize
-                        }
-                    }
-                })
-                .styleCursor(false); // Let CSS manage cursors
-
-            // Fullscreen toggle functionality
-            const btnFullscreen = document.getElementById('btnFullscreen');
-            const factoryFloor = document.getElementById('factoryFloor');
-            const fullscreenText = document.getElementById('fullscreenText');
-
-            if (btnFullscreen && factoryFloor) {
-                btnFullscreen.addEventListener('click', () => {
-                    if (!document.fullscreenElement) {
-                        factoryFloor.requestFullscreen?.(); // Request fullscreen for the factory floor element
-                    } else {
-                        document.exitFullscreen?.(); // Exit fullscreen
-                    }
-                });
-
-                // Listen for fullscreen change events to update button icon/text and element class
-                document.addEventListener('fullscreenchange', () => {
-                    if (document.fullscreenElement === factoryFloor) {
-                        factoryFloor.classList.add('fullscreen-active');
-                        btnFullscreen.innerHTML = '<i class="fas fa-compress-alt"></i> <span id="fullscreenText">ออกจากเต็มหน้าจอ</span>';
-                    } else {
-                        factoryFloor.classList.remove('fullscreen-active');
-                        btnFullscreen.innerHTML = '<i class="fas fa-expand-arrows-alt"></i> <span id="fullscreenText">ดูเต็มหน้าจอ</span>';
-                    }
-                });
-            }
-        });
-
-        // Initial data load when the page is ready
-        loadProcessDataWithDateFilter();
-    </script>
 </body>
 </html>
