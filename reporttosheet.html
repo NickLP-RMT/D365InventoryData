@@ -893,18 +893,35 @@
        * Clears all filter inputs and reloads data.
        */
       function clearFilters() {
-        document.getElementById('startDate').value = '';
-        document.getElementById('endDate').value = '';
-        document.getElementById('mainProcess').value = '';
-        document.getElementById('barcodeSearch').value = '';
+  document.getElementById('startDate').value = '';
+  document.getElementById('endDate').value = '';
+  document.getElementById('mainProcess').value = '';
+  document.getElementById('barcodeSearch').value = '';
 
-        // Clear Flatpickr instances
-        document.getElementById('startDate')._flatpickr?.clear();
-        document.getElementById('endDate')._flatpickr?.clear();
+  // Clear Flatpickr instances
+  document.getElementById('startDate')._flatpickr?.clear();
+  document.getElementById('endDate')._flatpickr?.clear();
 
-        currentPage = 1; // Reset to first page
-        loadData(); // Reload data with cleared filters
-      }
+  // Reset state
+  allFilteredData = [];
+  currentPage = 1;
+  hasSearched = false;
+
+  // แสดงข้อความแนะนำใน summary tab
+  document.getElementById('summary').innerHTML = `
+    <div class="no-data">
+      <i class="fas fa-filter"></i>
+      <div>กรุณาเลือกตัวกรองข้อมูล และกดปุ่ม “ค้นหา”</div>
+    </div>
+  `;
+
+  // ล้างตารางและ pagination
+  document.getElementById('tableBody').innerHTML = '';
+  document.getElementById('paginationControls').style.display = 'none';
+
+  // กลับไปที่ tab สรุปยอด
+  App.switchTab('summary', document.getElementById('btnSummaryTab'));
+}
 
       /**
        * Adjusts timestamp by a given number of hours.
