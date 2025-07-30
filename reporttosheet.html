@@ -803,6 +803,7 @@
       let allFilteredData = []; // Stores all filtered data
       let currentPage = 1;
       const rowsPerPage = 20; // Number of rows to display per page
+      let hasSearched = false;
       const loadingOverlay = document.getElementById('loadingOverlay');
 
       /**
@@ -963,6 +964,7 @@
           // Trim barcode keyword to remove leading/trailing spaces
           const barcodeKeyword = document.getElementById('barcodeSearch').value.toLowerCase().trim();
 
+          hasSearched = true;
           // Filter data based on user inputs
           allFilteredData = data.filter((item) => {
             const rawDate = item.Timestamp;
@@ -1005,9 +1007,12 @@
       function updateSummary(data) {
         const summaryDiv = document.getElementById('summary');
         if (data.length === 0) {
-          summaryDiv.innerHTML = `<div class="no-data"><i class="fas fa-inbox"></i><div>ไม่พบข้อมูลที่ตรงกับเงื่อนไข</div></div>`;
-          return;
-        }
+  const msg = hasSearched
+    ? 'ไม่พบข้อมูลที่ตรงกับเงื่อนไข'
+    : 'กรุณาเลือกตัวกรองข้อมูล และกดปุ่ม “ค้นหา”';
+  summaryDiv.innerHTML = `<div class="no-data"><i class="fas fa-filter"></i><div>${msg}</div></div>`;
+  return;
+}
 
         const totalQty = data.reduce((sum, row) => sum + Number(row.Quantity || 0), 0);
         const uniqueScanner = [...new Set(data.map((row) => row.Scanner))].length;
@@ -1316,35 +1321,27 @@
 
     // Event listeners and initial setup outside the IIFE, calling App methods
     document.addEventListener('DOMContentLoaded', () => {
-      // Initialize Flatpickr for date input fields
-      flatpickr('#startDate', {
-        dateFormat: 'Y-m-d',
-        theme: 'light',
-      });
-      flatpickr('#endDate', {
-        dateFormat: 'Y-m-d',
-        theme: 'light',
-      });
+  // Initialize Flatpickr for date input fields
+  flatpickr('#startDate', {
+    dateFormat: 'Y-m-d',
+    theme: 'light',
+  });
+  flatpickr('#endDate', {
+    dateFormat: 'Y-m-d',
+    theme: 'light',
+  });
 
-      // Event listeners for main menu buttons
-      document.getElementById('btnDashboard').addEventListener('click', () => App.switchMainPage('pageDashboard'));
-      document.getElementById('btnSearch').addEventListener('click', () => App.switchMainPage('pageSearch'));
+  // Event listeners for main menu buttons
+  document.getElementById('btnDashboard').addEventListener('click', () => App.switchMainPage('pageDashboard'));
+  document.getElementById('btnSearch').addEventListener('click', () => App.switchMainPage('pageSearch'));
 
-      // Update datetime every second
-      setInterval(App.updateDatetime, 1000);
-      // Initial call to display datetime immediately
-      App.updateDatetime();
+  // Update datetime every second
+  setInterval(App.updateDatetime, 1000);
+  App.updateDatetime(); // Show immediately on load
 
-      // Initial load: Start by displaying the search page and loading data
-      // After loading data, explicitly switch to the summary tab to ensure correct initial display
-      App.switchMainPage('pageSearch');
-      // This call will ensure the 'summary' tab is active and 'details' tab is hidden
-      // We need to wait for loadData to finish before switching tabs to ensure content is ready.
-      // However, App.loadData() is async, and App.switchTab() is called immediately.
-      // The current fix is to clear the innerHTML of tbody and summaryDiv in loadData.
-      // The initial switchTab call is still useful for setting the active button and initial display.
-      App.switchTab('summary', document.getElementById('btnSummaryTab'));
-    });
+  // 👇 ไม่เรียกโหลดข้อมูลอัตโนมัติอีกแล้ว
+  App.switchTab('summary', document.getElementById('btnSummaryTab'));
+});
   </script>
 </body>
 </html>
