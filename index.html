@@ -2,1349 +2,730 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>📊 รายงาน Inventory TAG</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📦 บันทึก Inventory TAG</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-  <!-- Supabase JS is removed as it was not used in the provided code. -->
-  <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+  <script src="https://unpkg.com/@zxing/library@latest/umd/index.min.js"></script>
   <style>
-    /* Global Reset */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    /* CSS Variables for consistent styling */
     :root {
-      --primary-blue: #1e40af;
-      --secondary-blue: #3b82f6;
-      --light-blue: #dbeafe;
-      --dark-blue: #1e3a8a;
-      --accent-blue: #60a5fa;
-      --white: #ffffff;
-      --light-gray: #f8fafc;
-      --border-gray: #e2e8f0;
-      --text-dark: #1e293b;
-      --text-light: #64748b;
-      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      --primary-color: #2563eb;
+      --accent-color: #059669;
+      --accent-hover: #047857;
+      --success-color: #10b981;
+      --error-color: #dc2626;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --border-color: #e2e8f0;
+      --background: #f8fafc;
+      --surface: #ffffff;
+      --radius-lg: 0.75rem;
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
     }
 
-    /* Body Styling */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      font-family: 'Kanit', sans-serif;
-      background: linear-gradient(135deg, var(--light-gray) 0%, #e0f2fe 100%);
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
       min-height: 100vh;
-      color: var(--text-dark);
     }
 
-    /* Main Container */
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 2rem;
+    .container { width: 100%; max-width: 480px; }
+
+    .card {
+      background: var(--surface);
+      padding: 32px 24px;
+      border-radius: 1rem;
+      box-shadow: var(--shadow-lg);
     }
 
-    /* Header Styling */
     .header {
-      background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
-      padding: 1rem 2rem 1.2rem 2rem;
-      border-radius: 16px;
-      margin-bottom: 1.2rem;
-      box-shadow: var(--shadow-lg);
-      color: var(--white);
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
+      text-align: center;
+      margin-bottom: 24px;
     }
 
-    /* Header Row (for layout of title/datetime and description/menu) */
-    .header-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    /* Header Title (RMT Inventory TAG Report) */
-    .header-title {
-      font-size: 1.4rem;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      margin: 0;
-      line-height: 1;
-      font-weight: 700; /* Inherited from .header h1, but explicitly set for clarity */
-    }
-
-    .header-title i {
-      font-size: 2.5rem;
-      margin-top: 2px;
-    }
-
-    /* Current Date/Time Display */
-    .header-datetime {
-      font-size: 1rem;
-      font-weight: 500;
-      opacity: 0.9;
-    }
-
-    /* Header Description (System description) */
-    .header-description {
-      font-size: 1rem;
-      margin: 0;
-      opacity: 0.9; /* Inherited from .header p, but explicitly set for clarity */
-      font-weight: 300; /* Inherited from .header p, but explicitly set for clarity */
-    }
-
-    /* Header Navigation Menu */
-    .header-menu {
-      display: flex;
-      gap: 1rem;
-      margin-top: auto;
-    }
-
-    .header-menu-btn {
-      background: rgba(255 255 255 / 0.2);
-      border: none;
-      border-radius: 12px;
-      padding: 0.75rem 2rem;
-      font-size: 1rem;
-      font-weight: 600;
-      color: var(--white);
-      cursor: pointer;
-      transition: background-color 0.3s ease, transform 0.2s ease;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      text-decoration: none; /* Ensure links don't have underlines */
-    }
-
-    .header-menu-btn:hover:not(.active) {
-      background: rgba(255 255 255 / 0.4);
-      transform: translateY(-2px);
-    }
-
-    .header-menu-btn.active {
-      background: var(--white);
-      color: var(--primary-blue);
+    .header h2 {
+      font-size: 24px;
       font-weight: 700;
-      cursor: default;
-      box-shadow: var(--shadow-lg);
     }
 
-    /* Main Flex Layout (2 columns) - Adjusted to allow single body scrollbar */
-    .main-flex {
-      display: flex;
-      gap: 1.5rem;
-      align-items: flex-start;
-      /* Removed fixed height to allow content to dictate height and enable single body scrollbar */
-      /* height: calc(100vh - 110px); */
-      min-height: 420px; /* Keep min-height for initial layout stability */
+    .form-group {
+      margin-bottom: 20px;
     }
 
-    /* Controls Section (Left Panel) - Adjusted to allow single body scrollbar */
-    .controls-section {
-      flex: 0 0 20%;
-      max-width: 22%;
-      min-width: 200px;
-      /* Removed fixed height */
-      /* height: 100%; */
-      margin-bottom: 0;
-      background: var(--white);
-      padding: 1rem 1rem 0.75rem 1rem;
-      border-radius: 12px;
-      box-shadow: var(--shadow);
-      border: 1px solid var(--border-gray);
-      display: flex;
-      flex-direction: column;
-      box-sizing: border-box;
-      /* Removed overflow-y to allow the main body scrollbar to handle scrolling */
-      /* overflow-y: auto; */
-    }
-
-    /* Tab Container (Right Panel) - Adjusted to allow single body scrollbar */
-    .tab-container {
-      flex: 1 1 0;
-      min-width: 0;
-      max-width: 78%;
-      /* Removed fixed height */
-      /* height: 100%; */
-      background: var(--white);
-      border-radius: 16px;
-      box-shadow: var(--shadow);
-      border: 1px solid var(--border-gray);
-      /* Removed overflow: hidden to allow content to flow naturally */
-      /* overflow: hidden; */
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* Tab Content Area - Adjusted to allow single body scrollbar */
-    .tab-content {
-      flex: 1 1 auto;
-      /* Removed overflow-y to allow the main body scrollbar to handle scrolling */
-      /* overflow-y: auto; */
-      padding: 2rem;
-      min-height: 0;
-    }
-
-    /* Table Container - Keeps horizontal scroll for wide tables, no vertical scrollbar here */
-    .table-container {
-      overflow-x: auto; /* Retained for horizontal scrolling of wide tables */
-      max-height: unset; /* Ensure no max height */
-      overflow-y: unset; /* Ensure no vertical scrollbar for table-container itself */
-    }
-
-    /* Responsive Adjustments for main layout */
-    @media (max-width: 900px) {
-      .main-flex {
-        flex-direction: column;
-        height: auto;
-        min-height: unset;
-      }
-      .controls-section, .tab-container {
-        max-width: 100%;
-        width: 100%;
-        height: auto;
-        /* Ensure no overflow-y on mobile for these sections when stacked */
-        overflow-y: unset;
-      }
-      .tab-content {
-        max-height: unset;
-        overflow-y: unset;
-      }
-    }
-
-    /* Controls Section (Filters) */
-    .controls-title {
-      font-size: 1rem;
+    .form-label {
+      margin-bottom: 8px;
       font-weight: 600;
-      color: var(--text-dark);
-      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .barcode-row {
       display: flex;
-      align-items: center;
-      gap: 0.3rem;
+      gap: 8px;
     }
 
-    .controls {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 0.6rem;
-      margin-bottom: 1rem;
-    }
-
-    .input-group {
-      position: relative;
-    }
-
-    .input-group input,
-    .input-group select {
+    .form-control {
+      padding: 14px 16px;
       width: 100%;
-      padding: 0.5rem 0.75rem 0.5rem 2rem;
-      border: 2px solid var(--border-gray);
-      border-radius: 8px;
-      font-size: 0.87rem;
-      transition: all 0.3s ease;
-      background: var(--white);
-      color: var(--text-dark);
-      font-family: inherit;
+      font-size: 16px;
+      border: 1.5px solid var(--border-color);
+      border-radius: var(--radius-lg);
     }
 
-    .input-group input:focus,
-    .input-group select:focus {
-      outline: none;
-      border-color: var(--secondary-blue);
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-
-    .input-group select {
-      cursor: pointer;
-    }
-
-    .input-group i {
-      position: absolute;
-      left: 0.6rem;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-light);
-      font-size: 0.8rem;
-    }
-
-    /* Vertical Button Group (Filter/Export Buttons) */
-    .button-group.vertical-buttons {
-      display: flex;
-      flex-direction: column;
-      gap: 0.6rem;
-      margin-top: 0.6rem;
-    }
-
-    .button-group.vertical-buttons .btn {
-      width: 100% !important; /* Ensure buttons take full width */
-      min-width: 0;
-      box-sizing: border-box;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 0.7rem 1rem;
-      font-size: 1rem;
+    button {
+      border: none;
+      border-radius: var(--radius-lg);
+      padding: 14px 16px;
       font-weight: 600;
-      border-radius: 8px;
-      border: none;
-      transition: background 0.2s, box-shadow 0.2s;
       cursor: pointer;
-      gap: 0.5rem;
-      white-space: nowrap; /* Prevent text wrapping */
-    }
-
-    .button-group.vertical-buttons .btn.btn-primary {
-      background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
-      color: #fff;
-    }
-
-    .button-group.vertical-buttons .btn.btn-primary:hover {
-      background: linear-gradient(135deg, var(--secondary-blue) 0%, var(--primary-blue) 100%);
-      box-shadow: var(--shadow-lg);
-    }
-
-    .button-group.vertical-buttons .btn.btn-secondary {
-      background: var(--white);
-      color: var(--primary-blue);
-      border: 2px solid var(--primary-blue);
-    }
-
-    .button-group.vertical-buttons .btn.btn-secondary:hover {
-      background: var(--primary-blue);
-      color: #fff;
-    }
-
-    .button-group.vertical-buttons .btn i {
-      font-size: 1.1rem;
-      margin-right: 0.35rem;
-      vertical-align: middle;
-      display: inline-block;
-    }
-
-    .button-group.vertical-buttons .btn:focus {
-      outline: 2px solid var(--secondary-blue);
-    }
-
-    /* General button group (if any horizontal buttons were present) */
-    .button-group .btn {
-      display: flex;
+      transition: 0.2s ease;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
-      text-align: center;
     }
 
-    /* Tab Header Styling */
-    .tab-header {
-      display: flex;
-      background: var(--light-gray);
-      border-bottom: 1px solid var(--border-gray);
-    }
-
-    .tab-button {
-      flex: 1;
-      padding: 1rem 2rem;
-      border: none;
-      background: transparent;
-      color: var(--text-light);
-      font-size: 1rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      font-family: inherit;
-      border-bottom: 3px solid transparent;
-    }
-
-    .tab-button.active {
-      background: var(--white);
-      color: var(--primary-blue);
-      border-bottom-color: var(--primary-blue);
-    }
-
-    .tab-button:hover:not(.active) {
-      background: rgba(59, 130, 246, 0.05);
-      color: var(--primary-blue);
-    }
-
-    /* Summary Grid Layout */
-    .summary-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.5rem;
-    }
-
-    /* Summary Card Styling */
-    .summary-card {
-      background: linear-gradient(135deg, var(--white) 0%, #f8fafc 100%);
-      border: 1px solid var(--border-gray);
-      border-radius: 10px;
-      padding: 0.9rem 1rem;
-      box-shadow: var(--shadow);
-      transition: all 0.2s ease;
-      position: relative;
-      overflow: hidden;
-      min-width: 0;
-    }
-
-    .summary-card:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-lg);
-    }
-
-    .summary-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: linear-gradient(90deg, var(--primary-blue) 0%, var(--accent-blue) 100%);
-    }
-
-    .summary-card .icon {
-      width: 38px;
-      height: 38px;
-      border-radius: 8px;
-      margin-bottom: 0.65rem;
-      color: var(--primary-blue);
-      font-size: 1.05rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, var(--light-blue) 0%, #bfdbfe 100%);
-    }
-
-    .summary-card .title {
-      font-size: 0.78rem;
-      font-weight: 500;
-      color: var(--text-light);
-      margin-bottom: 0.25rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .summary-card .value {
-      font-size: 1.32rem;
-      font-weight: 700;
-      color: var(--text-dark);
-      line-height: 1;
-    }
-
-    /* Table Styling */
-    table {
+    .btn-primary {
       width: 100%;
-      border-collapse: collapse;
-      background: var(--white);
+      background: var(--primary-color);
+      color: white;
+      margin-top: 16px;
     }
 
-    th,
-    td {
-      padding: 1rem;
-      text-align: left;
-      border-bottom: 1px solid var(--border-gray);
+    .btn-scanner {
+      background: var(--accent-color);
+      color: white;
+      font-size: 20px;
+      min-width: 60px;
     }
 
-    th {
-      background: linear-gradient(135deg, var(--primary-blue) 0%, var(--dark-blue) 100%);
-      color: var(--white);
-      font-weight: 600;
-      font-size: 0.875rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      position: sticky;
-      top: 0;
-      z-index: 10;
+    .btn-scanner:hover {
+      background: var(--accent-hover);
     }
 
-    td {
-      font-size: 0.9rem;
-      color: var(--text-dark);
-    }
-
-    tbody tr {
-      transition: all 0.2s ease;
-    }
-
-    tbody tr:hover {
-      background: var(--light-gray);
-    }
-
-    /* Loading State for content areas */
-    .loading {
-      text-align: center;
-      padding: 3rem;
-      color: var(--text-light);
-      font-size: 1.1rem;
-    }
-
-    .loading i {
-      font-size: 2rem;
-      margin-bottom: 1rem;
-      color: var(--secondary-blue);
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      from {
-        transform: rotate(0deg);
-      }
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    /* Error State */
-    .error {
-      text-align: center;
-      padding: 3rem;
-      color: #dc2626;
-      font-size: 1.1rem;
-    }
-
-    /* No Data State */
-    .no-data {
-      text-align: center;
-      padding: 3rem;
-      color: var(--text-light);
-      font-size: 1.1rem;
-    }
-
-    /* Responsive Adjustments for smaller screens */
-    @media (max-width: 768px) {
-      .container {
-        padding: 1rem;
-      }
-
-      /* Adjust header title size for smaller screens */
-      .header-title {
-        font-size: 2rem;
-      }
-
-      .controls {
-        grid-template-columns: 1fr;
-      }
-
-      .summary-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .button-group {
-        justify-content: center;
-      }
-
-      .tab-button {
-        padding: 0.75rem 1rem;
-        font-size: 0.9rem;
-      }
-
-      table {
-        font-size: 0.8rem;
-      }
-
-      th,
-    td {
-      padding: 0.5rem;
-    }
-    }
-
-    /* Flatpickr customization */
-    .flatpickr-calendar {
-      border-radius: 12px !important;
-      box-shadow: var(--shadow-lg) !important;
-      border: 1px solid var(--border-gray) !important;
-    }
-
-    .flatpickr-day.selected {
-      background: var(--primary-blue) !important;
-      border-color: var(--primary-blue) !important;
-    }
-
-    /* Pagination Controls */
-    .pagination-controls {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 0.5rem;
-      margin-top: 1.5rem;
-      padding-top: 1rem;
-      border-top: 1px solid var(--border-gray);
-    }
-
-    .pagination-btn {
-      padding: 0.5rem 1rem;
-      border: 1px solid var(--border-gray);
-      border-radius: 8px;
-      background-color: var(--white);
-      color: var(--primary-blue);
-      cursor: pointer;
-      font-size: 0.9rem;
-      transition: all 0.2s ease;
-      font-family: inherit;
-    }
-
-    .pagination-btn:hover:not(.active):not(:disabled) {
-      background-color: var(--light-blue);
-      border-color: var(--secondary-blue);
-      color: var(--dark-blue);
-    }
-
-    .pagination-btn.active {
-      background-color: var(--primary-blue);
-      color: var(--white);
-      border-color: var(--primary-blue);
-      font-weight: 600;
-      cursor: default;
-    }
-
-    .pagination-btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    .pagination-info {
-      font-size: 0.9rem;
-      color: var(--text-light);
-      margin: 0 1rem;
-    }
-
-    /* Dashboard Content (Under Development) */
-    #pageDashboard {
-      min-height: 300px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--white);
-      border-radius: 16px;
-      box-shadow: var(--shadow);
-      padding: 2rem;
-      font-size: 1.2rem;
-      color: var(--text-light);
-    }
-
-    /* Loading Overlay Styles */
-    .loading-overlay {
+    #scanner-view {
+      display: none;
       position: fixed;
-      top: 0;
-      left: 0;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #000;
+      z-index: 1000;
+    }
+
+    #scanner-container {
       width: 100%;
       height: 100%;
-      background: rgba(255, 255, 255, 0.8);
+      position: relative;
       display: flex;
       justify-content: center;
       align-items: center;
-      z-index: 1000;
-      flex-direction: column;
-      gap: 1rem;
-      color: var(--primary-blue);
-      font-size: 1.2rem;
-      font-weight: 500;
     }
 
-    .loading-overlay i {
-      font-size: 3rem;
-      animation: spin 1.5s linear infinite;
+    #scanner-container video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .scanner-ui {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      z-index: 1001;
+    }
+
+    .scanner-header, .scanner-footer {
+      padding: 20px;
+      color: white;
+      text-align: center;
+      background: rgba(0,0,0,0.5);
+    }
+
+    .btn-close-scanner {
+      background: rgba(220,38,38,0.9);
+      color: white;
+      border-radius: 50%;
+      width: 56px;
+      height: 56px;
+      font-size: 24px;
+    }
+
+    .scan-box {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 250px;
+      height: 250px;
+      border: none;
+      border-radius: 20px;
+      z-index: 1002;
+      box-shadow: 0 0 0 4000px rgba(0,0,0,0.7);
+    }
+
+    .scan-corners {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 250px;
+      height: 250px;
+      z-index: 1003;
+    }
+
+    .corner {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      border: 4px solid #00ff00;
+      border-radius: 8px;
+    }
+
+    .corner::before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border: 2px solid #00ff00;
+      border-radius: 4px;
+      opacity: 0.6;
+      animation: corner-pulse 2s infinite;
+    }
+
+    .corner.top-left {
+      top: -4px;
+      left: -4px;
+      border-right: none;
+      border-bottom: none;
+    }
+
+    .corner.top-right {
+      top: -4px;
+      right: -4px;
+      border-left: none;
+      border-bottom: none;
+    }
+
+    .corner.bottom-left {
+      bottom: -4px;
+      left: -4px;
+      border-right: none;
+      border-top: none;
+    }
+
+    .corner.bottom-right {
+      bottom: -4px;
+      right: -4px;
+      border-left: none;
+      border-top: none;
+    }
+
+    .scan-grid {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 200px;
+      height: 200px;
+      opacity: 0.3;
+      z-index: 1004;
+    }
+
+    .grid-line {
+      position: absolute;
+      background: #00ff00;
+    }
+
+    .grid-line.horizontal {
+      width: 100%;
+      height: 1px;
+    }
+
+    .grid-line.vertical {
+      height: 100%;
+      width: 1px;
+    }
+
+    .grid-line:nth-child(1) { top: 25%; }
+    .grid-line:nth-child(2) { top: 50%; }
+    .grid-line:nth-child(3) { top: 75%; }
+    .grid-line:nth-child(4) { left: 25%; }
+    .grid-line:nth-child(5) { left: 50%; }
+    .grid-line:nth-child(6) { left: 75%; }
+
+    .scan-line {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 220px;
+      height: 2px;
+      background: linear-gradient(to right, transparent, #00ff00, transparent);
+      animation: qr-scan-move 3s infinite;
+      z-index: 1005;
+    }
+
+    @keyframes qr-scan-move {
+      0% { top: calc(50% - 110px); opacity: 0.8; }
+      50% { top: 50%; opacity: 1; }
+      100% { top: calc(50% + 110px); opacity: 0.8; }
+    }
+
+    @keyframes corner-pulse {
+      0% { opacity: 0.6; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.1); }
+      100% { opacity: 0.6; transform: scale(1); }
+    }
+
+    .scan-guide-text {
+      position: absolute;
+      top: 25%;
+      width: 100%;
+      text-align: center;
+      color: #fff;
+      font-size: 18px;
+      font-weight: 500;
+      z-index: 1004;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    }
+
+    .scan-status {
+      position: absolute;
+      bottom: 25%;
+      width: 100%;
+      text-align: center;
+      color: #00ff00;
+      font-size: 16px;
+      font-weight: 400;
+      z-index: 1004;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    }
+
+    input[type="number"]::-webkit-inner-spin-button {
+      display: none;
+    }
+
+    input[type="number"] {
+      -moz-appearance: textfield;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <!-- Header -->
-    <div class="header">
-      <!-- Top Row: Title and Current Datetime -->
-      <div class="header-row">
-        <h1 class="header-title">
-          <i class="fas fa-chart-bar"></i>
-          RMT Inventory TAG Report
-        </h1>
-        <div id="currentDatetime" class="header-datetime"></div>
+    <div class="card" id="main-view">
+      <div class="header">
+        <h2>📦 RMT InventoryTAG CHP</h2>
       </div>
-      <!-- Bottom Row: Description and Navigation Menu -->
-      <div class="header-row">
-        <p class="header-description">
-          ระบบจัดการและรายงานข้อมูล Inventory ส่วนโรงงาน CHP
-        </p>
-        <nav class="header-menu">
-          <a href="boardtosheet.html" class="header-menu-btn" id="btnDashboard">
-            <i class="fas fa-tachometer-alt"></i> Dashboard
-          </a>
-          <a href="reporttosheet.html" class="header-menu-btn active" id="btnSearch">
-            <i class="fas fa-search"></i> ค้นหา
-          </a>
-        </nav>
+      <div class="form-group">
+        <label class="form-label">รหัส QR Code</label>
+        <div class="barcode-row">
+          <input type="text" id="barcode" class="form-control" placeholder="กดปุ่มสีเขียวเพื่อสแกน QR Code" readonly>
+          <button class="btn-scanner" onclick="startScanner()">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM13 13h2v2h-2v-2zM15 15h2v2h-2v-2zM13 17h2v2h-2v-2zM15 19h2v2h-2v-2zM17 13h2v2h-2v-2zM19 15h2v2h-2v-2zM17 17h2v2h-2v-2zM19 19h2v2h-2v-2z"/>
+            </svg>
+          </button>
+        </div>
       </div>
-    </div>
+      <div class="form-group">
+<!-- 🔽 กระบวนการหลัก -->
+<div class="form-group">
+  <label class="form-label">กระบวนการหลัก</label>
+  <select id="mainProcess" class="form-control" onchange="handleMainProcessChange()">
+    <option value="">-- เลือกกระบวนการหลัก --</option>
+    <option value="ผสมผง">ผสมผง</option>
+    <option value="Compact">Compact</option>
+    <option value="Sinter & Steam">Sinter & Steam</option>
+    <option value="Finishing">Finishing</option>
+    <option value="Machining">Machining</option>
+    <option value="Sub Store">Sub Store</option>
+    <option value="Final Inspection">Final Inspection</option>
+    <option value="Magna flux">Magna flux</option>
+    <option value="Sort">Sort</option>
+    <option value="Pack">Pack</option>
+    <option value="Rework">Rework</option>
+  </select>
+</div>
 
-   
-    <!-- Search Page (Main functionality) -->
-    <div id="pageSearch" style="display: block;">
-      <div class="main-flex">
-        <!-- Controls Section (Left Panel for Filters) -->
-        <aside class="controls-section">
-          <div class="controls-title">
-            <i class="fas fa-filter"></i>
-            ตัวกรองข้อมูล
-          </div>
-          <div class="controls">
-            <div class="input-group">
-              <i class="fas fa-calendar-alt"></i>
-              <input type="text" id="startDate" placeholder="วันที่เริ่ม" />
-            </div>
-            <div class="input-group">
-              <i class="fas fa-calendar-alt"></i>
-              <input type="text" id="endDate" placeholder="วันที่สิ้นสุด" />
-            </div>
-            <div class="input-group">
-              <i class="fas fa-cogs"></i>
-              <select id="mainProcess">
-                <option value="">ทุกกระบวนการ</option>
-                <option value="ผสมผง">ผสมผง</option>
-                <option value="Compact">Compact</option>
-                <option value="Sinter & Steam">Sinter & Steam</option>
-                <option value="Finishing">Finishing</option>
-                <option value="Machining">Machining</option>
-                <option value="Sub Store">Sub Store</option>
-                <option value="Final Inspection">Final Inspection</option>
-                <option value="Magna flux">Magna flux</option>
-                <option value="Sort">Sort</option>
-                <option value="Pack">Pack</option>
-                <option value="Rework">Rework</option>
-              </select>
-            </div>
-            <div class="input-group">
-              <i class="fas fa-barcode"></i>
-              <input type="text" id="barcodeSearch" placeholder="ค้นหา Barcode..." />
-            </div>
-          </div>
-          <div class="button-group vertical-buttons">
-            <button class="btn btn-primary" onclick="App.loadData()">
-              <i class="fas fa-search"></i>
-              ค้นหา
-            </button>
-            <button class="btn btn-secondary" onclick="App.clearFilters()">
-              <i class="fas fa-eraser"></i>
-              Clear
-            </button>
-            <button class="btn btn-secondary" onclick="App.exportExcel()">
-              <i class="fas fa-file-excel"></i>
-              ดาวน์โหลด Excel
-            </button>
-          </div>
-        </aside>
+<!-- 🔽 กระบวนการย่อย -->
+<div class="form-group">
+  <label class="form-label">กระบวนการย่อย</label>
+  <select id="subProcess" class="form-control">
+    <option value="">-- เลือกกระบวนการย่อย --</option>
+  </select>
+</div>
+        <!-- 🔽 เลือกสถานะ -->
+        <div class="form-group">
+  <label for="status" class="form-label">สถานะ</label>
+  <select id="status" class="form-control">
+  <option value="">-- เลือกสถานะ --</option>
+</select>
+</div>
 
-        <!-- Tab Container (Right Panel for Summary/Details) -->
-        <section class="tab-container">
-          <!-- Tab Header Buttons -->
-          <div class="tab-header">
-            <button class="tab-button active" id="btnSummaryTab" onclick="App.switchTab('summary', this)">
-              <i class="fas fa-chart-pie"></i>
-              สรุปยอดข้อมูล
-            </button>
-            <button class="tab-button" id="btnDetailsTab" onclick="App.switchTab('details', this)">
-              <i class="fas fa-table"></i>
-              ตารางข้อมูลรายละเอียด
-            </button>
-          </div>
-          <!-- Summary Tab Content -->
-          <div id="summaryTab" class="tab-content active">
-            <div class="summary-grid" id="summary">
-              <!-- Loading content for summary will be handled by App.updateSummary or global overlay -->
-            </div>
-          </div>
-          <!-- Details Tab Content -->
-          <div id="detailsTab" class="tab-content">
-            <div class="table-container">
-              <table>
-                <thead>
-                  <tr>
-                    <th><i class="fas fa-calendar"></i> วันที่</th>
-                    <th><i class="fas fa-barcode"></i> Barcode</th>
-                    <th><i class="fas fa-cogs"></i> กระบวนการหลัก</th>
-                    <th><i class="fas fa-puzzle-piece"></i> กระบวนการย่อย</th>
-                    <th><i class="fas fa-flag"></i> สถานะ</th>
-                    <th><i class="fas fa-hashtag"></i> จำนวน</th>
-                    <th><i class="fas fa-user"></i> ผู้สแกน</th>
-                  </tr>
-                </thead>
-                <tbody id="tableBody">
-                  <!-- Loading content for table will be handled by App.displayTablePage or global overlay -->
-                </tbody>
-              </table>
-            </div>
-            <!-- Pagination Controls -->
-            <div id="paginationControls" class="pagination-controls" style="display: none;"></div>
-          </div>
-        </section>
+        <label class="form-label">จำนวน</label>
+        <input type="number" id="quantity" inputmode="numeric" class="form-control" placeholder="ระบุจำนวน">
       </div>
+
+      
+      <div class="form-group">
+        <label class="form-label">ชื่อผู้สแกน</label>
+        <input type="text" id="scanner" class="form-control" placeholder="ชื่อผู้สแกน">
+      </div>
+      <button class="btn-primary" onclick="submitBarcode()" style="font-size:18px;">💾 บันทึกข้อมูล</button>
+      <p style="text-align:center; margin-top: 12px; font-size: 12px; color: #64748b;">
+  © 2025 Resonac Materials (Thailand) Co., Ltd.
+</p>
     </div>
   </div>
 
-  <!-- Loading Overlay -->
-  <div id="loadingOverlay" class="loading-overlay" style="display: none;">
-    <i class="fas fa-sync-alt"></i>
-    <span>กำลังโหลดข้อมูล... กรุณารอสักครู่</span>
+  <!-- Scanner View -->
+  <div id="scanner-view">
+    <div id="scanner-container"></div>
+    <div class="scanner-ui">
+      <div class="scanner-header">
+        <h3>กำลังสแกน QR Code</h3>
+      </div>
+      <div class="scanner-footer">
+        <button class="btn-close-scanner" onclick="stopScanner()">✕</button>
+      </div>
+      <div class="scan-guide-text">วาง QR Code ในกรอบสี่เหลี่ยม</div>
+      <div class="scan-box"></div>
+      <div class="scan-corners">
+        <div class="corner top-left"></div>
+        <div class="corner top-right"></div>
+        <div class="corner bottom-left"></div>
+        <div class="corner bottom-right"></div>
+      </div>
+      <div class="scan-grid">
+        <div class="grid-line horizontal"></div>
+        <div class="grid-line horizontal"></div>
+        <div class="grid-line horizontal"></div>
+        <div class="grid-line vertical"></div>
+        <div class="grid-line vertical"></div>
+        <div class="grid-line vertical"></div>
+      </div>
+      <div class="scan-line"></div>
+      <div class="scan-status">📱 กำลังค้นหา QR Code...</div>
+    </div>
   </div>
+
+  <audio id="beep" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg" preload="auto"></audio>
 
   <script>
-    // Encapsulate all application logic within an IIFE to avoid global scope pollution.
-    const App = (function() {
-      let allFilteredData = []; // Stores all filtered data
-      let currentPage = 1;
-      const rowsPerPage = 20; // Number of rows to display per page
-      const loadingOverlay = document.getElementById('loadingOverlay');
+  const apiURL = "https://script.google.com/macros/s/AKfycbwv3h5myYLxn4cermsajkeOr6AL3a_-vyYzJNGJNkyRU-HV2eulbot0O3vO5XGPYUot/exec";
+  let codeReader;
 
-      /**
-       * Shows the loading overlay.
-       */
-      function showLoadingOverlay() {
-        loadingOverlay.style.display = 'flex';
-      }
+  async function submitBarcode() {
+  const barcode = document.getElementById("barcode").value.trim();
+  const quantity = document.getElementById("quantity").value.trim();
+  const scanner = document.getElementById("scanner").value.trim();
+  const mainProcess = document.getElementById("mainProcess").value.trim();
+  const subProcess = document.getElementById("subProcess").value.trim();
+  const status = document.getElementById("status").value.trim();
 
-      /**
-       * Hides the loading overlay.
-       */
-      function hideLoadingOverlay() {
-        loadingOverlay.style.display = 'none';
-      }
-
-      /**
-       * Switches between main application pages (Dashboard/Search).
-       * @param {string} pageId - The ID of the page to display (e.g., 'pageDashboard', 'pageSearch').
-       */
-      function switchMainPage(pageId) {
-        const pages = ['pageDashboard', 'pageSearch'];
-        pages.forEach((id) => {
-          document.getElementById(id).style.display = 'none'; // Hide all pages
-        });
-        document.getElementById(pageId).style.display = 'block'; // Show the selected page
-
-        // Update active state for main menu buttons
-        document.querySelectorAll('.header-menu-btn').forEach((btn) => {
-          btn.classList.remove('active');
-        });
-        document.getElementById('btn' + pageId.replace('page', '')).classList.add('active');
-
-        // If switching to search page, load data
-        if (pageId === 'pageSearch') {
-          loadData();
-        }
-      }
-
-      /**
-       * Switches between tabs within the search page (Summary/Details).
-       * @param {string} tabName - The name of the tab to display (e.g., 'summary', 'details').
-       * @param {HTMLElement} clickedButtonElement - The button element that was clicked (or null if called internally).
-       */
-      function switchTab(tabName, clickedButtonElement = null) {
-        const summaryTab = document.getElementById('summaryTab');
-        const detailsTab = document.getElementById('detailsTab');
-        const paginationControls = document.getElementById('paginationControls');
-
-        // Explicitly hide both tab content divs
-        summaryTab.style.display = 'none';
-        detailsTab.style.display = 'none';
-
-        // Remove active class from all tab buttons
-        document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-
-        // Add 'active' class to the clicked tab button if provided, otherwise find it
-        let targetButton;
-        if (clickedButtonElement) {
-            targetButton = clickedButtonElement;
-        } else {
-            // Find the button based on tabName if not provided (e.g., for initial load)
-            if (tabName === 'summary') {
-                targetButton = document.getElementById('btnSummaryTab');
-            } else if (tabName === 'details') {
-                targetButton = document.getElementById('btnDetailsTab');
-            }
-        }
-
-        if (targetButton) {
-            targetButton.classList.add('active');
-        }
-
-        if (tabName === 'summary') {
-            summaryTab.style.display = 'block';
-            summaryTab.classList.add('active'); // Add active class for CSS styling
-            paginationControls.style.display = 'none';
-        } else if (tabName === 'details') {
-            detailsTab.style.display = 'block';
-            detailsTab.classList.add('active'); // Add active class for CSS styling
-            paginationControls.style.display = 'flex';
-            displayTablePage(currentPage);
-        }
-      }
-
-      /**
-       * Clears all filter inputs and reloads data.
-       */
-      function clearFilters() {
-        document.getElementById('startDate').value = '';
-        document.getElementById('endDate').value = '';
-        document.getElementById('mainProcess').value = '';
-        document.getElementById('barcodeSearch').value = '';
-
-        // Clear Flatpickr instances
-        document.getElementById('startDate')._flatpickr?.clear();
-        document.getElementById('endDate')._flatpickr?.clear();
-
-        currentPage = 1; // Reset to first page
-        loadData(); // Reload data with cleared filters
-      }
-
-      /**
-       * Adjusts timestamp by a given number of hours.
-       * Note: This function assumes the input `dateString` is in a format that `new Date()` can parse.
-       * For robust timezone handling, consider a dedicated library or ensuring server-side consistency.
-       * @param {string} dateString - The date string to adjust.
-       * @param {number} hours - The number of hours to add or subtract.
-       * @returns {Date} The adjusted Date object.
-       */
-      function adjustTimeByHours(dateString, hours) {
-        const date = new Date(dateString);
-        date.setHours(date.getHours() + hours);
-        return date;
-      }
-
-      /**
-       * Extracts the barcode part before a slash, if present.
-       * Ensures the input barcode is treated as a string.
-       * @param {*} barcode - The raw barcode value (can be string, number, null, undefined).
-       * @returns {string} The extracted barcode part or '-' if empty.
-       */
-      function extractBarcodeBeforeSlash(barcode) {
-        const barcodeStr = String(barcode || '').trim(); // Convert to string and trim
-        if (!barcodeStr) return '-';
-        const slashIndex = barcodeStr.indexOf('/');
-        return slashIndex !== -1 ? barcodeStr.substring(0, slashIndex) : barcodeStr;
-      }
-
-      /**
-       * Loads and filters data from the Google Apps Script endpoint.
-       */
-      async function loadData() {
-        const url = 'https://script.google.com/macros/s/AKfycbwYy1acBX-V37hiU8lhTY-9YGWgVjVplQOIzhNg1-cNispv6L43_rCVRXVO-HqAfik/exec?page=getInventory';
-
-        const tbody = document.getElementById('tableBody');
-        const summaryDiv = document.getElementById('summary');
-        const paginationControls = document.getElementById('paginationControls');
-
-        // Clear content areas while loading, as the global overlay will cover them.
-        // This prevents "กำลังโหลดข้อมูล..." from appearing behind the overlay.
-        tbody.innerHTML = '';
-        summaryDiv.innerHTML = '';
-        paginationControls.style.display = 'none'; // Hide pagination during loading
-        showLoadingOverlay(); // Show global loading overlay
-
-        try {
-          const response = await fetch(url);
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          const data = await response.json();
-
-          // Get filter values from input fields
-          const start = document.getElementById('startDate').value;
-          const end = document.getElementById('endDate').value;
-          const selectedProcess = document.getElementById('mainProcess').value;
-          // Trim barcode keyword to remove leading/trailing spaces
-          const barcodeKeyword = document.getElementById('barcodeSearch').value.toLowerCase().trim();
-
-          // Filter data based on user inputs
-          allFilteredData = data.filter((item) => {
-            const rawDate = item.Timestamp;
-            // Extract date part only for comparison (YYYY-MM-DD)
-            const dateOnly = new Date(rawDate).toISOString().split('T')[0];
-
-            const matchDate = (!start || dateOnly >= start) && (!end || dateOnly <= end);
-            const matchProcess = !selectedProcess || item.mainProcess === selectedProcess;
-            // Ensure item.Barcode is a string before calling .includes()
-            const itemBarcodeStr = String(item.Barcode || '');
-            const matchBarcode = !barcodeKeyword || (itemBarcodeStr.toLowerCase().includes(barcodeKeyword));
-            return matchDate && matchProcess && matchBarcode;
-          });
-
-          updateSummary(allFilteredData); // Update summary cards
-          currentPage = 1; // Reset to first page after new data load
-          displayTablePage(currentPage); // Display table data for the first page
-        } catch (error) {
-          console.error('Error loading data:', error);
-          // Display error messages using SweetAlert and in content areas
-          Swal.fire({
-            icon: 'error',
-            title: 'เกิดข้อผิดพลาดในการโหลดข้อมูล',
-            text: `ไม่สามารถดึงข้อมูลจากเซิร์ฟเวอร์ได้: ${error.message || String(error)}`,
-            confirmButtonColor: '#dc2626',
-          });
-          // Display error messages directly in the content areas if fetch fails
-          tbody.innerHTML = `<tr><td colspan="7" class="error"><i class="fas fa-exclamation-triangle"></i><div>เกิดข้อผิดพลาดในการโหลดข้อมูล: ${error.message || String(error)}</div></td></tr>`;
-          summaryDiv.innerHTML = `<div class="error"><i class="fas fa-exclamation-triangle"></i><div>เกิดข้อผิดพลาดในการโหลดข้อมูล: ${error.message || String(error)}</div></div>`;
-          paginationControls.style.display = 'none'; // Ensure pagination is hidden on error
-        } finally {
-          hideLoadingOverlay(); // Always hide loading overlay
-        }
-      }
-
-      /**
-       * Updates the summary cards based on the provided data.
-       * @param {Array<Object>} data - The filtered data to summarize.
-       */
-      function updateSummary(data) {
-        const summaryDiv = document.getElementById('summary');
-        if (data.length === 0) {
-          summaryDiv.innerHTML = `<div class="no-data"><i class="fas fa-inbox"></i><div>ไม่พบข้อมูลที่ตรงกับเงื่อนไข</div></div>`;
-          return;
-        }
-
-        const totalQty = data.reduce((sum, row) => sum + Number(row.Quantity || 0), 0);
-        const uniqueScanner = [...new Set(data.map((row) => row.Scanner))].length;
-
-        // Define all possible processes for summary cards
-        const allProcesses = [
-          'ผสมผง', 'Compact', 'Sinter & Steam', 'Finishing', 'Machining',
-          'Sub Store', 'Final Inspection', 'Magna flux', 'Sort', 'Pack', 'Rework',
-        ];
-
-        // Initialize process counts
-        const processCount = {};
-        allProcesses.forEach((process) => {
-          processCount[process] = 0;
-        });
-
-        // Aggregate quantity by main process
-        data.forEach((row) => {
-          const proc = row.mainProcess || 'อื่นๆ';
-          if (allProcesses.includes(proc)) {
-            processCount[proc] += Number(row.Quantity || 0);
-          }
-        });
-
-        // Generate HTML for process summary cards
-        const processCards = allProcesses
-          .map(
-            (process) => `
-            <div class="summary-card">
-              <div class="icon"><i class="fas fa-cog"></i></div>
-              <div class="title">${process}</div>
-              <div class="value">${processCount[process].toLocaleString()}</div>
-            </div>
-          `
-          )
-          .join('');
-
-        // Render all summary cards
-        summaryDiv.innerHTML = `
-          <div class="summary-card">
-            <div class="icon"><i class="fas fa-list"></i></div>
-            <div class="title">รายการทั้งหมด</div>
-            <div class="value">${data.length.toLocaleString()}</div>
-          </div>
-          <div class="summary-card">
-            <div class="icon"><i class="fas fa-boxes"></i></div>
-            <div class="title">รวมจำนวน</div>
-            <div class="value">${totalQty.toLocaleString()}</div>
-          </div>
-          <div class="summary-card">
-            <div class="icon"><i class="fas fa-users"></i></div>
-            <div class="title">ผู้สแกน</div>
-            <div class="value">${uniqueScanner}</div>
-          </div>
-          ${processCards}
-        `;
-      }
-
-      /**
-       * Updates the current date and time display in the header.
-       */
-      function updateDatetime() {
-        const el = document.getElementById('currentDatetime');
-        const now = new Date();
-        el.textContent = now.toLocaleString('th-TH', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit'
-        });
-      }
-
-      /**
-       * Displays a specific page of table data.
-       * @param {number} page - The page number to display.
-       */
-      function displayTablePage(page) {
-        currentPage = page;
-        const tbody = document.getElementById('tableBody');
-        const paginationControls = document.getElementById('paginationControls');
-
-        const startIndex = (currentPage - 1) * rowsPerPage;
-        const endIndex = startIndex + rowsPerPage;
-        const dataToDisplay = allFilteredData.slice(startIndex, endIndex);
-
-        if (dataToDisplay.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="7" class="no-data"><i class="fas fa-inbox"></i><div>ไม่พบข้อมูลในหน้านี้</div></td></tr>`;
-          paginationControls.style.display = 'none';
-          return;
-        }
-
-        // Generate HTML for table rows
-        tbody.innerHTML = dataToDisplay
-          .map((row) => {
-            // Adjust time by 0 hours (assuming timestamp is already local or handles timezone correctly)
-            const adjustedDate = adjustTimeByHours(row.Timestamp, 0);
-            const displayBarcode = extractBarcodeBeforeSlash(row.Barcode);
-
-            return `
-              <tr>
-                <td>${adjustedDate.toLocaleDateString('th-TH', {
-                  year: 'numeric',
-                  month: 'short',
-                  day: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}</td>
-                <td><code>${displayBarcode}</code></td>
-                <td>${row.mainProcess || '-'}</td>
-                <td>${row.subProcess || '-'}</td>
-                <td><span class="status">${row.status || '-'}</span></td>
-                <td><strong>${(row.Quantity || 0).toLocaleString()}</strong></td>
-                <td>${row.Scanner || '-'}</td>
-              </tr>
-            `;
-          }).join('');
-
-        setupPagination(); // Re-setup pagination controls
-
-        // Show pagination controls only if the details tab is active
-        if (document.getElementById('detailsTab').classList.contains('active')) {
-          paginationControls.style.display = 'flex';
-        }
-      }
-
-      /**
-       * Sets up the pagination buttons based on the total filtered data.
-       */
-      function setupPagination() {
-        const paginationControls = document.getElementById('paginationControls');
-        paginationControls.innerHTML = ''; // Clear existing buttons
-
-        const totalPages = Math.ceil(allFilteredData.length / rowsPerPage);
-
-        if (totalPages <= 1) {
-          paginationControls.style.display = 'none'; // Hide pagination if only one page or no data
-          return;
-        }
-
-        // Previous button
-        const prevBtn = document.createElement('button');
-        prevBtn.classList.add('pagination-btn');
-        prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i> Previous';
-        prevBtn.disabled = currentPage === 1;
-        prevBtn.onclick = () => displayTablePage(currentPage - 1);
-        paginationControls.appendChild(prevBtn);
-
-        // Logic for displaying page numbers (current page +/- 2, with ellipsis)
-        let startPage = Math.max(1, currentPage - 2);
-        let endPage = Math.min(totalPages, currentPage + 2);
-
-        // Adjust start/end to show 5 pages if possible
-        if (endPage - startPage < 4) {
-          if (startPage === 1) endPage = Math.min(totalPages, 5);
-          if (endPage === totalPages) startPage = Math.max(1, totalPages - 4);
-        }
-
-        // First page button and ellipsis if needed
-        if (startPage > 1) {
-          const firstPageBtn = document.createElement('button');
-          firstPageBtn.classList.add('pagination-btn');
-          firstPageBtn.textContent = '1';
-          firstPageBtn.onclick = () => displayTablePage(1);
-          paginationControls.appendChild(firstPageBtn);
-          if (startPage > 2) {
-            const ellipsis = document.createElement('span');
-            ellipsis.textContent = '...';
-            ellipsis.classList.add('pagination-info');
-            paginationControls.appendChild(ellipsis);
-          }
-        }
-
-        // Page number buttons
-        for (let i = startPage; i <= endPage; i++) {
-          const pageBtn = document.createElement('button');
-          pageBtn.classList.add('pagination-btn');
-          pageBtn.textContent = i;
-          if (i === currentPage) {
-            pageBtn.classList.add('active'); // Highlight active page
-          }
-          pageBtn.onclick = () => displayTablePage(i);
-          paginationControls.appendChild(pageBtn);
-        }
-
-        // Last page button and ellipsis if needed
-        if (endPage < totalPages) {
-          if (endPage < totalPages - 1) {
-            const ellipsis = document.createElement('span');
-            ellipsis.textContent = '...';
-            ellipsis.classList.add('pagination-info');
-            paginationControls.appendChild(ellipsis);
-          }
-          const lastPageBtn = document.createElement('button');
-          lastPageBtn.classList.add('pagination-btn');
-          lastPageBtn.textContent = totalPages;
-          lastPageBtn.onclick = () => displayTablePage(totalPages);
-          paginationControls.appendChild(lastPageBtn);
-        }
-
-        // Next button
-        const nextBtn = document.createElement('button');
-        nextBtn.classList.add('pagination-btn');
-        nextBtn.innerHTML = 'Next <i class="fas fa-chevron-right"></i>';
-        nextBtn.disabled = currentPage === totalPages;
-        nextBtn.onclick = () => displayTablePage(currentPage + 1);
-        paginationControls.appendChild(nextBtn);
-      }
-
-      /**
-       * Exports the filtered data to an Excel file.
-       */
-      function exportExcel() {
-        try {
-          const wb = XLSX.utils.book_new();
-          const rows = allFilteredData.map((row) => {
-            let formattedDate = '-';
-            const adjustedDate = adjustTimeByHours(row.Timestamp, 0);
-            // Validate if adjustedDate is a valid Date object before formatting
-            if (adjustedDate instanceof Date && !isNaN(adjustedDate.getTime())) {
-              formattedDate = adjustedDate.toLocaleDateString('th-TH', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-              });
-            } else {
-                console.warn('Invalid Timestamp encountered:', row.Timestamp);
-            }
-
-            const displayBarcode = extractBarcodeBeforeSlash(row.Barcode);
-            const quantity = Number(row.Quantity || 0); // Ensure quantity is a number
-            // Pass raw number to Excel, let Excel handle formatting
-            // let formattedQuantity = '-';
-            // if (!isNaN(quantity)) {
-            //     formattedQuantity = quantity.toLocaleString();
-            // } else {
-            //     console.warn('Invalid Quantity encountered:', row.Quantity);
-            // }
-
-            return [
-              formattedDate,
-              displayBarcode,
-              row.mainProcess || '-',
-              row.subProcess || '-',
-              row.status || '-',
-              quantity, // Pass the raw number here
-              row.Scanner || '-',
-            ];
-          });
-
-          if (rows.length === 0) {
-            Swal.fire({
-              icon: 'warning',
-              title: 'ไม่มีข้อมูล',
-              text: 'ไม่พบข้อมูลที่ตรงตามเงื่อนไขสำหรับการส่งออก',
-              confirmButtonColor: '#1e40af',
-            });
-            return;
-          }
-
-          const ws = XLSX.utils.aoa_to_sheet([
-            ['วันที่', 'Barcode', 'กระบวนการหลัก', 'กระบวนการย่อย', 'สถานะ', 'จำนวน', 'ผู้สแกน'],
-            ...rows,
-          ]);
-
-          XLSX.utils.book_append_sheet(wb, ws, 'Inventory TAG Report');
-          XLSX.writeFile(wb, `Inventory_Report_${new Date().toISOString().slice(0, 10)}.xlsx`);
-
-          Swal.fire({
-            icon: 'success',
-            title: 'ส่งออกสำเร็จ',
-            text: 'ไฟล์ Excel ได้ถูกดาวน์โหลดแล้ว',
-            confirmButtonColor: '#1e40af',
-            timer: 2000,
-          });
-        } catch (error) {
-          console.error('Export error:', error); // Log the full error object for debugging
-          Swal.fire({
-            icon: 'error',
-            title: 'เกิดข้อผิดพลาด',
-            text: `ไม่สามารถส่งออกไฟล์ได้: ${error.message || String(error)}`, // Include error message or stringified error
-            confirmButtonColor: '#1e40af',
-          });
-        }
-      }
-
-      // Public API for the App module
-      return {
-        switchMainPage: switchMainPage,
-        switchTab: switchTab,
-        clearFilters: clearFilters,
-        loadData: loadData,
-        exportExcel: exportExcel,
-        // Expose other functions if needed for direct access (e.g., for testing)
-        displayTablePage: displayTablePage,
-        setupPagination: setupPagination,
-        updateSummary: updateSummary,
-        updateDatetime: updateDatetime,
-        adjustTimeByHours: adjustTimeByHours,
-        extractBarcodeBeforeSlash: extractBarcodeBeforeSlash
-      };
-    })(); // End of IIFE
-
-    // Event listeners and initial setup outside the IIFE, calling App methods
-    document.addEventListener('DOMContentLoaded', () => {
-      // Initialize Flatpickr for date input fields
-      flatpickr('#startDate', {
-        dateFormat: 'Y-m-d',
-        theme: 'light',
-      });
-      flatpickr('#endDate', {
-        dateFormat: 'Y-m-d',
-        theme: 'light',
-      });
-
-      // Event listeners for main menu buttons
-      document.getElementById('btnDashboard').addEventListener('click', () => App.switchMainPage('pageDashboard'));
-      document.getElementById('btnSearch').addEventListener('click', () => App.switchMainPage('pageSearch'));
-
-      // Update datetime every second
-      setInterval(App.updateDatetime, 1000);
-      // Initial call to display datetime immediately
-      App.updateDatetime();
-
-      // Initial load: Start by displaying the search page and loading data
-      // After loading data, explicitly switch to the summary tab to ensure correct initial display
-      App.switchMainPage('pageSearch');
-      // This call will ensure the 'summary' tab is active and 'details' tab is hidden
-      // We need to wait for loadData to finish before switching tabs to ensure content is ready.
-      // However, App.loadData() is async, and App.switchTab() is called immediately.
-      // The current fix is to clear the innerHTML of tbody and summaryDiv in loadData.
-      // The initial switchTab call is still useful for setting the active button and initial display.
-      App.switchTab('summary', document.getElementById('btnSummaryTab'));
+  // ✅ ตรวจสอบให้ครบทุกช่องที่จำเป็น
+  if (!barcode || !quantity || !scanner || !mainProcess || !subProcess || !status) {
+    Swal.fire({
+      icon: "error",
+      title: "กรอกข้อมูลไม่ครบ",
+      text: "กรุณากรอกข้อมูลให้ครบทุกช่อง",
     });
-  </script>
+    return;
+  }
+
+  // ✅ ตรวจสอบว่า quantity เป็นตัวเลขและมากกว่า 0
+  if (isNaN(quantity) || Number(quantity) <= 0) {
+    Swal.fire({
+      icon: "warning",
+      title: "จำนวนไม่ถูกต้อง",
+      text: "กรุณากรอกจำนวนเป็นตัวเลขที่มากกว่า 0",
+    });
+    return;
+  }
+
+  // ✅ ดึงชื่อเต็มของ subProcess
+  const subProcessText = document.querySelector('#subProcess option:checked')?.textContent || '-';
+  const mainProcessText = mainProcess || '-';
+  const statusText = status || '-';
+
+  const confirmResult = await Swal.fire({
+    title: "ยืนยันข้อมูลก่อนบันทึก",
+    html: `
+      <div style="text-align: left">
+        <fieldset style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
+          <legend><strong>🔎 รหัส QR Code</strong></legend>
+          <p>${barcode}</p>
+        </fieldset>
+
+        <fieldset style="border: 1px solid #ccc; padding: 10px;">
+          <legend><strong>📋 รายละเอียด</strong></legend>
+          <p><strong>⚙️ กระบวนการหลัก:</strong> ${mainProcessText}</p>
+          <p><strong>🧩 กระบวนการย่อย:</strong> ${subProcessText}</p>
+          <p><strong>📌 สถานะ:</strong> ${statusText}</p>
+          <p><strong>🔢 จำนวน:</strong> ${quantity}</p>
+          <p><strong>👤 ผู้สแกน:</strong> ${scanner}</p>
+        </fieldset>
+      </div>
+    `,
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonText: "✅ ยืนยัน",
+    cancelButtonText: "❌ ยกเลิก",
+  });
+
+  if (!confirmResult.isConfirmed) return;
+
+  Swal.fire({
+    title: "กำลังบันทึกข้อมูล...",
+    allowOutsideClick: false,
+    didOpen: () => {
+      Swal.showLoading();
+    },
+  });
+
+  try {
+    const res = await fetch(`${apiURL}?page=submitBarcode&barcode=${barcode}&quantity=${quantity}&scanner=${scanner}&mainProcess=${mainProcess}&subProcess=${subProcess}&status=${status}`, {
+  method: "POST"
+});
+    const data = await res.json();
+
+    if (data.success) {
+      Swal.fire({
+        icon: "success",
+        title: "✅ บันทึกสำเร็จ",
+        timer: 2000,
+        showConfirmButton: false,
+      });
+      document.getElementById("barcode").value = "";
+      document.getElementById("quantity").value = "";
+      document.getElementById("mainProcess").value = "";
+      document.getElementById("subProcess").innerHTML = "<option value=''>-- เลือกกระบวนการย่อย --</option>";
+      document.getElementById("subProcess").disabled = true;
+      document.getElementById("status").innerHTML = "<option value=''>-- เลือกสถานะ --</option>";
+    } else {
+      Swal.fire({
+        icon: "error",
+        title: "เกิดข้อผิดพลาด",
+        text: data.message,
+      });
+    }
+  } catch (err) {
+    Swal.fire({
+      icon: "error",
+      title: "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์",
+      text: "กรุณาลองใหม่อีกครั้ง",
+    });
+    console.error(err);
+  }
+}
+
+
+  // 🟢 เริ่มสแกน QR ด้วย ZXing
+async function startScanner() {
+  document.getElementById("main-view").style.display = "none";
+  document.getElementById("scanner-view").style.display = "block";
+
+  codeReader = new ZXing.BrowserMultiFormatReader();
+  const videoElem = document.createElement("video");
+  videoElem.setAttribute("autoplay", true);
+  videoElem.setAttribute("muted", true);
+  videoElem.setAttribute("playsinline", true);
+  videoElem.style.width = "100%";
+  videoElem.style.height = "100%";
+  videoElem.style.objectFit = "cover";
+
+  const container = document.getElementById("scanner-container");
+  container.innerHTML = ""; // ล้างก่อน
+  container.appendChild(videoElem);
+
+  try {
+    const constraints = { video: { facingMode: 'environment' } };
+    await codeReader.decodeFromConstraints(constraints, videoElem, (result, err) => {
+      if (result) {
+        const cleanedText = result.text.replace(/\s*MW6 Demo\s*$/i, '').trim();
+        document.getElementById("barcode").value = cleanedText;
+        document.getElementById("beep").play();
+        stopScanner();
+      }
+    });
+  } catch (err) {
+    console.error("ไม่สามารถเปิดกล้อง:", err);
+    Swal.fire({ icon: "error", title: "❌ ไม่สามารถเปิดกล้อง", text: err.message });
+    stopScanner();
+  }
+}
+
+// 🔴 หยุดการสแกน
+function stopScanner() {
+  if (codeReader) {
+    codeReader.reset();
+  }
+  document.getElementById("scanner-container").innerHTML = "";
+  document.getElementById("scanner-view").style.display = "none";
+  document.getElementById("main-view").style.display = "block";
+}
+function handleMainProcessChange() {
+  const main = document.getElementById("mainProcess").value;
+  const sub = document.getElementById("subProcess");
+  const statusSelect = document.getElementById("status");
+
+  sub.innerHTML = "";
+  statusSelect.innerHTML = "";
+
+  const subOptions = {
+    "Compact": [["P", "P - Compact"]],
+    "Sinter & Steam": [
+      ["S", "S - Sinter"],
+      ["STE", "STE - Steam"],
+      ["TEMP", "TEMP - Temper"],
+      ["MW", "MW - MachineWash"]
+    ],
+    "Finishing": [
+      ["ESE", "ESE - Chk. Crack"],
+      ["OD", "OD - Oil Dip"],
+      ["BR", "BR - Barrel"],
+      ["H", "H - De-burring"],
+      ["DRY", "DRY - Drying"],
+      ["SB", "SB - Shot blast"],
+      ["R", "R - Impreganate"],
+      ["OG", "OG - Impreganate"],
+      ["U", "U - UitraSonicWash"],
+      ["DR", "DR - DrawingPress(Sizing)"],
+      ["RP", "RP - Sizing"],
+      ["RO", "RO - Rolling"]
+    ],
+    "Machining": [
+      ["MC", "MC - Machining"],
+      ["NCL", "NCL - NC Lath."],
+      ["L", "L - Lath."],
+      ["GC", "GC - Grinding"],
+      ["DP", "DP - Throuth Pin"],
+      ["UT", "UT - InductionHarden"],
+      ["F", "F - Buffing"],
+      ["D", "D - Drilling"],
+      ["AS", "AS - Assembly"],
+      ["WE", "WE - Welding"]
+    ],
+    "Magna flux": [
+      ["SEM", "SEM - Magna flux"],
+      ["SEMT", "SEMT - Magna flux"]
+    ],
+    "Sort": [["SEL", "SEL - Sort"]],
+    "Pack": [["KON", "KON - Pack"]],
+    "Rework": [["SELD", "SELD - Sort dimension"]],
+    "Final Inspection": [["K", "K - Final Inspection"]]
+  };
+
+  const statusOptions = {
+    "ผสมผง": ["ผงเหล็ก", "ผงปั่น"],
+    "Compact": ["Green Part", "Quarantine"],
+    "Sinter & Steam": [
+      "รอ Sinter", "Sinter O.K", "Quarantine Sinter",
+      "รอ Steam 1", "Steam 1 OK", "Quarantine Steam 1",
+      "รอ Steam 2", "Steam 2 OK", "Quarantine Steam 2"
+    ],
+    "Finishing": [
+      "รอ Sizing", "Sizing OK", "รอ Rolling", "Rolling OK",
+      "รอ Rumble - Oil - Dry", "รอ Check Crack",
+      "รอ Shot blast", "Shot blast OK", "OK", "Quarantine",
+      "รอ Rumble2", "Quarantine Rumble2"
+    ],
+    "Machining": [
+      "Blank รอM/C", "Blank รอส่ง Sub con", "Blank รอส่ง Steam",
+      "Quarantine", "รอส่ง Sorting", "Blank รอชุบแข็ง", "ชุบแข็ง OK ส่ง Magna"
+    ],
+    "Sub Store": [
+      "Blank Wait for Sub-Con", "งานรอส่ง M/F,Rumble,Steam,Sort G1P",
+      "Quarantine Blank Wait for Sub-Con", "Wait for Sorting",
+      "Quarantine รอส่ง Rework"
+    ],
+    "Sort": [
+      "รอ M/F (Blank Part)", "รอ M/F (Sorting Part)", "M/F OK", "Quarantine M/F",
+      "งานBlank รอ Sort", "รอ Sort", "Quarantine Sort", "งานรอทิ้ง Sort",
+      "รอ Pack", "Pack OK (FG1)", "Re-oil (FG1)"
+    ],
+    "Pack": [
+      "รอ Pack", "Pack OK (FG1)", "Re-oil (FG1)", "Quarantine Pack"
+    ],
+    "Rework": [
+      "Quarantine Compact", "Quarantine Sinter", "Quarantine Steam", "Quarantine Finishing",
+      "Quarantine Machining", "Rework Blank Part", "Rework Sorting Part",
+      "Judgement (Blank part)", "Judgement (Sorting part)",
+      "Scrap Blank Part", "Scrap Sorting Part"
+    ],
+    "Magna flux": [
+      "รอ M/F (Blank Part)", "รอ M/F (Sorting Part)", "M/F OK", "Quarantine M/F"
+    ]
+    // ❌ ไม่ต้องเพิ่ม Final Inspection ในที่นี้
+  };
+
+  // 🔽 Sub Process Handling
+  if (main === "ผสมผง" || main === "Sub Store") {
+    sub.disabled = true;
+    sub.style.backgroundColor = "#e5e7eb";
+    const option = document.createElement("option");
+    option.text = "ไม่มี";
+    sub.appendChild(option);
+  } else if (["Compact", "Sort", "Pack", "Rework", "Final Inspection"].includes(main)) {
+    sub.disabled = false;
+    sub.style.backgroundColor = "#ffffff";
+    const [code, label] = subOptions[main][0];
+    const option = document.createElement("option");
+    option.value = code;
+    option.text = label;
+    sub.appendChild(option);
+  } else if (subOptions[main]) {
+    sub.disabled = false;
+    sub.style.backgroundColor = "#ffffff";
+    const defaultOption = document.createElement("option");
+    defaultOption.text = "-- เลือกกระบวนการย่อย --";
+    defaultOption.value = "";
+    sub.appendChild(defaultOption);
+    subOptions[main].forEach(([code, label]) => {
+      const opt = document.createElement("option");
+      opt.value = code;
+      opt.textContent = label;
+      sub.appendChild(opt);
+    });
+  } else {
+    sub.disabled = true;
+    sub.style.backgroundColor = "#e5e7eb";
+    const fallback = document.createElement("option");
+    fallback.text = "-- ไม่มีข้อมูล --";
+    sub.appendChild(fallback);
+  }
+
+  // 🔽 Status Handling
+  if (statusOptions[main]) {
+    statusSelect.disabled = false;
+    statusSelect.style.backgroundColor = "#ffffff";
+    const defaultOption = document.createElement("option");
+    defaultOption.value = "";
+    defaultOption.text = "-- เลือกสถานะ --";
+    statusSelect.appendChild(defaultOption);
+    statusOptions[main].forEach(status => {
+      const option = document.createElement("option");
+      option.value = status;
+      option.textContent = status;
+      statusSelect.appendChild(option);
+    });
+  } else {
+    statusSelect.disabled = true;
+    statusSelect.style.backgroundColor = "#e5e7eb";
+    const none = document.createElement("option");
+    none.text = "ไม่มี";
+    statusSelect.appendChild(none);
+  }
+}
+</script>
+
 </body>
 </html>
