@@ -1128,7 +1128,7 @@
           .map((row) => {
             // Adjust time by 0 hours (assuming timestamp is already local or handles timezone correctly)
             const adjustedDate = adjustTimeByHours(row.Timestamp, 0);
-            const displayBarcode = extractBarcodeBeforeSlash(row.Barcode);
+           const displayBarcode = String(row.Barcode || '').trim();
 
             return `
               <tr>
@@ -1262,7 +1262,7 @@
                 console.warn('Invalid Timestamp encountered:', row.Timestamp);
             }
 
-            const displayBarcode = extractBarcodeBeforeSlash(row.Barcode);
+            const displayBarcode = String(row.Barcode || '').trim();
             const quantity = Number(row.Quantity || 0); // Ensure quantity is a number
             // Pass raw number to Excel, let Excel handle formatting
             // let formattedQuantity = '-';
