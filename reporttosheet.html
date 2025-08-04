@@ -1116,14 +1116,15 @@
       function updateDatetime() {
         const el = document.getElementById('currentDatetime');
         const now = new Date();
-        el.textContent = now.toLocaleString('th-TH', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit'
-        });
+        el.textContent = now.toLocaleString('en-GB', {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit'
+});
+
       }
 
       /**
@@ -1149,26 +1150,21 @@
         tbody.innerHTML = dataToDisplay
           .map((row) => {
             // Adjust time by 0 hours (assuming timestamp is already local or handles timezone correctly)
-            const adjustedDate = adjustTimeByHours(row.Timestamp, 0);
+           const adjustedDate = adjustTimeByHours(row.Timestamp, 0);
+           const formattedDate = formatDateToAD(adjustedDate);
            const displayBarcode = String(row.Barcode || '').trim();
 
             return `
-              <tr>
-                <td>${adjustedDate.toLocaleDateString('th-TH', {
-                  year: 'numeric',
-                  month: 'short',
-                  day: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}</td>
-                <td><code>${displayBarcode}</code></td>
-                <td>${row.mainProcess || '-'}</td>
-                <td>${row.subProcess || '-'}</td>
-                <td><span class="status">${row.status || '-'}</span></td>
-                <td><strong>${(row.Quantity || 0).toLocaleString()}</strong></td>
-                <td>${row.Scanner || '-'}</td>
-              </tr>
-            `;
+  <tr>
+    <td>${formattedDate}</td>
+    <td><code>${displayBarcode}</code></td>
+    <td>${row.mainProcess || '-'}</td>
+    <td>${row.subProcess || '-'}</td>
+    <td><span class="status">${row.status || '-'}</span></td>
+    <td><strong>${(row.Quantity || 0).toLocaleString()}</strong></td>
+    <td>${row.Scanner || '-'}</td>
+  </tr>
+`;
           }).join('');
 
         setupPagination(); // Re-setup pagination controls
