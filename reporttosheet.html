@@ -954,6 +954,23 @@
        * Loads and filters data from the Google Apps Script endpoint.
        */
       async function loadData() {
+         const start = document.getElementById('startDate').value;
+  const end = document.getElementById('endDate').value;
+
+  // ✅ ตรวจสอบว่ามีการป้อนทั้ง start และ end แล้วเปรียบเทียบ
+  if (start && end) {
+    const startDateTime = new Date(start);
+    const endDateTime = new Date(end);
+    if (startDateTime > endDateTime) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'ช่วงเวลาผิดพลาด',
+        text: 'วันที่เริ่มต้นต้องไม่มากกว่าวันที่สิ้นสุด',
+        confirmButtonColor: '#dc2626'
+      });
+      return; // ❌ ยุติการโหลดข้อมูล
+    }
+  }
         const url = 'https://script.google.com/macros/s/AKfycbwYy1acBX-V37hiU8lhTY-9YGWgVjVplQOIzhNg1-cNispv6L43_rCVRXVO-HqAfik/exec?page=getInventory';
 
         const tbody = document.getElementById('tableBody');
