@@ -986,9 +986,16 @@
           allFilteredData = data.filter((item) => {
             const rawDate = item.Timestamp;
             // Extract date part only for comparison (YYYY-MM-DD)
-            const dateOnly = new Date(rawDate).toISOString().split('T')[0];
+            const itemDate = new Date(rawDate);
+            const startDateObj = start ? new Date(start) : null;
+            const endDateObj = end ? new Date(end) : null;
+            const matchDate =
+            (!startDateObj || itemDate >= startDateObj) &&
+            (!endDateObj || itemDate <= endDateObj);
 
-            const matchDate = (!start || dateOnly >= start) && (!end || dateOnly <= end);
+
+
+            
             const matchProcess = !selectedProcess || item.mainProcess === selectedProcess;
             // Ensure item.Barcode is a string before calling .includes()
             const itemBarcodeStr = String(item.Barcode || '');
@@ -1340,13 +1347,18 @@
     document.addEventListener('DOMContentLoaded', () => {
   // Initialize Flatpickr for date input fields
   flatpickr('#startDate', {
-    dateFormat: 'Y-m-d',
-    theme: 'light',
-  });
-  flatpickr('#endDate', {
-    dateFormat: 'Y-m-d',
-    theme: 'light',
-  });
+  enableTime: true,
+  dateFormat: 'Y-m-d H:i',
+  time_24hr: true,
+  theme: 'light'
+});
+flatpickr('#endDate', {
+  enableTime: true,
+  dateFormat: 'Y-m-d H:i',
+  time_24hr: true,
+  theme: 'light'
+});
+
 
   // Event listeners for main menu buttons
   document.getElementById('btnDashboard').addEventListener('click', () => App.switchMainPage('pageDashboard'));
