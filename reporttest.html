@@ -995,7 +995,7 @@ updateDatetime();
       tbody.innerHTML = dataToDisplay
         .map((row) => {
           const adjustedDate = adjustTimeByHours(row.created_at, -7);
-          const displayBarcode = extractBarcodeBeforeSlash(row.barcode);
+          const displayBarcode = String(row.Barcode || '').trim(); // <-- ไม่ตัดแล้ว
 
           return `
           <tr>
@@ -1102,7 +1102,7 @@ updateDatetime();
         const wb = XLSX.utils.book_new();
         const rows = allFilteredData.map((row) => {
           const adjustedDate = adjustTimeByHours(row.created_at, -7);
-          const displayBarcode = extractBarcodeBeforeSlash(row.barcode);
+          const displayBarcode = String(row.Barcode || '').trim();
           return [
             adjustedDate.toLocaleDateString('th-TH', {
               year: 'numeric',
