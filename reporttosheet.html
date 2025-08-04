@@ -1261,6 +1261,16 @@
         nextBtn.onclick = () => displayTablePage(currentPage + 1);
         paginationControls.appendChild(nextBtn);
       }
+      
+function formatDateToAD(dateInput) {
+  const d = new Date(dateInput);
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear(); // ค.ศ.
+  const hour = String(d.getHours()).padStart(2, '0');
+  const minute = String(d.getMinutes()).padStart(2, '0');
+  return `${day}-${month}-${year} ${hour}:${minute}`;
+}
 
       /**
        * Exports the filtered data to an Excel file.
@@ -1300,13 +1310,7 @@
       let formattedDate = '-';
       const date = new Date(row.Timestamp);
       if (date instanceof Date && !isNaN(date.getTime())) {
-        formattedDate = date.toLocaleDateString('th-TH', {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit'
-        }).replace(/\//g, '-');
+        formattedDate = formatDateToAD(row.Timestamp);
       }
 
       const barcode = String(row.Barcode || '').trim();
