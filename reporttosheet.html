@@ -954,92 +954,81 @@
        * Loads and filters data from the Google Apps Script endpoint.
        */
       async function loadData() {
-         const start = document.getElementById('startDate').value;
+  const start = document.getElementById('startDate').value;
   const end = document.getElementById('endDate').value;
 
-  // ✅ ตรวจสอบว่ามีการป้อนทั้ง start และ end แล้วเปรียบเทียบ
-  if (start && end) {
-    const startDateTime = new Date(start);
-    const endDateTime = new Date(end);
-    if (startDateTime > endDateTime) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'ช่วงเวลาผิดพลาด',
-        text: 'วันที่สิ้นสุดต้องน้อยกว่าวันที่เริ่มต้น',
-        confirmButtonColor: '#dc2626'
-      });
-      return; // ❌ ยุติการโหลดข้อมูล
-    }
+  // 🔴 ตรวจสอบกรณีไม่กรอกวันที่เริ่มต้นหรือสิ้นสุด
+  if (!start || !end) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'กรุณาใส่ช่วงเวลาให้ครบ',
+      text: 'โปรดระบุทั้งวันที่เริ่มต้นและวันที่สิ้นสุด',
+      confirmButtonColor: '#dc2626'
+    });
+    return;
   }
-        const url = 'https://script.google.com/macros/s/AKfycbwYy1acBX-V37hiU8lhTY-9YGWgVjVplQOIzhNg1-cNispv6L43_rCVRXVO-HqAfik/exec?page=getInventory';
 
-        const tbody = document.getElementById('tableBody');
-        const summaryDiv = document.getElementById('summary');
-        const paginationControls = document.getElementById('paginationControls');
+  // 🔴 ตรวจสอบกรณีวันที่เริ่มต้นมากกว่าสิ้นสุด
+  const startDateTime = new Date(start);
+  const endDateTime = new Date(end);
+  if (startDateTime > endDateTime) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'ช่วงเวลาผิดพลาด',
+      text: 'วันที่เริ่มต้นต้องไม่มากกว่าวันที่สิ้นสุด',
+      confirmButtonColor: '#dc2626'
+    });
+    return;
+  }
 
-        // Clear content areas while loading, as the global overlay will cover them.
-        // This prevents "กำลังโหลดข้อมูล..." from appearing behind the overlay.
-        tbody.innerHTML = '';
-        summaryDiv.innerHTML = '';
-        paginationControls.style.display = 'none'; // Hide pagination during loading
-        showLoadingOverlay(); // Show global loading overlay
+  // เรียก API
+  const url = 'https://script.google.com/macros/s/AKfycbwYy1acBX-V37hiU8lhTY-9YGWgVjVplQOIzhNg1-cNispv6L43_rCVRXVO-HqAfik/exec?page=getInventory';
+  const tbody = document.getElementById('tableBody');
+  const summaryDiv = document.getElementById('summary');
+  const paginationControls = document.getElementById('paginationControls');
 
-        try {
-          const response = await fetch(url);
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          const data = await response.json();
+  // เคลียร์เนื้อหาเดิม
+  tbody.innerHTML = '';
+  summaryDiv.innerHTML = '';
+  paginationControls.style.display = 'none';
+  showLoadingOverlay();
 
-          // Get filter values from input fields
-          const start = document.getElementById('startDate').value;
-          const end = document.getElementById('endDate').value;
-          const selectedProcess = document.getElementById('mainProcess').value;
-          // Trim barcode keyword to remove leading/trailing spaces
-          const barcodeKeyword = document.getElementById('barcodeSearch').value.toLowerCase().trim();
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    const data = await response.json();
 
-          hasSearched = true;
-          // Filter data based on user inputs
-          allFilteredData = data.filter((item) => {
-            const rawDate = item.Timestamp;
-            // Extract date part only for comparison (YYYY-MM-DD)
-            const itemDate = new Date(rawDate);
-            const startDateObj = start ? new Date(start) : null;
-            const endDateObj = end ? new Date(end) : null;
-            const matchDate =
-            (!startDateObj || itemDate >= startDateObj) &&
-            (!endDateObj || itemDate <= endDateObj);
+    // ตัวกรอง
+    const selectedProcess = document.getElementById('mainProcess').value;
+    const barcodeKeyword = document.getElementById('barcodeSearch').value.toLowerCase().trim();
+    hasSearched = true;
 
+    allFilteredData = data.filter((item) => {
+      const itemDate = new Date(item.Timestamp);
+      const matchDate = itemDate >= startDateTime && itemDate <= endDateTime;
+      const matchProcess = !selectedProcess || item.mainProcess === selectedProcess;
+      const itemBarcodeStr = String(item.Barcode || '');
+      const matchBarcode = !barcodeKeyword || itemBarcodeStr.toLowerCase().includes(barcodeKeyword);
+      return matchDate && matchProcess && matchBarcode;
+    });
 
-
-            
-            const matchProcess = !selectedProcess || item.mainProcess === selectedProcess;
-            // Ensure item.Barcode is a string before calling .includes()
-            const itemBarcodeStr = String(item.Barcode || '');
-            const matchBarcode = !barcodeKeyword || (itemBarcodeStr.toLowerCase().includes(barcodeKeyword));
-            return matchDate && matchProcess && matchBarcode;
-          });
-
-          updateSummary(allFilteredData); // Update summary cards
-          currentPage = 1; // Reset to first page after new data load
-          displayTablePage(currentPage); // Display table data for the first page
-        } catch (error) {
-          console.error('Error loading data:', error);
-          // Display error messages using SweetAlert and in content areas
-          Swal.fire({
-            icon: 'error',
-            title: 'เกิดข้อผิดพลาดในการโหลดข้อมูล',
-            text: `ไม่สามารถดึงข้อมูลจากเซิร์ฟเวอร์ได้: ${error.message || String(error)}`,
-            confirmButtonColor: '#dc2626',
-          });
-          // Display error messages directly in the content areas if fetch fails
-          tbody.innerHTML = `<tr><td colspan="7" class="error"><i class="fas fa-exclamation-triangle"></i><div>เกิดข้อผิดพลาดในการโหลดข้อมูล: ${error.message || String(error)}</div></td></tr>`;
-          summaryDiv.innerHTML = `<div class="error"><i class="fas fa-exclamation-triangle"></i><div>เกิดข้อผิดพลาดในการโหลดข้อมูล: ${error.message || String(error)}</div></div>`;
-          paginationControls.style.display = 'none'; // Ensure pagination is hidden on error
-        } finally {
-          hideLoadingOverlay(); // Always hide loading overlay
-        }
-      }
+    updateSummary(allFilteredData);
+    currentPage = 1;
+    displayTablePage(currentPage);
+  } catch (error) {
+    console.error('Error loading data:', error);
+    Swal.fire({
+      icon: 'error',
+      title: 'เกิดข้อผิดพลาดในการโหลดข้อมูล',
+      text: `ไม่สามารถดึงข้อมูลจากเซิร์ฟเวอร์ได้: ${error.message || String(error)}`,
+      confirmButtonColor: '#dc2626',
+    });
+    tbody.innerHTML = `<tr><td colspan="7" class="error"><i class="fas fa-exclamation-triangle"></i><div>เกิดข้อผิดพลาด: ${error.message || String(error)}</div></td></tr>`;
+    summaryDiv.innerHTML = `<div class="error"><i class="fas fa-exclamation-triangle"></i><div>เกิดข้อผิดพลาด: ${error.message || String(error)}</div></div>`;
+  } finally {
+    hideLoadingOverlay();
+  }
+}
 
       /**
        * Updates the summary cards based on the provided data.
